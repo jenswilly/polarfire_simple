@@ -1,0 +1,19 @@
+# Bank voltages (J45 in default position 1-2 -> Bank1 = 3.3V)
+set_iobank -bank_name Bank0 -vcci 1.80 -fixed true -update_iostd true
+set_iobank -bank_name Bank1 -vcci 3.30 -fixed true -update_iostd true
+
+# 50 MHz reference clock
+set_io -port_name REF_CLK_50MHz -pin_name R18 -fixed true -io_std LVCMOS18 -DIRECTION INPUT
+
+# Push-button (active low)
+set_io -port_name SWITCH1 -pin_name T19 -fixed true -DIRECTION INPUT
+
+# LEDs (active high)
+set_io -port_name LED1 -pin_name T18 -fixed true -DIRECTION OUTPUT
+set_io -port_name LED2 -pin_name V17 -fixed true -DIRECTION OUTPUT
+set_io -port_name LED3 -pin_name U20 -fixed true -DIRECTION OUTPUT
+
+# MMUART0 <-> FTDI (UART0_TX = MSS transmit, UART0_RX = MSS receive)
+set_io -port_name UART0_TX -pin_name Y21 -fixed true -DIRECTION OUTPUT
+set_io -port_name UART0_RX -pin_name W21 -fixed true -DIRECTION INPUT
+

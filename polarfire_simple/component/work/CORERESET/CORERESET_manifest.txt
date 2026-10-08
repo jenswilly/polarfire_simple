@@ -1,0 +1,15 @@
+Microchip Technology Inc. - Microchip Libero Software Release 2026.1 (Version 2026.1.0.17)
+
+Date      :  Wed Oct  7 11:09:51 2026
+Project   :  /home/jenswilly/Projs/polarfire_simple/polarfire_simple
+Component :  CORERESET
+Family    :  PolarFireSoC
+
+
+HDL source files for all Synthesis and Simulation tools:
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET.vhd
+
+Stimulus files for all Simulation tools:
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET_0/test/corereset_pf_tb.vhd
+

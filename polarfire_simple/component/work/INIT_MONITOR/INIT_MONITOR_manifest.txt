@@ -1,0 +1,12 @@
+Microchip Technology Inc. - Microchip Libero Software Release 2026.1 (Version 2026.1.0.17)
+
+Date      :  Wed Oct  7 11:09:02 2026
+Project   :  /home/jenswilly/Projs/polarfire_simple/polarfire_simple
+Component :  INIT_MONITOR
+Family    :  PolarFireSoC
+
+
+HDL source files for all Synthesis and Simulation tools:
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/INIT_MONITOR/INIT_MONITOR_0/INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/INIT_MONITOR/INIT_MONITOR.v
+
