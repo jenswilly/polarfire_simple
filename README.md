@@ -9,6 +9,7 @@ It drives three LEDs:
 | LED1 | Push-button SWITCH1 (inverted), pure fabric | T18 |
 | LED2 | MSS register write via FIC0 AXI → bit 0     | V17 |
 | LED3 | MSS register write via FIC0 AXI → bit 1     | U20 |
+| LED4–7 | Tied low (off)                          | U21, AA18, V16, U15 |
 
 ## Design overview
 
