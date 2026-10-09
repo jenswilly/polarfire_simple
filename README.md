@@ -47,6 +47,8 @@ mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
 hdl/                axi_led_reg.vhd: AXI4-Lite LED register (linked into Libero)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 polarfire_simple/   Libero project (.prjx + component configs); build output is git-ignored
+softconsole/        SoftConsole workspace
+  led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
 ```
 
 ## Building
@@ -57,7 +59,25 @@ polarfire_simple/   Libero project (.prjx + component configs); build output is 
 
 The `.prjx` file references `hdl/axi_led_reg.vhd` and `constraints/io.pdc` by **absolute path** (`/home/jenswilly/Projs/polarfire_simple/...`). If you clone the repository somewhere else, re-link those two files.
 
+## Software (SoftConsole)
+
+1. Start SoftConsole with the workspace `softconsole/`. Import `softconsole/led_test` with **File → Import → Existing Projects into Workspace**, leaving "copy" unticked.
+2. Set the active build configuration to **`Discovery-Kit-LIM-Debug`** and build. The pre-build step generates `fpga_design_config/` from the MSS XML in `src/boards/mpfs-discovery-kit/fpga_design/design_description/`. Copy `mss/MSS_simple_mss_cfg.xml` there again after any MSS change.
+3. Debug with **`led_test hw all-harts debug`** (GDB OpenOCD Debugging). It loads the program into L2 LIM over JTAG and stops in `e51()`. Then resume.
+
+The E51 prints a banner and the ID register on MMUART0, then counts 0–3 on LED2/LED3.
+
+### Serial console (Linux)
+The console is MMUART0, routed through the fabric to FT4232H channel D (interface 3), at 115200 8N1.
+
+By default Linux binds only interface 2 of the board's USB device (`1514:2008`), so only `/dev/ttyUSB0` appears, and that isn't our UART. To enable the other channels:
+```bash
+echo 1514 2008 | sudo tee /sys/bus/usb-serial/drivers/ftdi_sio/new_id
+screen /dev/serial/by-id/usb-Microsemi_Embedded_FlashPro5_*-if03-port0 115200
+```
+To make this permanent, add a udev rule (see CLAUDE.md) that binds all interfaces, leaves interface 0 (JTAG) free, and creates `/dev/pfsoc-uart0`.
+
 ## Status / next steps
 - [x] FPGA design built and programmed. SWITCH1 → LED1 works.
-- [ ] SoftConsole bare-metal app: copy the MSS-generated config into `fpga_design_config`, write to `0x6000_0000`, read the ID at `0x6000_0004`.
-- [ ] HSS in eNVM to boot the app.
+- [x] Bare-metal app (LIM debug): AXI reads and writes to `0x6000_0000` work, LED2/LED3 count, UART output works.
+- [ ] Standalone boot: `Discovery-Kit-eNVM-Scratchpad-Release` in eNVM via Libero *Configure Design Initialization Data and Memories*.

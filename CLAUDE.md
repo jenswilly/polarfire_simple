@@ -15,7 +15,11 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - Libero: `/usr/local/microchip/Libero_SoC_2026.1`, started via `~/Microchip/start_libero.sh` (license daemon).
 - MSS Configurator: `/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/pfsoc_mss`
 - IP vault: `/usr/local/microchip/common/vault/Components/` (core GUI labels are in `fs/p0f0/<CORE>.xml`)
-- SoftConsole v2022.2 is in `~/Microchip`. It is older than Libero 2026.1, so check compatibility at the software stage.
+- SoftConsole v2022.2 is in `~/Microchip` (the latest release). The workspace is `softconsole/`.
+- The bare-metal project `softconsole/led_test` is a copy of `applications/mpfs-blank-baremetal` from Microchip's `polarfire-soc-bare-metal-examples` (local clone in `~/Projs/pfsoc-bare-metal-examples`).
+  - Build configuration: `Discovery-Kit-LIM-Debug`. Debug with `led_test hw all-harts debug` (GDB OpenOCD).
+  - The pre-build step runs `mpfs_configuration_generator.py`, which turns `src/boards/mpfs-discovery-kit/fpga_design/design_description/*.xml` (a copy of `mss/MSS_simple_mss_cfg.xml`) into `fpga_design_config/`. **Copy the XML again whenever the MSS config changes.**
+  - The application code is in `src/application/hart0/e51.c`. Only the E51 runs our code; the U54s stay in WFI.
 - Board reference: Microchip `polarfire-soc/polarfire-soc-discovery-kit-reference-design` on GitHub. Pins, MSS `.cfg` and DDR4 settings were taken from it (that design targets Libero 2025.2).
 
 ## Board facts
@@ -37,3 +41,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - MSS cfg items that needed fixing compared with the defaults: `DDR4_READ_PREAMBLE 1`, `L2CACHE_LIM_SIZE 4` / `L2CACHE_SCRATCH_SIZE 4`. The scratchpad is needed by the HSS.
 - The `.prjx` stores linked files as absolute paths.
 - The I/O Editor writes an export to `constraints/pre/` (git-ignored). The source of truth is `constraints/io.pdc`.
+- **Console UART:** the template maps the E51 to MMUART1, but our design uses **MMUART0** (`g_mss_uart0_lo`, `MSS_PERIPH_MMUART0`). It reaches the FT4232H **channel D, interface 3**: `/dev/serial/by-id/usb-Microsemi_Embedded_FlashPro5_*-if03-port0`, or `/dev/pfsoc-uart0` via the udev rule.
+- **Linux sees only one serial port for the board.** The kernel's `ftdi_sio` binds only interface 2 of `1514:2008` (Embedded FlashPro5). Fix: `echo 1514 2008 | sudo tee /sys/bus/usb-serial/drivers/ftdi_sio/new_id`, or permanently with `/etc/udev/rules.d/99-pfsoc-discovery-uart.rules` (it binds all interfaces, unbinds interface 0 = JTAG, and adds the `/dev/pfsoc-uart0` symlink).
+- **SoftConsole project rename:** renaming in the IDE does not update the template's shared `.launch` files, so they get hidden as belonging to a "missing project". The launch files, `.project` and `.cproject` were updated by hand to `led_test`. Don't use SoftConsole's auto-created debug config: it doesn't start OpenOCD, has no `set DEVICE MPFS`, and uses rv32.
+- To access FIC0 from software, call `mss_config_clk_rst(MSS_PERIPH_FIC0, …, PERIPHERAL_ON)`. The HAL startup releases the fabric reset (`mss_enable_fabric`).

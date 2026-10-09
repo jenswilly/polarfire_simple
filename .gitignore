@@ -6,22 +6,29 @@ polarfire_simple/tooldata/
 polarfire_simple/simulation/modelsim.ini
 polarfire_simple/stimulus/
 
+polarfire_simple/viewdraw/
+
 # Logs and lock/backup files
 *.log
 *.msg
 *.lock
 *.bak
+*.sav
 *~
 polarfire_simple/constraint/*_errors.log
 
 # I/O Editor exports written next to the linked constraint file
 constraints/pre/
 
-# ---- SoftConsole / Eclipse (for the upcoming software part) ----
+# ---- SoftConsole / Eclipse ----
+# Workspace metadata is per-machine (shared launch configs live in the project)
 softconsole/.metadata/
-softconsole/**/Debug/
-softconsole/**/Release/
-softconsole/**/*.launch.bak
+# Build output folders are named after the build configuration
+softconsole/*/*-Debug/
+softconsole/*/*-Release/
+# Generated from the MSS XML by the pre-build step
+softconsole/*/src/boards/*/fpga_design_config/
+softconsole/*/.settings/
 
 # ---- Misc ----
 .DS_Store
