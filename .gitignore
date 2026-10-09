@@ -1,7 +1,11 @@
 # ---- Libero project (polarfire_simple/) : keep config, drop build output ----
 # Synthesis, place & route, bitstreams and programming files (all regenerable)
 polarfire_simple/synthesis/
-polarfire_simple/designer/
+polarfire_simple/designer/*
+# ...except the eNVM (Boot Mode 1) client config from Configure Design Initialization Data and Memories
+!polarfire_simple/designer/TOP/
+polarfire_simple/designer/TOP/*
+!polarfire_simple/designer/TOP/ENVM.cfg
 polarfire_simple/tooldata/
 polarfire_simple/simulation/modelsim.ini
 polarfire_simple/stimulus/

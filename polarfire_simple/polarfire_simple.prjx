@@ -918,8 +918,15 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791538391"
-SIZE="9153"
+TIME="1791538401"
+SIZE="9429"
+ENDFILE
+VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
+STATE="utd"
+TIME="1791538400"
+SIZE="34658"
+PARENT="<project>/component/work/TOP/TOP.cxf"
+IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 STATE="utd"
@@ -980,7 +987,7 @@ TIME="1791367352"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
-STATE="ood"
+STATE="utd"
 TIME="1791367352"
 SIZE="2470844"
 ENDFILE
@@ -1030,7 +1037,7 @@ VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_PROCESSOR_user.bfm,sim"
 ENDLIST
 ENDLIST
 LIST "TOP::work"
-FILE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
+FILE "<project>/component/work/TOP/TOP.vhd,hdl"
 LIST SynthesisConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 ENDLIST
@@ -1040,6 +1047,18 @@ ENDLIST
 LIST PNRConstraints
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+ENDLIST
+LIST ProjectState5.1
+LIST Impl1
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
+LIST FlowOptions
+UsePhySynth=FALSE
+UseSynth=TRUE
+UseFhbAutoInst=FALSE
+ENDLIST
+Used_File_List
+ENDUsed_File_List
+ENDLIST
 ENDLIST
 ENDLIST
 ENDLIST
@@ -1167,6 +1186,18 @@ IS32BIT="1"
 EndProfile
 ENDLIST
 LIST ProjectState5.1
+LIST "TOP::work"
+LIST Impl1
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
+LIST FlowOptions
+UsePhySynth=FALSE
+UseSynth=TRUE
+UseFhbAutoInst=FALSE
+ENDLIST
+Used_File_List
+ENDUsed_File_List
+ENDLIST
+ENDLIST
 ENDLIST
 LIST ExcludePackageForSimulation
 ENDLIST
@@ -1181,11 +1212,10 @@ ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
 Reports;Reports;0
-ReportsCurrentItem;Place and Route:TOP_layout_log.log
-Constraint Manager;Constraint Manager;0
+ReportsCurrentItem;Run Programming Action:TOP_PROGRAM.log
 HDL;/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc;0
 SmartDesign;TOP;0
-ACTIVEVIEW;TOP
+ACTIVEVIEW;/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
@@ -1733,7 +1763,7 @@ SUBBLOCK "PF_CCC_C0_PF_CCC_C0_0_PF_CCC::work","component/work/PF_CCC_C0/PF_CCC_C
 ENDLIST
 LIST "PF_CCC_C0_PF_CCC_C0_0_PF_CCC::work","component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.v","FALSE","FALSE"
 ENDLIST
-LIST "TOP::work","component/work/TOP/TOP.cxf","TRUE","FALSE"
+LIST "TOP::work","component/work/TOP/TOP.vhd","TRUE","FALSE"
 SUBBLOCK "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
 SUBBLOCK "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
 SUBBLOCK "INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR.v","TRUE","FALSE"

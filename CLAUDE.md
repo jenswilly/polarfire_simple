@@ -19,6 +19,8 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - The bare-metal project `softconsole/led_test` is a copy of `applications/mpfs-blank-baremetal` from Microchip's `polarfire-soc-bare-metal-examples` (local clone in `~/Projs/pfsoc-bare-metal-examples`).
   - Build configuration: `Discovery-Kit-LIM-Debug`. Debug with `led_test hw all-harts debug` (GDB OpenOCD).
   - The pre-build step runs `mpfs_configuration_generator.py`, which turns `src/boards/mpfs-discovery-kit/fpga_design/design_description/*.xml` (a copy of `mss/MSS_simple_mss_cfg.xml`) into `fpga_design_config/`. **Copy the XML again whenever the MSS config changes.**
+  - `Discovery-Kit-eNVM-Scratchpad-Release` has a **post-build step** that runs `mpfsBootmodeProgrammer.jar --bootmode 1 --dryrun` to create `bootmode1/led_test-bm1-p0.hex` (a dummy SBIC page at `0x2022_0000` followed by the image at `0x2022_0100`). **Use this hex as the Libero "Boot Mode 1" eNVM client.** The plain `led_test.hex` is rejected because it starts at `0x2022_0100`. The step hard-codes `FPGENPROG=/usr/local/microchip/Libero_SoC_2026.1/...`, so update it if Libero is upgraded.
+  - The Libero eNVM client config is saved in `polarfire_simple/designer/TOP/ENVM.cfg`. This is the only file under `designer/` that is tracked in git. It stores **`-number_of_bytes`** (currently 30560), so after the program grows, select the hex again in the eNVM client.
   - The application code is in `src/application/hart0/e51.c`. Only the E51 runs our code; the U54s stay in WFI.
 - Board reference: Microchip `polarfire-soc/polarfire-soc-discovery-kit-reference-design` on GitHub. Pins, MSS `.cfg` and DDR4 settings were taken from it (that design targets Libero 2025.2).
 

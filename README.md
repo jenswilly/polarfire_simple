@@ -47,7 +47,7 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
 hdl/                axi_led_reg.vhd: AXI4-Lite LED register (linked into Libero)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
-polarfire_simple/   Libero project (.prjx + component configs); build output is git-ignored
+polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
 ```
@@ -78,7 +78,20 @@ screen /dev/serial/by-id/usb-Microsemi_Embedded_FlashPro5_*-if03-port0 115200
 ```
 To make this permanent, add a udev rule (see CLAUDE.md) that binds all interfaces, leaves interface 0 (JTAG) free, and creates `/dev/pfsoc-uart0`.
 
+### Standalone boot from eNVM (boot mode 1)
+The board runs `led_test` on its own at power-up. The program is stored in eNVM, copied to the L2 scratchpad and run from there.
+
+1. In SoftConsole, build the **`Discovery-Kit-eNVM-Scratchpad-Release`** configuration. A post-build step runs Microchip's `mpfsBootmodeProgrammer.jar --bootmode 1 --dryrun`, which creates `Discovery-Kit-eNVM-Scratchpad-Release/bootmode1/led_test-bm1-p0.hex`: a dummy SBIC page at `0x2022_0000` followed by the program at `0x2022_0100`.
+2. In Libero, open **Configure Design Initialization Data and Memories → eNVM**. The Boot Mode 1 client (`BOOT_MODE_1_ENVM_CLIENT`) points at that hex, with base address `0x20220000`. Its settings are saved in `polarfire_simple/designer/TOP/ENVM.cfg`.
+3. Run Generate Design Initialization Data → Generate Bitstream → Run PROGRAM Action, then power-cycle the board.
+
+Use the `-bm1-p0.hex`, not the plain `led_test.hex`. Libero rejects the plain file because its data starts at `0x2022_0100`.
+
+After a software change, rebuild, then edit the eNVM client and select the hex again. The client stores a fixed byte count (`-number_of_bytes`), so a larger program isn't picked up automatically. Then regenerate and program.
+
+For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-harts debug`. The JTAG reset and halt overrides the eNVM program until the next power cycle.
+
 ## Status / next steps
 - [x] FPGA design built and programmed. SWITCH1 → LED1 works.
 - [x] Bare-metal app (LIM debug): AXI reads and writes to `0x6000_0000` work, LED2/LED3 count, UART output works.
-- [ ] Standalone boot: `Discovery-Kit-eNVM-Scratchpad-Release` in eNVM via Libero *Configure Design Initialization Data and Memories*.
+- [x] Standalone boot from eNVM (boot mode 1): everything works after a power cycle, without a PC.
