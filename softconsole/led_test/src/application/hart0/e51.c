@@ -11,13 +11,21 @@
 #define LED_REG (*(volatile uint32_t *)(LED_REG_BASE + 0x0U))
 #define LED_ID_REG (*(volatile uint32_t *)(LED_REG_BASE + 0x4U))
 
-#define DELAY_LOOPS                                                            \
-  30000000U /* roughly 0.3-0.5 s at 600 MHz; adjust to taste */
-
 volatile uint32_t count_sw_ints_h0 = 0U;
 
 static void uart_print(const char *s) {
   MSS_UART_polled_tx_string(&g_mss_uart0_lo, (const uint8_t *)s);
+}
+
+/* Busy-wait using the CLINT mtime counter (LIBERO_SETTING_MSS_RTC_TOGGLE_CLK = 1 MHz) */
+static void delay_ms(uint32_t ms)
+{
+    const uint64_t ticks = (uint64_t)ms * (LIBERO_SETTING_MSS_RTC_TOGGLE_CLK / 1000U);
+    const uint64_t start = readmtime();
+
+    while ((readmtime() - start) < ticks)
+    {
+    }
 }
 
 void e51(void) {
@@ -41,8 +49,7 @@ void e51(void) {
   uart_print(buf);
 
   while (1U) {
-    for (volatile uint32_t d = 0U; d < DELAY_LOOPS; d++) {
-    }
+    delay_ms(500U);
 
     count = (count + 1U) & 0x3U;
     LED_REG = count;
