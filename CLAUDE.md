@@ -12,7 +12,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - Hand-written sources live outside the Libero folder (`hdl/`, `constraints/`, `mss/`) and are *linked* into the project, not imported.
 
 ## Tools / paths
-- Libero: `/usr/local/microchip/Libero_SoC_2026.1`, started via `~/Microchip/start_libero.sh` (license daemon).
+- Libero: `/usr/local/microchip/Libero_SoC_2026.1`, started via `tools/start_libero.sh`, which starts the FlexLM license server in `~/FlexLM` if needed. Stop the server with `tools/stop_licenser_server.sh`. Setup and troubleshooting are in `tools/README.md`.
 - MSS Configurator: `/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/pfsoc_mss`
 - IP vault: `/usr/local/microchip/common/vault/Components/` (core GUI labels are in `fs/p0f0/<CORE>.xml`)
 - SoftConsole v2022.2 is in `~/Microchip` (the latest release). The workspace is `softconsole/`.
