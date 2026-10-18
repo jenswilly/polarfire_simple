@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Sun Oct 18 10:08:00 2026
+-- Created by SmartDesign Sun Oct 18 12:12:15 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -22,6 +22,7 @@ entity TOP is
         REFCLK_N      : in    std_logic;
         REF_CLK_50MHz : in    std_logic;
         SWITCH1       : in    std_logic;
+        SWITCH2       : in    std_logic;
         UART0_RX      : in    std_logic;
         -- Outputs
         A             : out   std_logic_vector(13 downto 0);
@@ -33,6 +34,7 @@ entity TOP is
         CK0_N         : out   std_logic;
         CKE0          : out   std_logic;
         CS0_N         : out   std_logic;
+        DEBUG         : out   std_logic;
         DM            : out   std_logic_vector(1 downto 0);
         LED1          : out   std_logic;
         LED2          : out   std_logic;
@@ -145,6 +147,19 @@ component AXI_IC
 end component;
 -- axi_led_reg
 -- using entity instantiation for component axi_led_reg
+-- button_debounce
+component button_debounce
+    -- Port list
+    port(
+        -- Inputs
+        btn_in      : in  std_logic;
+        clk         : in  std_logic;
+        reset_n     : in  std_logic;
+        -- Outputs
+        pressed_out : out std_logic;
+        pulse_out   : out std_logic
+        );
+end component;
 -- CLKINT
 component CLKINT
     -- Port list
@@ -280,6 +295,17 @@ component MSS_simple
         DQS_N                : inout std_logic_vector(1 downto 0)
         );
 end component;
+-- OR2
+component OR2
+    -- Port list
+    port(
+        -- Inputs
+        A : in  std_logic;
+        B : in  std_logic;
+        -- Outputs
+        Y : out std_logic
+        );
+end component;
 -- PF_CCC_C0
 component PF_CCC_C0
     -- Port list
@@ -290,6 +316,18 @@ component PF_CCC_C0
         -- Outputs
         OUT0_FABCLK_0     : out std_logic;
         PLL_LOCK_0        : out std_logic
+        );
+end component;
+-- pulse_stretch
+component pulse_stretch
+    -- Port list
+    port(
+        -- Inputs
+        clk       : in  std_logic;
+        pulse_in  : in  std_logic;
+        reset_n   : in  std_logic;
+        -- Outputs
+        pulse_out : out std_logic
         );
 end component;
 ----------------------------------------------------------------------
@@ -317,8 +355,10 @@ signal AXI_IC_0_AXI4Lmtarget0_WDATA              : std_logic_vector(31 downto 0)
 signal AXI_IC_0_AXI4Lmtarget0_WREADY             : std_logic;
 signal AXI_IC_0_AXI4Lmtarget0_WSTRB              : std_logic_vector(3 downto 0);
 signal AXI_IC_0_AXI4Lmtarget0_WVALID             : std_logic;
+signal axi_led_reg_0_DEBUG_PULSE                 : std_logic;
 signal BA_net_0                                  : std_logic_vector(1 downto 0);
 signal BG0_net_0                                 : std_logic;
+signal button_debounce_0_pulse_out               : std_logic;
 signal CAS_N_net_0                               : std_logic;
 signal CK0_net_0                                 : std_logic;
 signal CK0_N_net_0                               : std_logic;
@@ -327,12 +367,14 @@ signal CLKINT_0_Y                                : std_logic;
 signal CORERESET_0_FABRIC_RESET_N                : std_logic;
 signal CORERESET_0_PLL_POWERDOWN_B               : std_logic;
 signal CS0_N_net_0                               : std_logic;
+signal DEBUG_net_0                               : std_logic;
 signal DM_net_0                                  : std_logic_vector(1 downto 0);
 signal INIT_MONITOR_0_DEVICE_INIT_DONE           : std_logic;
 signal INIT_MONITOR_0_FABRIC_POR_N               : std_logic;
 signal LED1_net_0                                : std_logic;
 signal LED2_net_0                                : std_logic;
 signal LED3_net_0                                : std_logic;
+signal LED4_net_0                                : std_logic;
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR  : std_logic_vector(37 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST : std_logic_vector(1 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE : std_logic_vector(3 downto 0);
@@ -375,6 +417,7 @@ signal MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID  : std_logic;
 signal MSS_simple_0_FIC_0_DLL_LOCK_M2F           : std_logic;
 signal MSS_simple_0_MSS_RESET_N_M2F              : std_logic;
 signal ODT0_net_0                                : std_logic;
+signal OR2_1_Y                                   : std_logic;
 signal PF_CCC_C0_0_OUT0_FABCLK_0                 : std_logic;
 signal PF_CCC_C0_0_PLL_LOCK_0                    : std_logic;
 signal RAS_N_net_0                               : std_logic;
@@ -396,9 +439,11 @@ signal LED1_net_1                                : std_logic;
 signal UART0_TX_net_1                            : std_logic;
 signal LED2_net_1                                : std_logic;
 signal LED3_net_1                                : std_logic;
+signal LED4_net_1                                : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
+signal DEBUG_net_1                               : std_logic;
 ----------------------------------------------------------------------
 -- TiedOff Signals
 ----------------------------------------------------------------------
@@ -418,7 +463,6 @@ begin
 ----------------------------------------------------------------------
 -- TieOff assignments
 ----------------------------------------------------------------------
- LED4           <= '0';
  LED5           <= '0';
  LED6           <= '0';
  LED7           <= '0';
@@ -455,12 +499,16 @@ begin
  LED2           <= LED2_net_1;
  LED3_net_1     <= LED3_net_0;
  LED3           <= LED3_net_1;
+ LED4_net_1     <= LED4_net_0;
+ LED4           <= LED4_net_1;
  BA_net_1       <= BA_net_0;
  BA(1 downto 0) <= BA_net_1;
  DM_net_1       <= DM_net_0;
  DM(1 downto 0) <= DM_net_1;
  A_net_1        <= A_net_0;
  A(13 downto 0) <= A_net_1;
+ DEBUG_net_1    <= DEBUG_net_0;
+ DEBUG          <= DEBUG_net_1;
 ----------------------------------------------------------------------
 -- Component instances
 ----------------------------------------------------------------------
@@ -553,29 +601,40 @@ axi_led_reg_0 : entity work.axi_led_reg
         -- Inputs
         ACLK        => PF_CCC_C0_0_OUT0_FABCLK_0,
         ARESETN     => CORERESET_0_FABRIC_RESET_N,
-        AWADDR      => AXI_IC_0_AXI4Lmtarget0_AWADDR,
-        AWPROT      => AXI_IC_0_AXI4Lmtarget0_AWPROT,
         AWVALID     => AXI_IC_0_AXI4Lmtarget0_AWVALID,
-        WDATA       => AXI_IC_0_AXI4Lmtarget0_WDATA,
-        WSTRB       => AXI_IC_0_AXI4Lmtarget0_WSTRB,
         WVALID      => AXI_IC_0_AXI4Lmtarget0_WVALID,
         BREADY      => AXI_IC_0_AXI4Lmtarget0_BREADY,
-        ARADDR      => AXI_IC_0_AXI4Lmtarget0_ARADDR,
-        ARPROT      => AXI_IC_0_AXI4Lmtarget0_ARPROT,
         ARVALID     => AXI_IC_0_AXI4Lmtarget0_ARVALID,
         RREADY      => AXI_IC_0_AXI4Lmtarget0_RREADY,
+        AWADDR      => AXI_IC_0_AXI4Lmtarget0_AWADDR,
+        AWPROT      => AXI_IC_0_AXI4Lmtarget0_AWPROT,
+        WDATA       => AXI_IC_0_AXI4Lmtarget0_WDATA,
+        WSTRB       => AXI_IC_0_AXI4Lmtarget0_WSTRB,
+        ARADDR      => AXI_IC_0_AXI4Lmtarget0_ARADDR,
+        ARPROT      => AXI_IC_0_AXI4Lmtarget0_ARPROT,
         -- Outputs
         AWREADY     => AXI_IC_0_AXI4Lmtarget0_AWREADY,
         WREADY      => AXI_IC_0_AXI4Lmtarget0_WREADY,
-        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
         BVALID      => AXI_IC_0_AXI4Lmtarget0_BVALID,
         ARREADY     => AXI_IC_0_AXI4Lmtarget0_ARREADY,
-        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
-        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP,
         RVALID      => AXI_IC_0_AXI4Lmtarget0_RVALID,
         LED2        => LED2_net_0,
         LED3        => LED3_net_0,
-        DEBUG_PULSE => OPEN 
+        DEBUG_PULSE => axi_led_reg_0_DEBUG_PULSE,
+        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
+        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
+        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP 
+        );
+-- button_debounce_0
+button_debounce_0 : button_debounce
+    port map( 
+        -- Inputs
+        clk         => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n     => CORERESET_0_FABRIC_RESET_N,
+        btn_in      => SWITCH2,
+        -- Outputs
+        pressed_out => LED4_net_0,
+        pulse_out   => button_debounce_0_pulse_out 
         );
 -- CLKINT_0
 CLKINT_0 : CLKINT
@@ -702,6 +761,15 @@ MSS_simple_0 : MSS_simple
         DQS                  => DQS,
         DQS_N                => DQS_N 
         );
+-- OR2_1
+OR2_1 : OR2
+    port map( 
+        -- Inputs
+        A => button_debounce_0_pulse_out,
+        B => axi_led_reg_0_DEBUG_PULSE,
+        -- Outputs
+        Y => OR2_1_Y 
+        );
 -- PF_CCC_C0_0
 PF_CCC_C0_0 : PF_CCC_C0
     port map( 
@@ -711,6 +779,16 @@ PF_CCC_C0_0 : PF_CCC_C0
         -- Outputs
         OUT0_FABCLK_0     => PF_CCC_C0_0_OUT0_FABCLK_0,
         PLL_LOCK_0        => PF_CCC_C0_0_PLL_LOCK_0 
+        );
+-- pulse_stretch_0
+pulse_stretch_0 : pulse_stretch
+    port map( 
+        -- Inputs
+        clk       => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n   => CORERESET_0_FABRIC_RESET_N,
+        pulse_in  => OR2_1_Y,
+        -- Outputs
+        pulse_out => DEBUG_net_0 
         );
 
 end RTL;

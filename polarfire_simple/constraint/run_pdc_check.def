@@ -1,0 +1,8 @@
+DESIGN=TOP
+DESDIR=/home/jenswilly/Projs/polarfire_simple/polarfire_simple/designer/TOP
+TARGET_DIR=/home/jenswilly/Projs/polarfire_simple/polarfire_simple/designer/TOP
+FAM=PolarFireSoC
+DIE=PA5SOC095T
+PACKAGE=fcsg325
+SPEED=-1
+PDC_FILE=/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,,

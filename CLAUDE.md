@@ -34,6 +34,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
   - SWITCH1 T19 (active low), SWITCH2 U18
   - LED1–7: T18, V17, U20, U21, AA18, V16, U15 (active high)
   - FTDI UART: MSS TX → Y21, MSS RX ← W21
+  - DEBUG (RPi header, GPIO21 per the user): E13 = `GPIO128NB1`, Bank1, so `-io_std LVCMOS33`
 - MSS reference clock is **125 MHz**. DDR4 is x16, 1 GB.
 
 ## Gotchas learned
@@ -44,6 +45,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - MSS outputs that are not used must be marked unused: `PLL_CPU_LOCK_M2F`, `PLL_DDR_LOCK_M2F`, `MMUART_0_TXD_OE_M2F`.
 - MSS cfg items that needed fixing compared with the defaults: `DDR4_READ_PREAMBLE 1`, `L2CACHE_LIM_SIZE 4` / `L2CACHE_SCRATCH_SIZE 4`. The scratchpad is needed by the HSS.
 - The `.prjx` stores linked files as absolute paths.
+- **Bank1 pins need `-io_std LVCMOS33` in `io.pdc`.** The project default is LVCMOS18, which only fits Bank0 (the HSIO pins: LEDs, switches, clock). A Bank1 pin without it fails with "macro <port>_obuf is incompatible with this IoBank Bank1". The bank is in the last column of `$LIBERO_INSTALL_DIR/Libero_SoC/Designer/data/aPA5SOC/PA5SOC095/fcsg325.ddf` (`…B1` = Bank1, `HSIO…B0` = Bank0).
 - **Libero's working directory matters.** When an HDL+ core is updated, Libero writes `component/User/Private/<core>/…xml` relative to its working directory. Started from the repo root, that creates a stray `component/` there. `tools/start_libero.sh` therefore `cd`s into `polarfire_simple/` first.
 - **Libero needs `designer/impl1/` to exist.** Each revision (`Impl1` in the `.prjx` `LIST REVISIONS` / `CURREV`) has a folder `designer/impl<N>/`. If that folder is missing (e.g. on a fresh clone, because `designer/` is git-ignored), Libero quietly creates a new revision `Impl2` on open. `designer/impl1/simulation/.gitkeep` is tracked to prevent this. `designer/TOP/` is per root module, not per revision.
 - After changing an HDL+ core's ports, update the instance in SmartDesign and then **Generate Component**. Saving alone deletes `TOP.vhd` until it's generated again.
