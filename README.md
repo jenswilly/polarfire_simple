@@ -68,9 +68,15 @@ The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...
 
 ## Software (SoftConsole)
 
-1. Start SoftConsole with the workspace `softconsole/`. Import `softconsole/led_test` with **File → Import → Existing Projects into Workspace**, leaving "copy" unticked.
-2. Set the active build configuration to **`Discovery-Kit-LIM-Debug`** and build. The pre-build step generates `fpga_design_config/` from the MSS XML in `src/boards/mpfs-discovery-kit/fpga_design/design_description/`. Copy `mss/MSS_simple_mss_cfg.xml` there again after any MSS change.
-3. Debug with **`led_test hw all-harts debug`** (GDB OpenOCD Debugging). It loads the program into L2 LIM over JTAG and stops in `e51()`. Then resume.
+1. **Fresh clone only:** `softconsole/.metadata/` is git-ignored. Without it, SoftConsole refuses the folder ("is not an empty folder or a SoftConsole workspace"), because it accepts only an empty folder or one with `.metadata/softconsole.xml`. Create it from SoftConsole's own empty-workspace template:
+   ```bash
+   SC=~/Microchip/SoftConsole-v2022.2-RISC-V-747
+   unzip -q $SC/extras/workspace.empty.zip 'workspace.empty/.metadata/*' -d /tmp/sc-ws
+   cp -r /tmp/sc-ws/workspace.empty/.metadata softconsole/ && rm -r /tmp/sc-ws
+   ```
+2. Start SoftConsole with the workspace `softconsole/`. Import `softconsole/led_test` with **File → Import → Existing Projects into Workspace**, leaving "copy" unticked.
+3. Set the active build configuration to **`Discovery-Kit-LIM-Debug`** and build. The pre-build step generates `fpga_design_config/` from the MSS XML in `src/boards/mpfs-discovery-kit/fpga_design/design_description/`. Copy `mss/MSS_simple_mss_cfg.xml` there again after any MSS change.
+4. Debug with **`led_test hw all-harts debug`** (GDB OpenOCD Debugging). It loads the program into L2 LIM over JTAG and stops in `e51()`. Then resume.
 
 The E51 prints a banner and the ID register on MMUART0, then counts 0–3 on LED2/LED3.
 
