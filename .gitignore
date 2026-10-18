@@ -14,6 +14,14 @@ polarfire_simple/designer/impl1/simulation/*
 !polarfire_simple/designer/impl1/simulation/.gitkeep
 polarfire_simple/tooldata/
 polarfire_simple/simulation/modelsim.ini
+# Libero Simulate output (compiled libraries, generated run.do, waveforms, BFM vectors)
+polarfire_simple/simulation/presynth/
+polarfire_simple/simulation/postsynth/
+polarfire_simple/simulation/postlayout/
+polarfire_simple/simulation/run.do
+polarfire_simple/simulation/*.wlf
+polarfire_simple/simulation/*.vec
+polarfire_simple/simulation/transcript
 polarfire_simple/stimulus/
 
 polarfire_simple/viewdraw/
@@ -26,6 +34,9 @@ polarfire_simple/viewdraw/
 *.sav
 *~
 polarfire_simple/constraint/*_errors.log
+
+# QuestaSim output from sim/run_tb.sh (work library, transcript, waveforms)
+sim/out/
 
 # I/O Editor exports written next to the linked constraint file
 constraints/pre/

@@ -48,6 +48,7 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
 hdl/                axi_led_reg.vhd: AXI4-Lite LED register (linked into Libero)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
+sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
@@ -65,6 +66,24 @@ tools/              Libero license-server start/stop scripts (see tools/README.m
 The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...`) in two places. If you clone the repository somewhere else, fix both:
 - `polarfire_simple.prjx` links `hdl/axi_led_reg.vhd` and `constraints/io.pdc`. Re-link those two files.
 - `designer/TOP/ENVM.cfg` points the eNVM client at `led_test-bm1-p0.hex`. Select the hex again in the eNVM client.
+
+## Simulation
+
+Testbenches live in `sim/` and are self-checking. Run one from the command line with Libero's QuestaSim:
+
+```bash
+sim/run_tb.sh tb_axi_led_reg
+```
+
+The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (git-ignored). The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
+
+```bash
+/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_led_reg.wlf
+```
+
+The same testbench also runs from Libero. It is linked as a stimulus file and associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_led_reg` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_led_reg_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_led_reg` into `TOP`, so this testbench can't run there.
+
+`tb_axi_led_reg` checks the ID register, the LED register (write and readback) and `DEBUG_PULSE`: exactly one cycle per write of 1, even with a slow `BREADY`, no pulse when writing 0 or writing to the LED register, and DEBUG reads as 0.
 
 ## Software (SoftConsole)
 

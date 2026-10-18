@@ -63,6 +63,11 @@ STATE="utd"
 TIME="1792310629"
 SIZE="4055"
 ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
+STATE="utd"
+TIME="1792313589"
+SIZE="6190"
+ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/COREAXI4INTERCONNECT.cxf,actgen_cxf"
 STATE="utd"
 TIME="1792307741"
@@ -981,6 +986,41 @@ TIME="1792307741"
 SIZE="852"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
+VALUE "<project>/simulation/run.do,do"
+STATE="utd"
+TIME="1792315003"
+SIZE="16068"
+ENDFILE
+VALUE "<project>/simulation/tb_axi_led_reg_presynth_simulation.log,log"
+STATE="utd"
+TIME="1792315100"
+SIZE="66521"
+ENDFILE
+VALUE "<project>/simulation/testbench_presynth_simulation.log,log"
+STATE="utd"
+TIME="1792315008"
+SIZE="66472"
+ENDFILE
+VALUE "<project>/synthesis/TOP.so,so"
+STATE="utd"
+TIME="1792311911"
+SIZE="230"
+ENDFILE
+VALUE "<project>/synthesis/TOP.vm,syn_vm"
+STATE="utd"
+TIME="1792311911"
+SIZE="2471217"
+ENDFILE
+VALUE "<project>/synthesis/TOP_syn.prj,prj"
+STATE="utd"
+TIME="1792311912"
+SIZE="20990"
+ENDFILE
+VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
+STATE="utd"
+TIME="1792311911"
+SIZE="1152"
+ENDFILE
 ENDLIST
 LIST UsedFile
 ENDLIST
@@ -1018,6 +1058,9 @@ ENDLIST
 ENDLIST
 LIST "TOP::work"
 FILE "<project>/component/work/TOP/TOP.vhd,hdl"
+LIST AssociatedStimulus
+VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
+ENDLIST
 LIST SynthesisConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 ENDLIST
@@ -1028,9 +1071,25 @@ LIST PNRConstraints
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 ENDLIST
+LIST ProjectState5.1
+LIST Impl1
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
+ideSTIMULUS=StateSuccess
+LIST FlowOptions
+UsePhySynth=FALSE
+UseSynth=TRUE
+UseFhbAutoInst=FALSE
+ENDLIST
+Used_File_List
+ENDUsed_File_List
+ENDLIST
+ENDLIST
 ENDLIST
 ENDLIST
 LIST AssociatedStimulus
+LIST TOP
+VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
+ENDLIST
 ENDLIST
 LIST Other_Association
 LIST COREAXI4INTERCONNECT
@@ -1065,8 +1124,8 @@ Resolution=1ps
 VsimOpt=
 VcomOpt=
 VlogOpt=
-EntityName=testbench
-TopInstanceName=<top>_0
+EntityName=tb_axi_led_reg
+TopInstanceName=dut
 DoFileName=
 DoFileName2=wave.do
 DoFileParams=
@@ -1129,8 +1188,8 @@ NAME="Synplify Pro ME"
 FUNCTION="Synthesis"
 TOOL="Synplify Pro ME"
 LOCATION="/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Synplify_Pro/bin/synplify_pro"
-PARAM=""
-BATCH=0
+PARAM="-licensetype synplifypro_actel -batch -log synplify.log"
+BATCH=1
 LICENSE=""
 IS32BIT="1"
 EndProfile
@@ -1138,7 +1197,7 @@ NAME="QuestaSim ME"
 FUNCTION="Simulation"
 TOOL="QuestaSim ME"
 LOCATION="/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim"
-PARAM=""
+PARAM=" -l tb_axi_led_reg_presynth_simulation.log "
 BATCH=0
 LICENSE=""
 IS32BIT="1"
@@ -1154,6 +1213,19 @@ IS32BIT="1"
 EndProfile
 ENDLIST
 LIST ProjectState5.1
+LIST "TOP::work"
+LIST Impl1
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
+ideSTIMULUS=StateSuccess
+LIST FlowOptions
+UsePhySynth=FALSE
+UseSynth=TRUE
+UseFhbAutoInst=FALSE
+ENDLIST
+Used_File_List
+ENDUsed_File_List
+ENDLIST
+ENDLIST
 ENDLIST
 LIST ExcludePackageForSimulation
 ENDLIST
@@ -1167,8 +1239,10 @@ LIST UserCustomizedFileList
 ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
-StartPage;StartPage;0
-ACTIVEVIEW;StartPage
+Reports;Reports;0
+ReportsCurrentItem;Generate Bitstream:TOP_generateBitstream.log
+SmartDesign;TOP;0
+ACTIVEVIEW;Reports
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
@@ -1860,10 +1934,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/FIFO.v","FALSE","FALSE"
@@ -1940,10 +2014,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
@@ -1964,10 +2038,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
@@ -2724,6 +2798,9 @@ SUBBLOCK "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/CORE
 SUBBLOCK "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
+ENDLIST
+LIST "tb_axi_led_reg::work","/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd","FALSE","TRUE"
+SUBBLOCK "axi_led_reg::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd","FALSE","FALSE"
 ENDLIST
 LIST "testbench::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/testbench.v","FALSE","TRUE"
 SUBBLOCK "COREAXI4INTERCONNECT::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/CoreAxi4Interconnect.v","FALSE","FALSE"
