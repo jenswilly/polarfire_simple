@@ -1,0 +1,25 @@
+# PolarFire SoC Discovery Kit: on-board FT4232H, which enumerates as 1514:2008 (Embedded FlashPro5).
+#
+# By default ftdi_sio binds only interface 2. These rules:
+#   1. add 1514:2008 to ftdi_sio so all four interfaces get a ttyUSB,
+#   2. unbind interface 0 again, because that's JTAG (Libero / OpenOCD),
+#   3. create /dev/pfsoc-uart0 for interface 3 (channel D = MSS MMUART0).
+#
+# Install:
+#   sudo cp tools/99-pfsoc-discovery-uart.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+# then replug the board's USB cable.
+
+# 1. Teach ftdi_sio the ID. new_id fails with EEXIST once it's been added, so ignore errors.
+ACTION=="add", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="1514", ATTR{idProduct}=="2008", \
+  RUN+="/sbin/modprobe ftdi_sio", \
+  RUN+="/bin/sh -c 'echo 1514 2008 > /sys/bus/usb-serial/drivers/ftdi_sio/new_id 2>/dev/null || true'"
+
+# 2. Release interface 0 (JTAG) as soon as ftdi_sio binds it.
+ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", DRIVER=="ftdi_sio", \
+  ATTR{bInterfaceNumber}=="00", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+  RUN+="/bin/sh -c 'echo %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
+
+# 3. Stable name for the console UART (interface 3).
+ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="03", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+  SYMLINK+="pfsoc-uart0", GROUP="dialout", MODE="0660"

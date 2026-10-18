@@ -7,6 +7,8 @@ Libero SoC on Linux uses a **FlexLM floating license**. Even on a single machine
 | `start_libero.sh` | Starts the license server if it isn't up yet, waits until `actlmgrd` reports UP, sets the license environment variables and then `exec`s Libero. Arguments are passed through to Libero. |
 | `stop_licenser_server.sh` | Stops the license server: first `lmutil lmdown`, then SIGTERM to `lmgrd` and the vendor daemons if they haven't exited after 10 s. Touches only your own processes. Close Libero first, because it loses its license otherwise. |
 
+`99-pfsoc-discovery-uart.rules` is unrelated to licensing. It's the udev rule that makes all of the board's UARTs visible (see the top-level README, "Serial console").
+
 Both scripts expect the daemons and `License.dat` in `~/FlexLM` and the server on port **1702**. `start_libero.sh` hard-codes `LIBERO_BIN=/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/libero`, so update it when Libero is upgraded.
 
 ## One-time setup (Ubuntu)

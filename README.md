@@ -50,15 +50,20 @@ constraints/io.pdc  Pin and bank constraints (linked into Libero)
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
+tools/              Libero license-server start/stop scripts (see tools/README.md) and the udev rule for the board's UARTs
 ```
 
 ## Building
 
-1. Open `polarfire_simple/polarfire_simple.prjx` in Libero SoC 2026.1.
+1. Start Libero with `tools/start_libero.sh`, which starts the FlexLM license server first if it isn't running (one-time setup in `tools/README.md`). Open `polarfire_simple/polarfire_simple.prjx`.
 2. If the MSS config changed, regenerate it with the MSS Configurator (`pfsoc_mss`) into `mss/`, then re-import it with **File → Import → MSS**.
-3. In Design Flow, run Synthesize → Place and Route → Verify Timing → Generate Bitstream → Run PROGRAM Action. The board's embedded FlashPro6 is used for programming.
+3. In Design Flow, run Synthesize → Place and Route → Verify Timing → Generate Bitstream → Run PROGRAM Action. The board's embedded FlashPro5 is used for programming.
 
-The `.prjx` file references `hdl/axi_led_reg.vhd` and `constraints/io.pdc` by **absolute path** (`/home/jenswilly/Projs/polarfire_simple/...`). If you clone the repository somewhere else, re-link those two files.
+**Fresh clone:** the bitstream includes the eNVM boot image (see [Standalone boot](#standalone-boot-from-envm-boot-mode-1)), and that hex is build output, so it isn't in git. Build the `Discovery-Kit-eNVM-Scratchpad-Release` configuration in SoftConsole first. Otherwise Generate Design Initialization Data / Generate Bitstream fails on the missing file.
+
+The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...`) in two places. If you clone the repository somewhere else, fix both:
+- `polarfire_simple.prjx` links `hdl/axi_led_reg.vhd` and `constraints/io.pdc`. Re-link those two files.
+- `designer/TOP/ENVM.cfg` points the eNVM client at `led_test-bm1-p0.hex`. Select the hex again in the eNVM client.
 
 ## Software (SoftConsole)
 
@@ -76,7 +81,13 @@ By default Linux binds only interface 2 of the board's USB device (`1514:2008`),
 echo 1514 2008 | sudo tee /sys/bus/usb-serial/drivers/ftdi_sio/new_id
 screen /dev/serial/by-id/usb-Microsemi_Embedded_FlashPro5_*-if03-port0 115200
 ```
-To make this permanent, add a udev rule (see CLAUDE.md) that binds all interfaces, leaves interface 0 (JTAG) free, and creates `/dev/pfsoc-uart0`.
+To make this permanent, install the udev rule in `tools/`. It binds all interfaces, leaves interface 0 (JTAG) free, and creates `/dev/pfsoc-uart0`:
+```bash
+sudo cp tools/99-pfsoc-discovery-uart.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules   # then replug the board
+screen /dev/pfsoc-uart0 115200
+```
+`/dev/pfsoc-uart0` belongs to group `dialout`, so your user needs to be in that group.
 
 ### Standalone boot from eNVM (boot mode 1)
 The board runs `led_test` on its own at power-up. The program is stored in eNVM, copied to the L2 scratchpad and run from there.
