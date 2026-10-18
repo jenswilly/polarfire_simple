@@ -10,7 +10,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
   - IP configs: `polarfire_simple/component/work/<comp>/<comp>.cxf` (`configurableElement` values)
 - HDL is **VHDL** (project is set to VHDL-2008). Do not write Verilog.
 - Hand-written sources live outside the Libero folder (`hdl/`, `constraints/`, `mss/`) and are *linked* into the project, not imported.
-- Testbenches are in `sim/tb_<entity>.vhd`. They are self-checking and must print `TB PASSED` / `TB FAILED`. Run them with `sim/run_tb.sh tb_<entity>`, which compiles `hdl/*.vhd` and uses Libero's QuestaSim (needs the license server). Claude can run these directly. Extend the testbench whenever HDL behaviour changes.
+- Testbenches are in `sim/tb_<entity>.vhd`. They are self-checking and must print `TB PASSED` / `TB FAILED`. Run them with `sim/run_tb.sh tb_<entity> [vsim args, e.g. -gNAME=value]`, which compiles `hdl/*.vhd` and uses Libero's QuestaSim (needs the license server). Claude can run these directly. Extend the testbench whenever HDL behaviour changes.
 - **Libero simulation setup:** link the testbench as a stimulus file (type `tb_hdl` in the `.prjx`). Associate it via Design Flow → Verify Pre-Synthesized Design → Simulate → right-click → Organize Input Files → Organize Stimulus Files. That writes `LIST AssociatedStimulus` / `LIST TOP`. The Stimulus Hierarchy has **no** "Set as Active Stimulus" in 2026.1, and the Tcl `set_active_testbench "<tb>::work,<path>"` fails ("Cannot find module named …"). The testbench name and instance go in Project Settings → Simulation Options (`EntityName` / `TopInstanceName` in the `.prjx`). Only one testbench can be the Simulation Options testbench at a time.
 
 ## Tools / paths

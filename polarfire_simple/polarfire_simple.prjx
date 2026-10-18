@@ -54,28 +54,33 @@ ENDLIST
 LIST FileManager
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 STATE="utd"
-TIME="1792317654"
+TIME="1792345880"
 SIZE="1361"
 IS_READONLY="TRUE"
 ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd,hdl"
+STATE="utd"
+TIME="1792346095"
+SIZE="12704"
+ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd,hdl"
 STATE="utd"
-TIME="1792310629"
+TIME="1792345880"
 SIZE="4055"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd,hdl"
 STATE="utd"
-TIME="1792316001"
+TIME="1792345880"
 SIZE="2527"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd,hdl"
 STATE="utd"
-TIME="1792318066"
+TIME="1792345880"
 SIZE="1575"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
 STATE="utd"
-TIME="1792316016"
+TIME="1792345880"
 SIZE="6190"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/COREAXI4INTERCONNECT.cxf,actgen_cxf"
@@ -933,12 +938,12 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792318335"
+TIME="1792345880"
 SIZE="10030"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1792318335"
+TIME="1792345880"
 SIZE="37001"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
@@ -1001,23 +1006,13 @@ STATE="utd"
 TIME="1792315003"
 SIZE="16068"
 ENDFILE
-VALUE "<project>/simulation/tb_axi_led_reg_presynth_simulation.log,log"
-STATE="utd"
-TIME="1792315100"
-SIZE="66521"
-ENDFILE
-VALUE "<project>/simulation/testbench_presynth_simulation.log,log"
-STATE="utd"
-TIME="1792315008"
-SIZE="66472"
-ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
 TIME="1792311911"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
-STATE="utd"
+STATE="ood"
 TIME="1792311911"
 SIZE="2471217"
 ENDFILE
@@ -1083,7 +1078,6 @@ VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 ENDLIST
 LIST ProjectState5.1
 LIST Impl1
-ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 ideSTIMULUS=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
@@ -1225,7 +1219,6 @@ ENDLIST
 LIST ProjectState5.1
 LIST "TOP::work"
 LIST Impl1
-ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 ideSTIMULUS=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
@@ -1259,6 +1252,8 @@ LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
 SUBBLOCK "COREAXI4INTERCONNECT::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/CoreAxi4Interconnect.v","FALSE","FALSE"
 ENDLIST
 LIST "axi_led_reg::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd","FALSE","FALSE"
+ENDLIST
+LIST "axis_spi_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd","FALSE","FALSE"
 ENDLIST
 LIST "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
 ENDLIST

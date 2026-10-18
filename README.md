@@ -50,6 +50,7 @@ hdl/                Hand-written VHDL, linked into Libero:
                       axi_led_reg.vhd      AXI4-Lite LED register + debug pulse
                       button_debounce.vhd  Push-button debouncer with single-clock press pulse
                       pulse_stretch.vhd    Stretches a short pulse to 1 us (for the DEBUG pin)
+                      axis_spi_master.vhd  AXI4-Stream SPI master, fixed 10-byte frames (not in TOP yet)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
@@ -78,7 +79,7 @@ Testbenches live in `sim/` and are self-checking. Run one from the command line 
 sim/run_tb.sh tb_axi_led_reg
 ```
 
-The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (git-ignored). The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
+The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (git-ignored). The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. Any further arguments go to `vsim`, so generics can be overridden, e.g. `sim/run_tb.sh tb_axis_spi_master -gCPOL_I=1 -gCPHA_I=1`. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
 
 ```bash
 /usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_led_reg.wlf
@@ -91,6 +92,8 @@ The same testbench also runs from Libero. It is linked as a stimulus file and as
 `tb_button_debounce` uses `DEBOUNCE_CYCLES = 20` and asynchronous button edges. It checks: short glitches are ignored, both when released and when pressed; a bouncy press gives exactly one single-cycle pulse, exactly `DEBOUNCE_CYCLES + 2` clock edges after the last bounce; holding and releasing give no pulse; and holding the button through a reset gives one pulse after the reset.
 
 `tb_pulse_stretch` uses the default `STRETCH_CYCLES = 125`. It checks: a single-cycle input gives exactly 1 µs high, starting one clock later; a retrigger 50 cycles in merges into one pulse of 50 + 125 cycles; a 3-cycle input stays high until 125 cycles after its last cycle; and reset clears the output.
+
+`tb_axis_spi_master` defaults to the design settings (10-byte frames, `CLK_DIV = 7`, 125 MHz); integer generics (`CPOL_I`, `CPHA_I`, `MSB_I`, `RX_I`, `FRAME_BYTES`, `CLK_DIV`, `MISO_SYNC_I`, `STALLS`) select other modes. A behavioural SPI slave checks every MOSI byte, drives a known MISO sequence and checks that every CS_N assertion has exactly `FRAME_BYTES * 8` bits with SCLK idle at both CS_N edges. A timing monitor checks the SCLK half-periods and the CS_N setup/hold/idle times. The RX side is checked for data and `tlast` under random stalls plus long `m_axis_tready` stalls (overrun check). The last frame has a wrong `s_axis_tlast` and must give `frame_err_out` pulses, and a reset mid-byte must return the DUT to idle.
 
 ## Software (SoftConsole)
 
