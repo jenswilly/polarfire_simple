@@ -7,6 +7,7 @@ set_io -port_name REF_CLK_50MHz -pin_name R18 -fixed true -io_std LVCMOS18 -DIRE
 
 # Push-button (active low)
 set_io -port_name SWITCH1 -pin_name T19 -fixed true -DIRECTION INPUT
+set_io -port_name SWITCH2 -pin_name U18 -fixed true -DIRECTION INPUT
 
 # LEDs (active high)
 set_io -port_name LED1 -pin_name T18 -fixed true -DIRECTION OUTPUT
@@ -16,6 +17,10 @@ set_io -port_name LED4 -pin_name U21 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED5 -pin_name AA18 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED6 -pin_name V16 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED7 -pin_name U15 -fixed true -DIRECTION OUTPUT
+
+# RPi header (Bank1 = 3.3 V, so it needs LVCMOS33; the project default is LVCMOS18)
+set_io -port_name DEBUG -pin_name E13 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
+
 
 # MMUART0 <-> FTDI (UART0_TX = MSS transmit, UART0_RX = MSS receive)
 set_io -port_name UART0_TX -pin_name Y21 -fixed true -DIRECTION OUTPUT

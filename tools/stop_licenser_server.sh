@@ -1,7 +1,8 @@
 #!/bin/bash
 # Stop the FlexLM license server used by Microchip Libero SoC.
 
-FLEXLM_DIR="$HOME/FlexLM"
+LIBERO_INSTALL_DIR="/usr/local/microchip/Libero_SoC_2026.1"
+LMUTIL_PATH="$LIBERO_INSTALL_DIR/Libero_SoC/Designer/bin64/lmutil"
 PORT=1702
 
 if ! pgrep -u "$USER" -x lmgrd >/dev/null; then
@@ -10,7 +11,7 @@ if ! pgrep -u "$USER" -x lmgrd >/dev/null; then
 fi
 
 echo "Stopping license server..."
-"$FLEXLM_DIR/lmutil" lmdown -q -force -c "$PORT@localhost" >/dev/null 2>&1
+"$LMUTIL_PATH" lmdown -q -force -c "$PORT@localhost" >/dev/null 2>&1
 
 # Give lmgrd and its vendor daemons a moment to exit cleanly
 for i in {1..10}; do

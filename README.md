@@ -32,6 +32,7 @@ SWITCH1 (T19) ─ INV ─> LED1
 |--------|------|--------|-------------|
 | 0x0 | LED  | R/W | bit 0 = LED2, bit 1 = LED3 |
 | 0x4 | ID   | RO  | `0x1ED50001` (sanity check for AXI reads) |
+| 0x8 | DEBUG | WO | Writing bit 0 = 1 drives `DEBUG_PULSE` high for exactly one ACLK cycle. Writing 0 does nothing. Reads return 0. |
 
 The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low (32-bit) window.
 
@@ -45,26 +46,63 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 
 ```
 mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
-hdl/                axi_led_reg.vhd: AXI4-Lite LED register (linked into Libero)
+hdl/                Hand-written VHDL, linked into Libero:
+                      axi_led_reg.vhd      AXI4-Lite LED register + debug pulse
+                      button_debounce.vhd  Push-button debouncer with single-clock press pulse
+                      pulse_stretch.vhd    Stretches a short pulse to 1 us (for the DEBUG pin)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
+sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
+tools/              Libero license-server start/stop scripts (see tools/README.md) and the udev rule for the board's UARTs
 ```
 
 ## Building
 
-1. Open `polarfire_simple/polarfire_simple.prjx` in Libero SoC 2026.1.
+1. Start Libero with `tools/start_libero.sh`, which starts the FlexLM license server first if it isn't running (one-time setup in `tools/README.md`). Open `polarfire_simple/polarfire_simple.prjx`.
 2. If the MSS config changed, regenerate it with the MSS Configurator (`pfsoc_mss`) into `mss/`, then re-import it with **File → Import → MSS**.
-3. In Design Flow, run Synthesize → Place and Route → Verify Timing → Generate Bitstream → Run PROGRAM Action. The board's embedded FlashPro6 is used for programming.
+3. In Design Flow, run Synthesize → Place and Route → Verify Timing → Generate Bitstream → Run PROGRAM Action. The board's embedded FlashPro5 is used for programming.
 
-The `.prjx` file references `hdl/axi_led_reg.vhd` and `constraints/io.pdc` by **absolute path** (`/home/jenswilly/Projs/polarfire_simple/...`). If you clone the repository somewhere else, re-link those two files.
+**Fresh clone:** the bitstream includes the eNVM boot image (see [Standalone boot](#standalone-boot-from-envm-boot-mode-1)), and that hex is build output, so it isn't in git. Build the `Discovery-Kit-eNVM-Scratchpad-Release` configuration in SoftConsole first. Otherwise Generate Design Initialization Data / Generate Bitstream fails on the missing file.
+
+The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...`) in two places. If you clone the repository somewhere else, fix both:
+- `polarfire_simple.prjx` links `hdl/axi_led_reg.vhd` and `constraints/io.pdc`. Re-link those two files.
+- `designer/TOP/ENVM.cfg` points the eNVM client at `led_test-bm1-p0.hex`. Select the hex again in the eNVM client.
+
+## Simulation
+
+Testbenches live in `sim/` and are self-checking. Run one from the command line with Libero's QuestaSim:
+
+```bash
+sim/run_tb.sh tb_axi_led_reg
+```
+
+The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (git-ignored). The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
+
+```bash
+/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_led_reg.wlf
+```
+
+The same testbench also runs from Libero. It is linked as a stimulus file and associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_led_reg` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_led_reg_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_led_reg` into `TOP`, so this testbench can't run there.
+
+`tb_axi_led_reg` checks the ID register, the LED register (write and readback) and `DEBUG_PULSE`: exactly one cycle per write of 1, even with a slow `BREADY`, no pulse when writing 0 or writing to the LED register, and DEBUG reads as 0.
+
+`tb_button_debounce` uses `DEBOUNCE_CYCLES = 20` and asynchronous button edges. It checks: short glitches are ignored, both when released and when pressed; a bouncy press gives exactly one single-cycle pulse, exactly `DEBOUNCE_CYCLES + 2` clock edges after the last bounce; holding and releasing give no pulse; and holding the button through a reset gives one pulse after the reset.
+
+`tb_pulse_stretch` uses the default `STRETCH_CYCLES = 125`. It checks: a single-cycle input gives exactly 1 µs high, starting one clock later; a retrigger 50 cycles in merges into one pulse of 50 + 125 cycles; a 3-cycle input stays high until 125 cycles after its last cycle; and reset clears the output.
 
 ## Software (SoftConsole)
 
-1. Start SoftConsole with the workspace `softconsole/`. Import `softconsole/led_test` with **File → Import → Existing Projects into Workspace**, leaving "copy" unticked.
-2. Set the active build configuration to **`Discovery-Kit-LIM-Debug`** and build. The pre-build step generates `fpga_design_config/` from the MSS XML in `src/boards/mpfs-discovery-kit/fpga_design/design_description/`. Copy `mss/MSS_simple_mss_cfg.xml` there again after any MSS change.
-3. Debug with **`led_test hw all-harts debug`** (GDB OpenOCD Debugging). It loads the program into L2 LIM over JTAG and stops in `e51()`. Then resume.
+1. **Fresh clone only:** `softconsole/.metadata/` is git-ignored. Without it, SoftConsole refuses the folder ("is not an empty folder or a SoftConsole workspace"), because it accepts only an empty folder or one with `.metadata/softconsole.xml`. Create it from SoftConsole's own empty-workspace template:
+   ```bash
+   SC=~/Microchip/SoftConsole-v2022.2-RISC-V-747
+   unzip -q $SC/extras/workspace.empty.zip 'workspace.empty/.metadata/*' -d /tmp/sc-ws
+   cp -r /tmp/sc-ws/workspace.empty/.metadata softconsole/ && rm -r /tmp/sc-ws
+   ```
+2. Start SoftConsole with the workspace `softconsole/`. Import `softconsole/led_test` with **File → Import → Existing Projects into Workspace**, leaving "copy" unticked.
+3. Set the active build configuration to **`Discovery-Kit-LIM-Debug`** and build. The pre-build step generates `fpga_design_config/` from the MSS XML in `src/boards/mpfs-discovery-kit/fpga_design/design_description/`. Copy `mss/MSS_simple_mss_cfg.xml` there again after any MSS change.
+4. Debug with **`led_test hw all-harts debug`** (GDB OpenOCD Debugging). It loads the program into L2 LIM over JTAG and stops in `e51()`. Then resume.
 
 The E51 prints a banner and the ID register on MMUART0, then counts 0–3 on LED2/LED3.
 
@@ -76,7 +114,13 @@ By default Linux binds only interface 2 of the board's USB device (`1514:2008`),
 echo 1514 2008 | sudo tee /sys/bus/usb-serial/drivers/ftdi_sio/new_id
 screen /dev/serial/by-id/usb-Microsemi_Embedded_FlashPro5_*-if03-port0 115200
 ```
-To make this permanent, add a udev rule (see CLAUDE.md) that binds all interfaces, leaves interface 0 (JTAG) free, and creates `/dev/pfsoc-uart0`.
+To make this permanent, install the udev rule in `tools/`. It binds all interfaces, leaves interface 0 (JTAG) free, and creates `/dev/pfsoc-uart0`:
+```bash
+sudo cp tools/99-pfsoc-discovery-uart.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules   # then replug the board
+screen /dev/pfsoc-uart0 115200
+```
+`/dev/pfsoc-uart0` belongs to group `dialout`, so your user needs to be in that group.
 
 ### Standalone boot from eNVM (boot mode 1)
 The board runs `led_test` on its own at power-up. The program is stored in eNVM, copied to the L2 scratchpad and run from there.

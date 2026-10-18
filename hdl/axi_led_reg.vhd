@@ -1,6 +1,7 @@
--- Minimal AXI4-Lite slave: two LED bits + read-only ID register
+-- Minimal AXI4-Lite slave: two LED bits, read-only ID register and a debug pulse
 --   offset 0x0: LED control  (R/W)  bit0 = LED2, bit1 = LED3
 --   offset 0x4: ID           (RO)   0x1ED50001
+--   offset 0x8: DEBUG        (WO)   write bit0 = 1 -> DEBUG_PULSE high for one ACLK cycle (reads 0)
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -36,9 +37,13 @@ entity axi_led_reg is
         RRESP   : out std_logic_vector(1 downto 0);
         RVALID  : out std_logic;
         RREADY  : in  std_logic;
+
         -- LEDs
         LED2    : out std_logic;
-        LED3    : out std_logic
+        LED3    : out std_logic;
+
+        -- Debug pulse (one ACLK cycle per write to 0x8)
+        DEBUG_PULSE : out std_logic
     );
 end entity axi_led_reg;
 
@@ -46,6 +51,7 @@ architecture rtl of axi_led_reg is
     constant ID_VALUE : std_logic_vector(31 downto 0) := x"1ED50001";
 
     signal led_reg  : std_logic_vector(1 downto 0);
+    signal pulse_i  : std_logic;
     signal wr_ready : std_logic;
     signal bvalid_i : std_logic;
     signal rd_ready : std_logic;
@@ -69,6 +75,8 @@ begin
     write_proc : process (ACLK)
     begin
         if rising_edge(ACLK) then
+            -- Default: the pulse lasts only the cycle after the accepted write
+            pulse_i <= '0';
             if ARESETN = '0' then
                 led_reg  <= (others => '0');
                 bvalid_i <= '0';
@@ -76,6 +84,9 @@ begin
                 bvalid_i <= '1';
                 if AWADDR(3 downto 2) = "00" and WSTRB(0) = '1' then
                     led_reg <= WDATA(1 downto 0);
+                end if;
+                if AWADDR(3 downto 2) = "10" and WSTRB(0) = '1' then
+                    pulse_i <= WDATA(0);
                 end if;
             elsif BREADY = '1' then
                 bvalid_i <= '0';
@@ -103,6 +114,8 @@ begin
         end if;
     end process;
 
+    -- Assign signals to outputs
     LED2 <= led_reg(0);
     LED3 <= led_reg(1);
+    DEBUG_PULSE <= pulse_i;
 end architecture rtl;

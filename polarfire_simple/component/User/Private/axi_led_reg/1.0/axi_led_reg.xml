@@ -166,6 +166,10 @@
         <spirit:name>LED3</spirit:name>
         <spirit:direction>out</spirit:direction>
       </spirit:signal>
+      <spirit:signal>
+        <spirit:name>DEBUG_PULSE</spirit:name>
+        <spirit:direction>out</spirit:direction>
+      </spirit:signal>
     </spirit:signals>
     <spirit:hwParameters>
       <spirit:hwParameter spirit:id="ADDR_WIDTH" spirit:name="ADDR_WIDTH" spirit:prompt="ADDR_WIDTH:" spirit:dataType="int" spirit:resolve="user">38</spirit:hwParameter>
