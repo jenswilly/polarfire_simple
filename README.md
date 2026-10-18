@@ -46,7 +46,9 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 
 ```
 mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
-hdl/                axi_led_reg.vhd: AXI4-Lite LED register (linked into Libero)
+hdl/                Hand-written VHDL, linked into Libero:
+                      axi_led_reg.vhd      AXI4-Lite LED register + debug pulse
+                      button_debounce.vhd  Push-button debouncer with single-clock press pulse (not in the design yet)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
@@ -84,6 +86,8 @@ The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (g
 The same testbench also runs from Libero. It is linked as a stimulus file and associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_led_reg` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_led_reg_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_led_reg` into `TOP`, so this testbench can't run there.
 
 `tb_axi_led_reg` checks the ID register, the LED register (write and readback) and `DEBUG_PULSE`: exactly one cycle per write of 1, even with a slow `BREADY`, no pulse when writing 0 or writing to the LED register, and DEBUG reads as 0.
+
+`tb_button_debounce` uses `DEBOUNCE_CYCLES = 20` and asynchronous button edges. It checks: short glitches are ignored, both when released and when pressed; a bouncy press gives exactly one single-cycle pulse, exactly `DEBOUNCE_CYCLES + 2` clock edges after the last bounce; holding and releasing give no pulse; and holding the button through a reset gives one pulse after the reset.
 
 ## Software (SoftConsole)
 

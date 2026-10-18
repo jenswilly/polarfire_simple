@@ -35,7 +35,7 @@ architecture sim of tb_axi_led_reg is
     signal led3    : std_logic;
     signal pulse   : std_logic;
 
-    signal pulse_cycles : natural := 0;   -- total ACLK cycles with DEBUG_PULSE high
+    signal pulse_cycles : natural := 0;   -- Total ACLK cycles with DEBUG_PULSE high
     signal done         : boolean := false;
 begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
@@ -95,7 +95,7 @@ begin
             end loop;
             bready <= '0';
             check(bresp = "00", "BRESP not OKAY");
-            -- let any pulse finish before the caller checks pulse_cycles
+            -- Let any pulse finish before the caller checks pulse_cycles
             for i in 1 to 3 loop
                 wait until rising_edge(clk);
             end loop;
