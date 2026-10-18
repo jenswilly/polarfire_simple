@@ -6,6 +6,12 @@ polarfire_simple/designer/*
 !polarfire_simple/designer/TOP/
 polarfire_simple/designer/TOP/*
 !polarfire_simple/designer/TOP/ENVM.cfg
+# ...and a placeholder so designer/impl1/ exists. Without it Libero creates a new revision (Impl2, ...) on open.
+!polarfire_simple/designer/impl1/
+polarfire_simple/designer/impl1/*
+!polarfire_simple/designer/impl1/simulation/
+polarfire_simple/designer/impl1/simulation/*
+!polarfire_simple/designer/impl1/simulation/.gitkeep
 polarfire_simple/tooldata/
 polarfire_simple/simulation/modelsim.ini
 polarfire_simple/stimulus/

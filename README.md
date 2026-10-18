@@ -32,6 +32,7 @@ SWITCH1 (T19) ─ INV ─> LED1
 |--------|------|--------|-------------|
 | 0x0 | LED  | R/W | bit 0 = LED2, bit 1 = LED3 |
 | 0x4 | ID   | RO  | `0x1ED50001` (sanity check for AXI reads) |
+| 0x8 | DEBUG | WO | Writing bit 0 = 1 drives `DEBUG_PULSE` high for exactly one ACLK cycle. Writing 0 does nothing. Reads return 0. |
 
 The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low (32-bit) window.
 

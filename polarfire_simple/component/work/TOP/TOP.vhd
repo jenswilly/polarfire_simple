@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Fri Oct  9 11:33:20 2026
+-- Created by SmartDesign Sun Oct 18 10:08:00 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -551,30 +551,31 @@ axi_led_reg_0 : entity work.axi_led_reg
         )
     port map( 
         -- Inputs
-        ACLK    => PF_CCC_C0_0_OUT0_FABCLK_0,
-        ARESETN => CORERESET_0_FABRIC_RESET_N,
-        AWVALID => AXI_IC_0_AXI4Lmtarget0_AWVALID,
-        WVALID  => AXI_IC_0_AXI4Lmtarget0_WVALID,
-        BREADY  => AXI_IC_0_AXI4Lmtarget0_BREADY,
-        ARVALID => AXI_IC_0_AXI4Lmtarget0_ARVALID,
-        RREADY  => AXI_IC_0_AXI4Lmtarget0_RREADY,
-        AWADDR  => AXI_IC_0_AXI4Lmtarget0_AWADDR,
-        AWPROT  => AXI_IC_0_AXI4Lmtarget0_AWPROT,
-        WDATA   => AXI_IC_0_AXI4Lmtarget0_WDATA,
-        WSTRB   => AXI_IC_0_AXI4Lmtarget0_WSTRB,
-        ARADDR  => AXI_IC_0_AXI4Lmtarget0_ARADDR,
-        ARPROT  => AXI_IC_0_AXI4Lmtarget0_ARPROT,
+        ACLK        => PF_CCC_C0_0_OUT0_FABCLK_0,
+        ARESETN     => CORERESET_0_FABRIC_RESET_N,
+        AWADDR      => AXI_IC_0_AXI4Lmtarget0_AWADDR,
+        AWPROT      => AXI_IC_0_AXI4Lmtarget0_AWPROT,
+        AWVALID     => AXI_IC_0_AXI4Lmtarget0_AWVALID,
+        WDATA       => AXI_IC_0_AXI4Lmtarget0_WDATA,
+        WSTRB       => AXI_IC_0_AXI4Lmtarget0_WSTRB,
+        WVALID      => AXI_IC_0_AXI4Lmtarget0_WVALID,
+        BREADY      => AXI_IC_0_AXI4Lmtarget0_BREADY,
+        ARADDR      => AXI_IC_0_AXI4Lmtarget0_ARADDR,
+        ARPROT      => AXI_IC_0_AXI4Lmtarget0_ARPROT,
+        ARVALID     => AXI_IC_0_AXI4Lmtarget0_ARVALID,
+        RREADY      => AXI_IC_0_AXI4Lmtarget0_RREADY,
         -- Outputs
-        AWREADY => AXI_IC_0_AXI4Lmtarget0_AWREADY,
-        WREADY  => AXI_IC_0_AXI4Lmtarget0_WREADY,
-        BVALID  => AXI_IC_0_AXI4Lmtarget0_BVALID,
-        ARREADY => AXI_IC_0_AXI4Lmtarget0_ARREADY,
-        RVALID  => AXI_IC_0_AXI4Lmtarget0_RVALID,
-        LED2    => LED2_net_0,
-        LED3    => LED3_net_0,
-        BRESP   => AXI_IC_0_AXI4Lmtarget0_BRESP,
-        RDATA   => AXI_IC_0_AXI4Lmtarget0_RDATA,
-        RRESP   => AXI_IC_0_AXI4Lmtarget0_RRESP 
+        AWREADY     => AXI_IC_0_AXI4Lmtarget0_AWREADY,
+        WREADY      => AXI_IC_0_AXI4Lmtarget0_WREADY,
+        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
+        BVALID      => AXI_IC_0_AXI4Lmtarget0_BVALID,
+        ARREADY     => AXI_IC_0_AXI4Lmtarget0_ARREADY,
+        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
+        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP,
+        RVALID      => AXI_IC_0_AXI4Lmtarget0_RVALID,
+        LED2        => LED2_net_0,
+        LED3        => LED3_net_0,
+        DEBUG_PULSE => OPEN 
         );
 -- CLKINT_0
 CLKINT_0 : CLKINT

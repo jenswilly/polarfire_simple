@@ -12,7 +12,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - Hand-written sources live outside the Libero folder (`hdl/`, `constraints/`, `mss/`) and are *linked* into the project, not imported.
 
 ## Tools / paths
-- Libero: `/usr/local/microchip/Libero_SoC_2026.1`, started via `tools/start_libero.sh`, which starts the FlexLM license server in `~/FlexLM` if needed. Stop the server with `tools/stop_licenser_server.sh`. Setup and troubleshooting are in `tools/README.md`.
+- Libero: `/usr/local/microchip/Libero_SoC_2026.1`, started via `tools/start_libero.sh`, which starts the FlexLM license server if needed. The daemons are in `$LIBERO_INSTALL_DIR/LicenseDaemons/`, `lmutil` is in `Libero_SoC/Designer/bin64/`, and `License.dat` / `license.log` are in `~/Microchip/`. Stop the server with `tools/stop_licenser_server.sh`. Setup and troubleshooting are in `tools/README.md`.
 - MSS Configurator: `/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/pfsoc_mss`
 - IP vault: `/usr/local/microchip/common/vault/Components/` (core GUI labels are in `fs/p0f0/<CORE>.xml`)
 - SoftConsole v2022.2 is in `~/Microchip` (the latest release). The workspace is `softconsole/`.
@@ -20,7 +20,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
   - Build configuration: `Discovery-Kit-LIM-Debug`. Debug with `led_test hw all-harts debug` (GDB OpenOCD).
   - The pre-build step runs `mpfs_configuration_generator.py`, which turns `src/boards/mpfs-discovery-kit/fpga_design/design_description/*.xml` (a copy of `mss/MSS_simple_mss_cfg.xml`) into `fpga_design_config/`. **Copy the XML again whenever the MSS config changes.**
   - `Discovery-Kit-eNVM-Scratchpad-Release` has a **post-build step** that runs `mpfsBootmodeProgrammer.jar --bootmode 1 --dryrun` to create `bootmode1/led_test-bm1-p0.hex` (a dummy SBIC page at `0x2022_0000` followed by the image at `0x2022_0100`). **Use this hex as the Libero "Boot Mode 1" eNVM client.** The plain `led_test.hex` is rejected because it starts at `0x2022_0100`. The step hard-codes `FPGENPROG=/usr/local/microchip/Libero_SoC_2026.1/...`, so update it if Libero is upgraded.
-  - The Libero eNVM client config is saved in `polarfire_simple/designer/TOP/ENVM.cfg`. This is the only file under `designer/` that is tracked in git. It stores **`-number_of_bytes`** and an absolute path to the hex, so after the program grows, select the hex again in the eNVM client.
+  - The Libero eNVM client config is saved in `polarfire_simple/designer/TOP/ENVM.cfg`. Apart from the `designer/impl1/simulation/.gitkeep` placeholder, this is the only file under `designer/` that is tracked in git. It stores **`-number_of_bytes`** and an absolute path to the hex, so after the program grows, select the hex again in the eNVM client.
   - The application code is in `src/application/hart0/e51.c`. Only the E51 runs our code; the U54s stay in WFI.
 - Board reference: Microchip `polarfire-soc/polarfire-soc-discovery-kit-reference-design` on GitHub. Pins, MSS `.cfg` and DDR4 settings were taken from it (that design targets Libero 2025.2).
 
@@ -42,6 +42,9 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - MSS outputs that are not used must be marked unused: `PLL_CPU_LOCK_M2F`, `PLL_DDR_LOCK_M2F`, `MMUART_0_TXD_OE_M2F`.
 - MSS cfg items that needed fixing compared with the defaults: `DDR4_READ_PREAMBLE 1`, `L2CACHE_LIM_SIZE 4` / `L2CACHE_SCRATCH_SIZE 4`. The scratchpad is needed by the HSS.
 - The `.prjx` stores linked files as absolute paths.
+- **Libero's working directory matters.** When an HDL+ core is updated, Libero writes `component/User/Private/<core>/…xml` relative to its working directory. Started from the repo root, that creates a stray `component/` there. `tools/start_libero.sh` therefore `cd`s into `polarfire_simple/` first.
+- **Libero needs `designer/impl1/` to exist.** Each revision (`Impl1` in the `.prjx` `LIST REVISIONS` / `CURREV`) has a folder `designer/impl<N>/`. If that folder is missing (e.g. on a fresh clone, because `designer/` is git-ignored), Libero quietly creates a new revision `Impl2` on open. `designer/impl1/simulation/.gitkeep` is tracked to prevent this. `designer/TOP/` is per root module, not per revision.
+- After changing an HDL+ core's ports, update the instance in SmartDesign and then **Generate Component**. Saving alone deletes `TOP.vhd` until it's generated again.
 - The I/O Editor writes an export to `constraints/pre/` (git-ignored). The source of truth is `constraints/io.pdc`.
 - **Console UART:** the template maps the E51 to MMUART1, but our design uses **MMUART0** (`g_mss_uart0_lo`, `MSS_PERIPH_MMUART0`). It reaches the FT4232H **channel D, interface 3**: `/dev/serial/by-id/usb-Microsemi_Embedded_FlashPro5_*-if03-port0`, or `/dev/pfsoc-uart0` via the udev rule.
 - **Linux sees only one serial port for the board.** The kernel's `ftdi_sio` binds only interface 2 of `1514:2008` (Embedded FlashPro5). Fix: `echo 1514 2008 | sudo tee /sys/bus/usb-serial/drivers/ftdi_sio/new_id`, or permanently by installing `tools/99-pfsoc-discovery-uart.rules` in `/etc/udev/rules.d/` (it binds all interfaces, unbinds interface 0 = JTAG, and adds the `/dev/pfsoc-uart0` symlink).

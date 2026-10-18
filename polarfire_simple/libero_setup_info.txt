@@ -1,11 +1,11 @@
 # Microsemi Corp.
-# Date: 2026-Oct-14 10:43:01
+# Date: 2026-Oct-18 10:22:18
 Libero Release : 2026.1
 Libero Version : 2026.1.0.17
 Operating System Name : Linux
-Linux Distribution Description:	Ubuntu 22.04.5 LTS
+Linux Distribution Description:	Ubuntu 24.04.4 LTS
 
-Ram Size : Unknown
+Ram Size : 62.23 GB (usable)
 OS Type : 64-bit
 
 Environment Variables : 

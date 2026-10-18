@@ -9,32 +9,33 @@ Libero SoC on Linux uses a **FlexLM floating license**. Even on a single machine
 
 `99-pfsoc-discovery-uart.rules` is unrelated to licensing. It's the udev rule that makes all of the board's UARTs visible (see the top-level README, "Serial console").
 
-Both scripts expect the daemons and `License.dat` in `~/FlexLM` and the server on port **1702**. `start_libero.sh` hard-codes `LIBERO_BIN=/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/libero`, so update it when Libero is upgraded.
+Paths used by the scripts:
+
+| What | Where |
+|---|---|
+| `lmgrd` and vendor daemons | `$LIBERO_INSTALL_DIR/LicenseDaemons/` |
+| `lmutil` | `$LIBERO_INSTALL_DIR/Libero_SoC/Designer/bin64/lmutil` |
+| `License.dat` and `license.log` | `~/Microchip/` |
+
+The server runs on port **1702**. Both scripts hard-code `LIBERO_INSTALL_DIR=/usr/local/microchip/Libero_SoC_2026.1`, so update it in both when Libero is upgraded. The `DAEMON`/`VENDOR` lines in `License.dat` also contain that path.
 
 ## One-time setup (Ubuntu)
 
-### 1. Download the license daemons
+### 1. Verify paths
 
-The daemons are **not** part of the Libero installer. Download the Linux daemon package from the ["Daemons" tab on Microchip's Libero download/licensing page](https://www.microchip.com/en-us/products/fpgas-and-plds/fpga-and-soc-design-tools/fpga/licensing#tabs-c3cd7bb734-item-0457bf01b5-tab). Since Libero 2024.2, the 64-bit FlexLM v11.19 daemons are required for all floating licenses:
+The daemons are installed as part of Libero SoC Design Suite. But verify that the install location
+is `/usr/local/microchip/Libero_SoC_2026.1/`. If it isn't, change `LIBERO_INSTALL_DIR` in both scripts.
 
-| Daemon | Licenses |
-|---|---|
-| `actlmgrd` | Libero |
-| `snpslmd` | Synplify Pro ME / Identify ME |
-| `saltd` | ModelSim / QuestaSim ME (replaces the old `mgcld`) |
-
-Unpack the package and add the license file:
+The commands below use this shorthand:
 
 ```bash
-mkdir -p ~/FlexLM
-tar xzf Linux_Licensing_Daemon_*.tar.gz -C ~/FlexLM --strip-components=1
-cp /path/to/License.dat ~/FlexLM/
-chmod +x ~/FlexLM/{lmgrd,lmutil,actlmgrd,snpslmd,saltd}
+LIBERO=/usr/local/microchip/Libero_SoC_2026.1
 ```
 
-### 2. Ubuntu prerequisites
 
-`lmgrd` is linked against the LSB loader, which Ubuntu doesn't ship. Without it, `./lmgrd` fails with a misleading "No such file or directory":
+### 2. Ubuntu 22.04 prerequisites
+
+`lmgrd` is linked against the LSB loader, which Ubuntu 22.04 doesn't ship. Without it, `./lmgrd` fails with a misleading "No such file or directory":
 
 ```bash
 sudo ln -s /lib64/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3
@@ -49,31 +50,40 @@ sudo mkdir -p /usr/tmp && sudo chmod 1777 /usr/tmp
 Check that FlexLM sees the host ID (MAC address) the license was generated for:
 
 ```bash
-~/FlexLM/lmutil lmhostid
+$LIBERO/Libero_SoC/Designer/bin64/lmutil lmhostid
 ```
 
 On this machine it lists the MACs of `enp86s0` and `wlo1` without any changes. If the output is empty or doesn't contain the `HOSTID` from `License.dat`, the usual cause is Ubuntu's predictable interface names, because older FlexLM builds look for `eth0`. The fix is to rename the NIC to `eth0`, either with a netplan `set-name:` matched on the MAC address or with `net.ifnames=0 biosdevname=0` on the kernel command line.
 
 ### 3. Edit `License.dat`
 
-Only change the header lines:
+Put the license file in `~/Microchip/License.dat`. Only change the header lines:
 
 ```
 SERVER <hostname> <HOSTID> 1702
-DAEMON actlmgrd /home/<user>/FlexLM/actlmgrd
-DAEMON saltd /home/<user>/FlexLM/saltd
-VENDOR snpslmd /home/<user>/FlexLM/snpslmd
+DAEMON actlmgrd /usr/local/microchip/Libero_SoC_2026.1/LicenseDaemons/actlmgrd
+DAEMON saltd /usr/local/microchip/Libero_SoC_2026.1/LicenseDaemons/saltd
+VENDOR snpslmd /usr/local/microchip/Libero_SoC_2026.1/LicenseDaemons/snpslmd
 ```
 
 - Replace `<put.hostname.here>` with the output of `hostname`, without the angle brackets. Port 1702 is the default.
-- Point each `DAEMON`/`VENDOR` line at its binary using an **absolute path**, because `~` is not expanded. (Here, the `actlmgrd` line still says `PATH/actlmgrd` and the daemon starts anyway, because it is in the same directory as `lmgrd`. An absolute path is the safe choice.)
+- Point each `DAEMON`/`VENDOR` line at its binary using an **absolute path**, because `~` is not expanded. (A bare `PATH/actlmgrd` can still work, because the daemon is in the same directory as `lmgrd`. An absolute path is the safe choice.)
 - Leave the old `mgcld` line commented out.
 - **Do not touch** the `HOSTID` or the `FEATURE`/`INCREMENT` lines, because editing them breaks the signatures.
-- Only needed when a firewall sits between the server and its clients: add a fixed port to each vendor daemon, e.g. `DAEMON actlmgrd /home/<user>/FlexLM/actlmgrd PORT=1703`. Otherwise the daemons use random ports.
+- Only needed when a firewall sits between the server and its clients: add a fixed port to each vendor daemon, e.g. `DAEMON actlmgrd /usr/local/microchip/Libero_SoC_2026.1/LicenseDaemons/actlmgrd PORT=1703`. Otherwise the daemons use random ports.
 
 The hostname must resolve locally. Check with `getent hosts $(hostname)`, and add it to `/etc/hosts` if nothing is printed.
 
-### 4. Start Libero
+### 4. Add symlink
+
+Libero expects a path to a Red Hat-style directory for certificates. To fix this on Ubuntu, run
+
+```
+sudo mkdir -p /etc/pki/tls/certs/
+sudo ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
+```
+
+### 5. Start Libero
 
 ```bash
 tools/start_libero.sh &
@@ -82,20 +92,20 @@ tools/start_libero.sh &
 To do the same steps by hand:
 
 ```bash
-~/FlexLM/lmgrd -c ~/FlexLM/License.dat -l +$HOME/FlexLM/license.log   # as a normal user, not root
-~/FlexLM/lmutil lmstat -a -c 1702@localhost                          # all three daemons should be UP
+$LIBERO/LicenseDaemons/lmgrd -c ~/Microchip/License.dat -l +$HOME/Microchip/license.log   # as a normal user, not root
+$LIBERO/Libero_SoC/Designer/bin64/lmutil lmstat -a -c 1702@localhost                     # all three daemons should be UP
 
 export LM_LICENSE_FILE=1702@localhost
 export SNPSLMD_LICENSE_FILE=1702@localhost
 export SALT_LICENSE_SERVER=1702@localhost
-/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/libero &
+$LIBERO/Libero_SoC/Designer/bin64/libero &
 ```
 
 The `+` before the log path makes `lmgrd` append to the log instead of overwriting it. The environment variables are set in the launcher script rather than in `~/.bashrc`, so they apply only to Libero. If Libero runs on a different machine, use the server's hostname instead of `localhost`.
 
 ## Troubleshooting
 
-- **Libero can't check out a license:** run `~/FlexLM/lmutil lmstat -a -c 1702@localhost`. If a daemon isn't UP, the reason is in `~/FlexLM/license.log`. The usual causes are a wrong daemon path, a host ID mismatch, or a hostname that doesn't resolve.
+- **Libero can't check out a license:** run `$LIBERO/Libero_SoC/Designer/bin64/lmutil lmstat -a -c 1702@localhost`. If a daemon isn't UP, the reason is in `~/Microchip/license.log`. The usual causes are a wrong daemon path, a host ID mismatch, or a hostname that doesn't resolve.
 - **Harmless log warning:** `(snpslmd) Warning: Incompatible vendor daemon found.The vendor daemon <actlmgrd> is not supported in <SCL_2024.06> version.` can be ignored.
 - **`lmgrd: No such file or directory`** even though the file exists: the LSB loader symlink is missing (step 2).
 
@@ -112,8 +122,8 @@ Wants=network-online.target
 [Service]
 Type=forking
 User=<user>
-ExecStart=/home/<user>/FlexLM/lmgrd -c /home/<user>/FlexLM/License.dat -l +/home/<user>/FlexLM/license.log
-ExecStop=/home/<user>/FlexLM/lmutil lmdown -q -c /home/<user>/FlexLM/License.dat
+ExecStart=/usr/local/microchip/Libero_SoC_2026.1/LicenseDaemons/lmgrd -c /home/<user>/Microchip/License.dat -l +/home/<user>/Microchip/license.log
+ExecStop=/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/lmutil lmdown -q -c /home/<user>/Microchip/License.dat
 Restart=on-failure
 
 [Install]
