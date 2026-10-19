@@ -95,6 +95,12 @@ The same testbench also runs from Libero. It is linked as a stimulus file and as
 
 `tb_axis_spi_master` defaults to the design settings (10-byte frames, `CLK_DIV = 7`, 125 MHz); integer generics (`CPOL_I`, `CPHA_I`, `MSB_I`, `RX_I`, `FRAME_BYTES`, `CLK_DIV`, `MISO_SYNC_I`, `STALLS`) select other modes. A behavioural SPI slave checks every MOSI byte, drives a known MISO sequence and checks that every CS_N assertion has exactly `FRAME_BYTES * 8` bits with SCLK idle at both CS_N edges. A timing monitor checks the SCLK half-periods and the CS_N setup/hold/idle times. The RX side is checked for data and `tlast` under random stalls plus long `m_axis_tready` stalls (overrun check). The last frame has a wrong `s_axis_tlast` and must give `frame_err_out` pulses, and a reset mid-byte must return the DUT to idle.
 
+### Linking files
+
+To link a testbench file, go to Files -> stimulus -> Link Files. The linked file(s)
+will _not_ show up under Files -> stimulur, but they should be visible under Stimulus
+Hierarchy -> Work and -> User HDL Stimulus Files.
+
 ## Software (SoftConsole)
 
 1. **Fresh clone only:** `softconsole/.metadata/` is git-ignored. Without it, SoftConsole refuses the folder ("is not an empty folder or a SoftConsole workspace"), because it accepts only an empty folder or one with `.metadata/softconsole.xml`. Create it from SoftConsole's own empty-workspace template:
