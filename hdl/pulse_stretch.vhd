@@ -9,7 +9,7 @@ use ieee.std_logic_1164.all;
 
 entity pulse_stretch is
     generic (
-        STRETCH_CYCLES : positive := 125   -- Output length in clk cycles. Align with clock freq.
+        STRETCH_CYCLES : positive := 125_000   -- Output length in clk cycles. Align with clock freq.
     );
     port (
         clk       : in  std_logic;

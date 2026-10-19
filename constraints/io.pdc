@@ -20,6 +20,7 @@ set_io -port_name LED7 -pin_name U15 -fixed true -DIRECTION OUTPUT
 
 # RPi header (Bank1 = 3.3 V, so it needs LVCMOS33; the project default is LVCMOS18)
 set_io -port_name DEBUG -pin_name E13 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
+set_io -port_name DEBUG2 -pin_name B14 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
 
 
 # MMUART0 <-> FTDI (UART0_TX = MSS transmit, UART0_RX = MSS receive)

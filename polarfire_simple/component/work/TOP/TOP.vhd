@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Sun Oct 18 12:12:15 2026
+-- Created by SmartDesign Mon Oct 19 09:00:35 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -35,6 +35,7 @@ entity TOP is
         CKE0          : out   std_logic;
         CS0_N         : out   std_logic;
         DEBUG         : out   std_logic;
+        DEBUG2        : out   std_logic;
         DM            : out   std_logic_vector(1 downto 0);
         LED1          : out   std_logic;
         LED2          : out   std_logic;
@@ -466,6 +467,7 @@ begin
  LED5           <= '0';
  LED6           <= '0';
  LED7           <= '0';
+ DEBUG2         <= '1';
 ----------------------------------------------------------------------
 -- Top level output port assignments
 ----------------------------------------------------------------------
