@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Mon Oct 19 12:34:41 2026
+-- Created by SmartDesign Mon Oct 19 12:58:59 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -323,17 +323,7 @@ component PF_CCC_C0
         );
 end component;
 -- pulse_stretch
-component pulse_stretch
-    -- Port list
-    port(
-        -- Inputs
-        clk       : in  std_logic;
-        pulse_in  : in  std_logic;
-        reset_n   : in  std_logic;
-        -- Outputs
-        pulse_out : out std_logic
-        );
-end component;
+-- using entity instantiation for component pulse_stretch
 ----------------------------------------------------------------------
 -- Signal declarations
 ----------------------------------------------------------------------
@@ -789,7 +779,10 @@ PF_CCC_C0_0 : PF_CCC_C0
         PLL_LOCK_0        => PF_CCC_C0_0_PLL_LOCK_0 
         );
 -- pulse_stretch_0
-pulse_stretch_0 : pulse_stretch
+pulse_stretch_0 : entity work.pulse_stretch
+    generic map( 
+        STRETCH_CYCLES => ( 125000 )
+        )
     port map( 
         -- Inputs
         clk       => PF_CCC_C0_0_OUT0_FABCLK_0,
