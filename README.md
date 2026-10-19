@@ -51,6 +51,12 @@ hdl/                Hand-written VHDL, linked into Libero:
                       button_debounce.vhd  Push-button debouncer with single-clock press pulse
                       pulse_stretch.vhd    Stretches a short pulse to 1 us (for the DEBUG pin)
                       axis_spi_master.vhd  AXI4-Stream SPI master, fixed 10-byte frames (not in TOP yet)
+                      axis_spi_wo_master.vhd  Write-only version of axis_spi_master (no MISO/RX path)
+                      block_fifo.vhd       valid/ready wrapper around the CoreFIFO BLOCK_FIFO_CORE (80 bit x 512)
+                      block_serializer.vhd 80-bit block -> 10 AXI4-Stream bytes, MSB byte first, tlast on the last
+                      spi_tx_path.vhd      block_fifo + block_serializer + axis_spi_wo_master: 80-bit blocks in, SPI frames out
+                      test_block_producer.vhd  Test source for spi_tx_path: N blocks (A5 <seq> 02..09) per start pulse
+documentation/      Board PDFs and spi_tx_path.drawio (SPI TX path block diagram)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
@@ -94,6 +100,16 @@ The same testbench also runs from Libero. It is linked as a stimulus file and as
 `tb_pulse_stretch` sets `STRETCH_CYCLES = 125` (1 µs) instead of the design default of 125 000 (1 ms), to keep the simulation short. It checks: a single-cycle input gives exactly 1 µs high, starting one clock later; a retrigger 50 cycles in merges into one pulse of 50 + 125 cycles; a 3-cycle input stays high until 125 cycles after its last cycle; and reset clears the output.
 
 `tb_axis_spi_master` defaults to the design settings (10-byte frames, `CLK_DIV = 7`, 125 MHz); integer generics (`CPOL_I`, `CPHA_I`, `MSB_I`, `RX_I`, `FRAME_BYTES`, `CLK_DIV`, `MISO_SYNC_I`, `STALLS`) select other modes. A behavioural SPI slave checks every MOSI byte, drives a known MISO sequence and checks that every CS_N assertion has exactly `FRAME_BYTES * 8` bits with SCLK idle at both CS_N edges. A timing monitor checks the SCLK half-periods and the CS_N setup/hold/idle times. The RX side is checked for data and `tlast` under random stalls plus long `m_axis_tready` stalls (overrun check). The last frame has a wrong `s_axis_tlast` and must give `frame_err_out` pulses, and a reset mid-byte must return the DUT to idle.
+
+`tb_axis_spi_wo_master` is `tb_axis_spi_master` without the RX parts: the same SPI slave (MOSI only), timing monitor, bad-`tlast` frame and mid-byte reset, with the same `CPOL_I`/`CPHA_I`/`MSB_I`/`FRAME_BYTES`/`CLK_DIV`/`STALLS` generics.
+
+`tb_block_fifo` runs against the generated CoreFIFO RTL (`-- run_tb cores: BLOCK_FIFO_CORE`). It checks: the capacity is 512 blocks; FWFT shows a block on `m_data` with `m_valid` (5 clocks after the write) without a read and holds it while `m_ready` is low; 3000 blocks with random stalls on both sides arrive in order with all 80 bits; one block per clock with both sides always ready; a reset with blocks in the FIFO empties it.
+
+`tb_block_serializer` checks every byte (most significant first) and `tlast` under random stalls on both sides, that `m_axis` stays stable while stalled, a throughput of `BLOCK_BYTES + 1` clocks per block, and a reset mid-block. `-gBLOCK_BYTES=<n>` selects other block sizes.
+
+`tb_spi_tx_path` tests the whole path at the SPI pins (`-- run_tb cores: BLOCK_FIFO_CORE`). A behavioural SPI slave turns every CS_N assertion into an 80-bit word (first bit = bit 79) and checks it against the written blocks, so order, content, bit order and framing are checked together. 40 blocks with random gaps let the FIFO run empty; 600 back-to-back blocks overfill it, so `s_ready` must go low and every block must still arrive. `frame_err_out` must never pulse, and a reset with blocks in the FIFO and a frame in progress must leave the path idle. `CPOL_I`, `CPHA_I`, `CLK_DIV`, `NSPARSE` and `NBURST` can be overridden.
+
+`tb_test_block_producer` uses `BLOCKS_PER_PRESS = 3` (override with `-gBLOCKS_PER_PRESS=<n>`) and a consumer with random `m_ready`. It checks: each start pulse gives exactly `BLOCKS_PER_PRESS` blocks with the right content; `m_data`/`m_valid` stay stable while stalled; a start pulse during a burst is ignored; the sequence number continues across bursts and wraps from FF to 00; and a reset during a burst stops it and restarts the sequence.
 
 ### Linking files
 
