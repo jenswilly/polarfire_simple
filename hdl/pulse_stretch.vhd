@@ -1,6 +1,6 @@
 -- Pulse stretcher
 --   A high pulse_in (any length, synchronous to clk) makes pulse_out high for STRETCH_CYCLES
---   clk cycles, starting on the next clock edge (default 125 = 1 us at 125 MHz).
+--   clk cycles, starting on the next clock edge (default 125_000 = 1 ms at 125 MHz).
 --   A new pulse_in while pulse_out is high restarts the count, so close pulses merge.
 --   pulse_out comes straight from a flip-flop, so it is glitch-free on a pin.
 

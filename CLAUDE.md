@@ -10,8 +10,8 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
   - IP configs: `polarfire_simple/component/work/<comp>/<comp>.cxf` (`configurableElement` values)
 - HDL is **VHDL** (project is set to VHDL-2008). Do not write Verilog.
 - Hand-written sources live outside the Libero folder (`hdl/`, `constraints/`, `mss/`) and are *linked* into the project, not imported.
-- Testbenches are in `sim/tb_<entity>.vhd`. They are self-checking and must print `TB PASSED` / `TB FAILED`. Run them with `sim/run_tb.sh tb_<entity> [vsim args, e.g. -gNAME=value]`, which compiles `hdl/*.vhd` and uses Libero's QuestaSim (needs the license server). Claude can run these directly. Extend the testbench whenever HDL behaviour changes. A testbench that needs a Libero-generated core (e.g. CoreFIFO) names it in a header line `-- run_tb cores: <CORE> ...`; `run_tb.sh` then compiles the sources listed in `component/work/<CORE>/<CORE>_manifest.txt` (Verilog with `vlog -sv`, which COREFIFO.v needs) and runs vsim with `-t 1ps -L polarfire` for the LSRAM/µSRAM primitives.
-- **Libero simulation setup:** link the testbench as a stimulus file (type `tb_hdl` in the `.prjx`). Associate it via Design Flow → Verify Pre-Synthesized Design → Simulate → right-click → Organize Input Files → Organize Stimulus Files. That writes `LIST AssociatedStimulus` / `LIST TOP`. The Stimulus Hierarchy has **no** "Set as Active Stimulus" in 2026.1, and the Tcl `set_active_testbench "<tb>::work,<path>"` fails ("Cannot find module named …"). The testbench name and instance go in Project Settings → Simulation Options (`EntityName` / `TopInstanceName` in the `.prjx`). Only one testbench can be the Simulation Options testbench at a time.
+- Testbenches are in `sim/tb_<entity>.vhd`. They are self-checking and must print `TB PASSED` / `TB FAILED`. Run them with `sim/run_tb.sh tb_<entity> [vsim args, e.g. -gNAME=value]`, which compiles `hdl/*.vhd` and uses Libero's QuestaSim (needs the license server). Claude can run these directly. Extend the testbench whenever HDL behaviour changes. A testbench that needs a Libero-generated core (e.g. CoreFIFO) names it in a header line `-- run_tb cores: <CORE> ...`; `run_tb.sh` then compiles the sources listed in `component/work/<CORE>/<CORE>_manifest.txt` (Verilog with `vlog -sv`, which COREFIFO.v needs). vsim always runs with `-t 1ps -L polarfire` (Libero's precompiled PolarFire primitives, e.g. LSRAM/µSRAM).
+- **Libero simulation setup:** link the testbench as a stimulus file (type `tb_hdl` in the `.prjx`). Associate it via Design Flow → Verify Pre-Synthesized Design → Simulate → right-click → Organize Input Files → Organize Stimulus Files. That writes `LIST AssociatedStimulus` / `LIST TOP`. The Stimulus Hierarchy has **no** "Set as Active Stimulus" in 2026.1, and the Tcl `set_active_testbench "<tb>::work,<path>"` fails ("Cannot find module named …"). The testbench name and instance go in Project Settings → Simulation Options (`EntityName` / `TopInstanceName` in the `.prjx`). Only one testbench can be the Simulation Options testbench at a time. Link files via Files → stimulus → Link Files; a linked testbench does **not** appear under Files → stimulus, only in the Stimulus Hierarchy (Work, User HDL Stimulus Files). Not every testbench is linked; the command line is the main way to run them.
 
 ## Tools / paths
 - Libero: `/usr/local/microchip/Libero_SoC_2026.1`, started via `tools/start_libero.sh`, which starts the FlexLM license server if needed. The daemons are in `$LIBERO_INSTALL_DIR/LicenseDaemons/`, `lmutil` is in `Libero_SoC/Designer/bin64/`, and `License.dat` / `license.log` are in `~/Microchip/`. Stop the server with `tools/stop_licenser_server.sh`. Setup and troubleshooting are in `tools/README.md`.
@@ -31,11 +31,19 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - Banks: Bank0 1.8 V, Bank1 3.3 V (J45 at 1-2). MSS banks: B2 3.3 V, B4 1.8 V, B5 3.3 V.
 - Pins:
   - REF_CLK_50MHz R18
-  - SWITCH1 T19 (active low), SWITCH2 U18
+  - SWITCH1 T19, SWITCH2 U18 (both active low)
   - LED1–7: T18, V17, U20, U21, AA18, V16, U15 (active high)
   - FTDI UART: MSS TX → Y21, MSS RX ← W21
-  - DEBUG (RPi header, GPIO21 per the user): E13 = `GPIO128NB1`, Bank1, so `-io_std LVCMOS33`
+  - RPi header (Bank1, so `-io_std LVCMOS33`). GPIO = BCM number, pin = physical header pin. Source: the reference design's `script_support/constraints/MPFS_DISCOVERY_RPi.pdc`, which lists all RPi pins.
+    - DEBUG: GPIO21, pin 40, E13 (`GPIO128NB1`)
+    - SPI SCLK: GPIO19, pin 35, B19; MOSI: GPIO16, pin 36, B15; CS_N: GPIO26, pin 37, B17
+    - GPIO20, pin 38, B14: tied low
 - MSS reference clock is **125 MHz**. DDR4 is x16, 1 GB.
+
+## Design notes
+- Everything in the fabric runs on the 125 MHz `PF_CCC_C0` output with `CORERESET_0_FABRIC_RESET_N`.
+- **CoreFIFO `BLOCK_FIFO_CORE`** (COREFIFO 4.0.139): 80 bit × 512, single clock, sync reset, FWFT, active-high WE/RE (`WE_POLARITY`/`RE_POLARITY` = 0 in the `.cxf`). Libero generates it as Verilog, which is why `run_tb.sh` uses `vlog`. `hdl/block_fifo.vhd` wraps it and assumes exactly this configuration, so update both together.
+- Signal path and SPI TX path details are in README.md (Design overview, SPI TX path) and in `documentation/top_level.drawio` / `spi_tx_path.drawio`. Update the diagrams when TOP changes. Only `documentation/*.pdf` is in Git LFS; the `.drawio` files are plain git.
 
 ## Gotchas learned
 - **CoreAXI4Interconnect is v3.0.130** here, not v2.9 like the reference design. It uses Initiator/Target naming, and its bus interfaces are `AXI4minitiator0` and `AXI4Lmtarget0`. The data width is set under "Crossbar Configuration" ("User Width" is the AXI USER sideband, not the data width).

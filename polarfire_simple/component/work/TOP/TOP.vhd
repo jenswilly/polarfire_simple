@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Mon Oct 19 16:28:40 2026
+-- Created by SmartDesign Mon Oct 19 21:24:41 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -474,11 +474,11 @@ signal LED3_net_1                                : std_logic;
 signal LED4_net_1                                : std_logic;
 signal DEBUG_net_1                               : std_logic;
 signal RPi_GPIO16_net_1                          : std_logic;
+signal RPi_GPIO19_net_1                          : std_logic;
+signal RPi_GPIO26_net_1                          : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
-signal RPi_GPIO19_net_1                          : std_logic;
-signal RPi_GPIO26_net_1                          : std_logic;
 ----------------------------------------------------------------------
 -- TiedOff Signals
 ----------------------------------------------------------------------
@@ -541,16 +541,16 @@ begin
  DEBUG            <= DEBUG_net_1;
  RPi_GPIO16_net_1 <= RPi_GPIO16_net_0;
  RPi_GPIO16       <= RPi_GPIO16_net_1;
+ RPi_GPIO19_net_1 <= RPi_GPIO19_net_0;
+ RPi_GPIO19       <= RPi_GPIO19_net_1;
+ RPi_GPIO26_net_1 <= RPi_GPIO26_net_0;
+ RPi_GPIO26       <= RPi_GPIO26_net_1;
  BA_net_1         <= BA_net_0;
  BA(1 downto 0)   <= BA_net_1;
  DM_net_1         <= DM_net_0;
  DM(1 downto 0)   <= DM_net_1;
  A_net_1          <= A_net_0;
  A(13 downto 0)   <= A_net_1;
- RPi_GPIO19_net_1 <= RPi_GPIO19_net_0;
- RPi_GPIO19       <= RPi_GPIO19_net_1;
- RPi_GPIO26_net_1 <= RPi_GPIO26_net_0;
- RPi_GPIO26       <= RPi_GPIO26_net_1;
 ----------------------------------------------------------------------
 -- Component instances
 ----------------------------------------------------------------------
@@ -841,8 +841,8 @@ spi_tx_path_0 : spi_tx_path
         -- Inputs
         clk           => PF_CCC_C0_0_OUT0_FABCLK_0,
         reset_n       => CORERESET_0_FABRIC_RESET_N,
-        s_data        => test_block_producer_0_m_data,
         s_valid       => test_block_producer_0_m_valid,
+        s_data        => test_block_producer_0_m_data,
         -- Outputs
         s_ready       => spi_tx_path_0_s_ready,
         spi_sclk      => RPi_GPIO19_net_0,
@@ -860,8 +860,8 @@ test_block_producer_0 : test_block_producer
         start_in => OR2_1_Y,
         m_ready  => spi_tx_path_0_s_ready,
         -- Outputs
-        m_data   => test_block_producer_0_m_data,
-        m_valid  => test_block_producer_0_m_valid 
+        m_valid  => test_block_producer_0_m_valid,
+        m_data   => test_block_producer_0_m_data 
         );
 
 end RTL;

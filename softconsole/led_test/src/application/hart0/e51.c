@@ -2,6 +2,8 @@
  * polarfire_simple LED test - runs on E51 (hart 0)
  *   0x6000_0000 : LED register (bit0 = LED2, bit1 = LED3)
  *   0x6000_0004 : ID register (expect 0x1ED50001)
+ *   0x6000_0008 : DEBUG (write-only): writing 1 gives a 1 ms pulse on the DEBUG pin
+ *                 and sends one test block over SPI (not used here yet)
  */
 #include "drivers/mss/mss_mmuart/mss_uart.h"
 #include "mpfs_hal/mss_hal.h"

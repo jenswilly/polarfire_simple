@@ -2,29 +2,31 @@
 
 A minimal PolarFire SoC test project for the **PolarFire SoC Discovery Kit** (MPFS095T-1FCSG325E). It uses Libero SoC 2026.1 for the FPGA design and SoftConsole for the bare-metal software.
 
-It drives three LEDs:
+Outputs:
 
-| LED  | Source                                   | Pin  |
-|------|------------------------------------------|------|
+| Output | Source | Pin |
+|--------|--------|-----|
 | LED1 | Push-button SWITCH1 (inverted), pure fabric | T18 |
-| LED2 | MSS register write via FIC0 AXI → bit 0     | V17 |
-| LED3 | MSS register write via FIC0 AXI → bit 1     | U20 |
-| LED4–7 | Tied low (off)                          | U21, AA18, V16, U15 |
+| LED2 | MSS register write via FIC0 AXI → bit 0 | V17 |
+| LED3 | MSS register write via FIC0 AXI → bit 1 | U20 |
+| LED4 | SWITCH2, debounced (on while pressed) | U21 |
+| LED5–7 | Tied low (off) | AA18, V16, U15 |
+| DEBUG | 1 ms pulse per SWITCH2 press or write to DEBUG (`0x6000_0008`) | E13, RPi header pin 40 (GPIO21) |
+| SPI SCLK | `spi_tx_path` | B19, RPi header pin 35 (GPIO19) |
+| SPI MOSI | `spi_tx_path` | B15, RPi header pin 36 (GPIO16) |
+| SPI CS_N | `spi_tx_path` | B17, RPi header pin 37 (GPIO26) |
+| (unused) | Tied low | B14, RPi header pin 38 (GPIO20) |
+
+The RPi header pins are in Bank1 (3.3 V). GPIO numbers are BCM numbers; the pin numbers are the physical header pins.
 
 ## Design overview
 
-```
-REF_CLK_50MHz ─ CLKINT ─ PF_CCC (125 MHz) ─┬─ MSS FIC_0_ACLK
-                                           ├─ CoreAXI4Interconnect ACLK
-                                           └─ axi_led_reg ACLK
-INIT_MONITOR + CORERESET_PF  (EXT_RST_N = MSS_RESET_N_M2F & FIC_0_DLL_LOCK_M2F)
-        └─ FABRIC_RESET_N ─> interconnect / axi_led_reg ARESETN
+Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock with `FABRIC_RESET_N` from `CORERESET_PF`. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and `test_block_producer` → `spi_tx_path` → SPI.
 
-MSS FIC_0 AXI4 initiator (64-bit) ─> CoreAXI4Interconnect v3 (I0 AXI4 64b → T0 AXI4-Lite 32b)
-                                   ─> axi_led_reg (VHDL) ─> LED2, LED3
-MSS MMUART_0 (via fabric) ─> UART0_TX (Y21) / UART0_RX (W21) ─> on-board FTDI
-SWITCH1 (T19) ─ INV ─> LED1
-```
+### SPI TX path
+`spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 7` so SCLK = 125 MHz / 14 ≈ 8.93 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
+
+For now the blocks come from `test_block_producer`: each pulse from SWITCH2 or a write to DEBUG sends one block `A5 <seq> 02 03 04 05 06 07 08 09`, where `<seq>` counts blocks since reset.
 
 ### Register map (`axi_led_reg`, base `0x6000_0000`)
 
@@ -32,7 +34,7 @@ SWITCH1 (T19) ─ INV ─> LED1
 |--------|------|--------|-------------|
 | 0x0 | LED  | R/W | bit 0 = LED2, bit 1 = LED3 |
 | 0x4 | ID   | RO  | `0x1ED50001` (sanity check for AXI reads) |
-| 0x8 | DEBUG | WO | Writing bit 0 = 1 drives `DEBUG_PULSE` high for exactly one ACLK cycle. Writing 0 does nothing. Reads return 0. |
+| 0x8 | DEBUG | WO | Writing bit 0 = 1 drives `DEBUG_PULSE` high for exactly one ACLK cycle. In TOP that gives a 1 ms pulse on DEBUG and sends one test block over SPI, the same as a SWITCH2 press. Writing 0 does nothing. Reads return 0. |
 
 The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low (32-bit) window.
 
@@ -49,14 +51,14 @@ mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
 hdl/                Hand-written VHDL, linked into Libero:
                       axi_led_reg.vhd      AXI4-Lite LED register + debug pulse
                       button_debounce.vhd  Push-button debouncer with single-clock press pulse
-                      pulse_stretch.vhd    Stretches a short pulse to 1 us (for the DEBUG pin)
-                      axis_spi_master.vhd  AXI4-Stream SPI master, fixed 10-byte frames (not in TOP yet)
+                      pulse_stretch.vhd    Stretches a short pulse (1 ms in TOP, for the DEBUG pin)
+                      axis_spi_master.vhd  AXI4-Stream SPI master, full duplex, fixed 10-byte frames (not used; kept for later)
                       axis_spi_wo_master.vhd  Write-only version of axis_spi_master (no MISO/RX path)
                       block_fifo.vhd       valid/ready wrapper around the CoreFIFO BLOCK_FIFO_CORE (80 bit x 512)
                       block_serializer.vhd 80-bit block -> 10 AXI4-Stream bytes, MSB byte first, tlast on the last
                       spi_tx_path.vhd      block_fifo + block_serializer + axis_spi_wo_master: 80-bit blocks in, SPI frames out
                       test_block_producer.vhd  Test source for spi_tx_path: N blocks (A5 <seq> 02..09) per start pulse
-documentation/      Board PDFs and spi_tx_path.drawio (SPI TX path block diagram)
+documentation/      Board PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
@@ -74,7 +76,7 @@ tools/              Libero license-server start/stop scripts (see tools/README.m
 **Fresh clone:** the bitstream includes the eNVM boot image (see [Standalone boot](#standalone-boot-from-envm-boot-mode-1)), and that hex is build output, so it isn't in git. Build the `Discovery-Kit-eNVM-Scratchpad-Release` configuration in SoftConsole first. Otherwise Generate Design Initialization Data / Generate Bitstream fails on the missing file.
 
 The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...`) in two places. If you clone the repository somewhere else, fix both:
-- `polarfire_simple.prjx` links `hdl/axi_led_reg.vhd` and `constraints/io.pdc`. Re-link those two files.
+- `polarfire_simple.prjx` links all files in the `hdl/` folder, the testbenches in `sim/` and `constraints/io.pdc`. Re-link them, or search and replace the path in the `.prjx` while Libero is closed.
 - `designer/TOP/ENVM.cfg` points the eNVM client at `led_test-bm1-p0.hex`. Select the hex again in the eNVM client.
 
 ## Simulation
@@ -91,7 +93,7 @@ The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (g
 /usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_led_reg.wlf
 ```
 
-The same testbench also runs from Libero. It is linked as a stimulus file and associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_led_reg` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_led_reg_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_led_reg` into `TOP`, so this testbench can't run there.
+`tb_axi_led_reg` also runs from Libero. The testbenches `tb_axi_led_reg`, `tb_axis_spi_master`, `tb_button_debounce` and `tb_pulse_stretch` are linked into the project as stimulus files; the others run from the command line only. To link a testbench, use Files → stimulus → **Link Files**. A linked file does *not* show up under Files → stimulus, but it is listed in the Stimulus Hierarchy under Work and under User HDL Stimulus Files. `tb_axi_led_reg` is the one associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_led_reg` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_led_reg_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_led_reg` into `TOP`, so this testbench can't run there.
 
 `tb_axi_led_reg` checks the ID register, the LED register (write and readback) and `DEBUG_PULSE`: exactly one cycle per write of 1, even with a slow `BREADY`, no pulse when writing 0 or writing to the LED register, and DEBUG reads as 0.
 
@@ -110,12 +112,6 @@ The same testbench also runs from Libero. It is linked as a stimulus file and as
 `tb_spi_tx_path` tests the whole path at the SPI pins (`-- run_tb cores: BLOCK_FIFO_CORE`). A behavioural SPI slave turns every CS_N assertion into an 80-bit word (first bit = bit 79) and checks it against the written blocks, so order, content, bit order and framing are checked together. 40 blocks with random gaps let the FIFO run empty; 600 back-to-back blocks overfill it, so `s_ready` must go low and every block must still arrive. `frame_err_out` must never pulse, and a reset with blocks in the FIFO and a frame in progress must leave the path idle. `CPOL_I`, `CPHA_I`, `CLK_DIV`, `NSPARSE` and `NBURST` can be overridden.
 
 `tb_test_block_producer` uses `BLOCKS_PER_PRESS = 3` (override with `-gBLOCKS_PER_PRESS=<n>`) and a consumer with random `m_ready`. It checks: each start pulse gives exactly `BLOCKS_PER_PRESS` blocks with the right content; `m_data`/`m_valid` stay stable while stalled; a start pulse during a burst is ignored; the sequence number continues across bursts and wraps from FF to 00; and a reset during a burst stops it and restarts the sequence.
-
-### Linking files
-
-To link a testbench file, go to Files -> stimulus -> Link Files. The linked file(s)
-will _not_ show up under Files -> stimulur, but they should be visible under Stimulus
-Hierarchy -> Work and -> User HDL Stimulus Files.
 
 ## Software (SoftConsole)
 
@@ -164,3 +160,7 @@ For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-hart
 - [x] FPGA design built and programmed. SWITCH1 → LED1 works.
 - [x] Bare-metal app (LIM debug): AXI reads and writes to `0x6000_0000` work, LED2/LED3 count, UART output works.
 - [x] Standalone boot from eNVM (boot mode 1): everything works after a power cycle, without a PC.
+- [x] SWITCH2 debounce → LED4 works.
+- [ ] DEBUG pulse (1 ms) on RPi header pin 40: check on the scope.
+- [ ] SPI TX path: simulated (`tb_spi_tx_path`); check the frames on header pins 35–37 with a logic analyser.
+- [ ] Software: write blocks to the SPI TX path from the MSS instead of `test_block_producer`.

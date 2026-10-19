@@ -1,0 +1,175 @@
+<mxfile host="drawio" version="24.7.17">
+  <diagram id="top_level" name="TOP">
+    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1380" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title and clock/reset note -->
+        <mxCell id="title" value="&lt;b&gt;TOP&lt;/b&gt; (SmartDesign, polarfire_simple/component/work/TOP/TOP.vhd)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="700" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Clock and reset -->
+        <mxCell id="p_refclk" value="REF_CLK_50MHz&lt;br&gt;R18" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="clkint" value="&lt;b&gt;CLKINT&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="230" y="75" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ccc" value="&lt;b&gt;PF_CCC_C0&lt;/b&gt;&lt;br&gt;125 MHz" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="390" y="70" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="rst" value="&lt;b&gt;INIT_MONITOR + CORERESET_PF&lt;/b&gt;&lt;br&gt;EXT_RST_N = MSS_RESET_N_M2F &amp;amp; FIC_0_DLL_LOCK_M2F" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="610" y="70" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="clknote" value="The 125 MHz clock (OUT0_FABCLK_0) and FABRIC_RESET_N go to every fabric block below and to MSS FIC_0_ACLK. Those connections are not drawn." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="930" y="65" width="400" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- MSS and AXI -->
+        <mxCell id="p_uart_rx" value="UART0_RX&lt;br&gt;W21" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="190" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p_uart_tx" value="UART0_TX&lt;br&gt;Y21" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="260" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="mss" value="&lt;b&gt;MSS_simple&lt;/b&gt;&lt;br&gt;E51 runs led_test&lt;br&gt;MMUART_0 via fabric&lt;br&gt;FIC_0 AXI4 initiator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="230" y="180" width="160" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="axi_ic" value="&lt;b&gt;AXI_IC&lt;/b&gt;&lt;br&gt;CoreAXI4Interconnect v3&lt;br&gt;AXI4 64 b → AXI4-Lite 32 b&lt;br&gt;0x6000_0000–0x6000_0FFF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="450" y="210" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ledreg" value="&lt;b&gt;axi_led_reg&lt;/b&gt;&lt;br&gt;0x0 LED, 0x4 ID,&lt;br&gt;0x8 DEBUG" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="700" y="210" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_led23" value="LED2 V17&lt;br&gt;LED3 U20" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="225" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- SWITCH2 path -->
+        <mxCell id="p_sw2" value="SWITCH2&lt;br&gt;U18" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="390" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="debounce" value="&lt;b&gt;button_debounce&lt;/b&gt;&lt;br&gt;10 ms, active low" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="450" y="380" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p_led4" value="LED4&lt;br&gt;U21" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="320" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="or2" value="&lt;b&gt;OR2&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="750" y="440" width="60" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="stretch" value="&lt;b&gt;pulse_stretch&lt;/b&gt;&lt;br&gt;125 000 cycles = 1 ms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="930" y="430" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p_debug" value="DEBUG E13&lt;br&gt;RPi pin 40 (GPIO21)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="440" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- SPI TX path -->
+        <mxCell id="producer" value="&lt;b&gt;test_block_producer&lt;/b&gt;&lt;br&gt;1 block per pulse:&lt;br&gt;A5 &amp;lt;seq&amp;gt; 02 … 09" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="690" y="560" width="180" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="txpath" value="&lt;b&gt;spi_tx_path&lt;/b&gt;&lt;br&gt;FIFO 512 blocks, mode 0,&lt;br&gt;8.93 MHz, MSB first&lt;br&gt;(see spi_tx_path.drawio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="930" y="555" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p_spi" value="SCLK B19, pin 35&lt;br&gt;MOSI B15, pin 36&lt;br&gt;CS_N B17, pin 37" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="560" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- SWITCH1 -->
+        <mxCell id="p_sw1" value="SWITCH1&lt;br&gt;T19" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="670" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="inv" value="&lt;b&gt;INV&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="500" y="675" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p_led1" value="LED1&lt;br&gt;T18" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="670" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Connections -->
+        <mxCell id="e_ref_clkint" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="p_refclk" target="clkint">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_clkint_ccc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="clkint" target="ccc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ccc_rst" value="PLL_LOCK" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;" edge="1" parent="1" source="ccc" target="rst">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rx_mss" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.2857;entryDx=0;entryDy=0;" edge="1" parent="1" source="p_uart_rx" target="mss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mss_tx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.7857;exitDx=0;exitDy=0;entryX=1;entryY=0.5;" edge="1" parent="1" source="mss" target="p_uart_tx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mss_ic" value="FIC_0&lt;br&gt;AXI4 64 b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="mss" target="axi_ic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ic_reg" value="AXI4-Lite&lt;br&gt;32 b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="axi_ic" target="ledreg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_reg_led" value="LED2, LED3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="ledreg" target="p_led23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_reg_or" value="DEBUG_PULSE" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="ledreg" target="or2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sw2_deb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.4286;entryDx=0;entryDy=0;" edge="1" parent="1" source="p_sw2" target="debounce">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_deb_led4" value="pressed_out" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.2857;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="debounce" target="p_led4">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="680" y="400" />
+              <mxPoint x="680" y="345" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_deb_or" value="pulse_out" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.7143;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="debounce" target="or2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_or_stretch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="or2" target="stretch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_stretch_debug" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="stretch" target="p_debug">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_or_prod" value="start_in" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="or2" target="producer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prod_tx" value="80 b block&lt;br&gt;valid/ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="producer" target="txpath">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tx_spi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="txpath" target="p_spi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_sw1_inv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="p_sw1" target="inv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_inv_led1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="inv" target="p_led1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Legend and notes -->
+        <mxCell id="leg_pin" value="FPGA pin" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="750" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_vhdl" value="our VHDL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="140" y="750" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_ip" value="Libero core / macro" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="750" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_mss" value="MSS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="370" y="750" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Tied low: LED5–7 (AA18, V16, U15) and RPi_GPIO20 (B14, pin 38). RPi pins are in Bank1 (3.3 V); GPIO = BCM number, pin = physical header pin. MSS DDR4 pins are not drawn." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="450" y="740" width="900" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
