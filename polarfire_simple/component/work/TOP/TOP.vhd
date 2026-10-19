@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Mon Oct 19 09:00:35 2026
+-- Created by SmartDesign Mon Oct 19 12:34:41 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -35,7 +35,6 @@ entity TOP is
         CKE0          : out   std_logic;
         CS0_N         : out   std_logic;
         DEBUG         : out   std_logic;
-        DEBUG2        : out   std_logic;
         DM            : out   std_logic_vector(1 downto 0);
         LED1          : out   std_logic;
         LED2          : out   std_logic;
@@ -47,6 +46,10 @@ entity TOP is
         ODT0          : out   std_logic;
         RAS_N         : out   std_logic;
         RESET_N       : out   std_logic;
+        RPi_GPIO16    : out   std_logic;
+        RPi_GPIO19    : out   std_logic;
+        RPi_GPIO20    : out   std_logic;
+        RPi_GPIO26    : out   std_logic;
         UART0_TX      : out   std_logic;
         WE_N          : out   std_logic;
         -- Inouts
@@ -441,10 +444,10 @@ signal UART0_TX_net_1                            : std_logic;
 signal LED2_net_1                                : std_logic;
 signal LED3_net_1                                : std_logic;
 signal LED4_net_1                                : std_logic;
+signal DEBUG_net_1                               : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
-signal DEBUG_net_1                               : std_logic;
 ----------------------------------------------------------------------
 -- TiedOff Signals
 ----------------------------------------------------------------------
@@ -467,7 +470,10 @@ begin
  LED5           <= '0';
  LED6           <= '0';
  LED7           <= '0';
- DEBUG2         <= '1';
+ RPi_GPIO16     <= '0';
+ RPi_GPIO19     <= '0';
+ RPi_GPIO20     <= '0';
+ RPi_GPIO26     <= '0';
 ----------------------------------------------------------------------
 -- Top level output port assignments
 ----------------------------------------------------------------------
@@ -503,14 +509,14 @@ begin
  LED3           <= LED3_net_1;
  LED4_net_1     <= LED4_net_0;
  LED4           <= LED4_net_1;
+ DEBUG_net_1    <= DEBUG_net_0;
+ DEBUG          <= DEBUG_net_1;
  BA_net_1       <= BA_net_0;
  BA(1 downto 0) <= BA_net_1;
  DM_net_1       <= DM_net_0;
  DM(1 downto 0) <= DM_net_1;
  A_net_1        <= A_net_0;
  A(13 downto 0) <= A_net_1;
- DEBUG_net_1    <= DEBUG_net_0;
- DEBUG          <= DEBUG_net_1;
 ----------------------------------------------------------------------
 -- Component instances
 ----------------------------------------------------------------------
