@@ -88,15 +88,6 @@ architecture rtl of axis_spi_master is
         return r;
     end function;
 
-    function max_nat(a, b : natural) return natural is
-    begin
-        if a > b then
-            return a;
-        else
-            return b;
-        end if;
-    end function;
-
     function reverse(v : std_logic_vector(7 downto 0)) return std_logic_vector is
         variable r : std_logic_vector(7 downto 0);
     begin
@@ -106,10 +97,10 @@ architecture rtl of axis_spi_master is
         return r;
     end function;
 
-    -- Counter widths
-    constant DIV_W  : positive := max_nat(1, clog2(CLK_DIV));
-    constant WAIT_W : positive := max_nat(1, clog2(max_nat(max_nat(CS_SETUP, CS_HOLD), CS_IDLE) + 1));
-    constant BYTE_W : positive := max_nat(1, clog2(FRAME_BYTES));
+    -- Counter widths (maximum() is predefined in VHDL-2008)
+    constant DIV_W  : positive := maximum(1, clog2(CLK_DIV));
+    constant WAIT_W : positive := maximum(1, clog2(maximum(maximum(CS_SETUP, CS_HOLD), CS_IDLE) + 1));
+    constant BYTE_W : positive := maximum(1, clog2(FRAME_BYTES));
 
     type state_t is (S_IDLE, S_SETUP, S_LOAD, S_XFER, S_HOLD, S_GAP);
 
