@@ -29,12 +29,12 @@ use ieee.numeric_std.all;
 entity axis_spi_wo_master is
     generic (
         FRAME_BYTES : positive  := 10;     -- Bytes per cs_n assertion
-        CLK_DIV     : positive  := 7;      -- Clk cycles per sclk half-period (8.93 MHz at 125 MHz)
+        CLK_DIV     : positive  := 3;      -- Clk cycles per sclk half-period (20.83 MHz at 125 MHz)
         CPOL        : std_logic := '0';    -- Sclk idle level
         CPHA        : std_logic := '0';    -- 0: slave samples on leading edge, 1: on trailing edge
         MSB_FIRST   : boolean   := true;
-        CS_SETUP    : natural   := 1;      -- Extra half-periods cs_n low before the first edge
-        CS_HOLD     : natural   := 1;      -- Half-periods after the last edge before cs_n high
+        CS_SETUP    : natural   := 0;      -- Extra half-periods cs_n low before the first edge
+        CS_HOLD     : natural   := 0;      -- Half-periods after the last edge before cs_n high
         CS_IDLE     : natural   := 2       -- Min. half-periods cs_n high between frames
     );
     port (
