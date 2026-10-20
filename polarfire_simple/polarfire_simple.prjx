@@ -65,13 +65,18 @@ SIZE="13706"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd,hdl"
 STATE="utd"
-TIME="1792488936"
+TIME="1792490047"
 SIZE="9953"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd,hdl"
 STATE="utd"
 TIME="1792402342"
 SIZE="4055"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd,hdl"
+STATE="utd"
+TIME="1792492529"
+SIZE="4075"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd,hdl"
 STATE="utd"
@@ -100,8 +105,8 @@ SIZE="4111"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd,hdl"
 STATE="utd"
-TIME="1792411731"
-SIZE="2069"
+TIME="1792492543"
+SIZE="2289"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axis_spi_master.vhd,tb_hdl"
 STATE="utd"
@@ -1251,13 +1256,13 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792489144"
-SIZE="11045"
+TIME="1792496844"
+SIZE="11614"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1792489144"
-SIZE="39836"
+TIME="1792496843"
+SIZE="42093"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
@@ -1325,7 +1330,7 @@ TIME="1792420311"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
-STATE="utd"
+STATE="ood"
 TIME="1792420310"
 SIZE="2791815"
 ENDFILE
@@ -1392,7 +1397,7 @@ VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_PROCESSOR_user.bfm,sim"
 ENDLIST
 ENDLIST
 LIST "TOP::work"
-FILE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
+FILE "<project>/component/work/TOP/TOP.vhd,hdl"
 LIST AssociatedStimulus
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_button_debounce.vhd,tb_hdl"
@@ -1412,7 +1417,6 @@ ENDLIST
 LIST ProjectState5.1
 LIST Impl1
 ideSTIMULUS=StateSuccess
-ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1571,7 +1575,6 @@ LIST ProjectState5.1
 LIST "TOP::work"
 LIST Impl1
 ideSTIMULUS=StateSuccess
-ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1594,9 +1597,6 @@ LIST UserCustomizedFileList
 ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
-Reports;Reports;0
-ReportsCurrentItem;Place and Route:TOP_layout_log.log
-HDL;/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd;0
 SmartDesign;TOP;0
 ACTIVEVIEW;TOP
 ENDLIST
@@ -1607,6 +1607,8 @@ ENDLIST
 LIST "axi_led_reg::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd","FALSE","FALSE"
 ENDLIST
 LIST "axis_spi_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd","FALSE","FALSE"
+ENDLIST
+LIST "block_arbiter::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd","FALSE","FALSE"
 ENDLIST
 LIST "block_fifo::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd","FALSE","FALSE"
 SUBBLOCK "BLOCK_FIFO_CORE::work","component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.v","TRUE","FALSE"
@@ -2121,6 +2123,8 @@ LIST "caxi4interconnect_WriteDataMux::work","component/Actel/DirectCore/COREAXI4
 ENDLIST
 LIST "MSS::work","component/work/MSS_simple/MSS_NOBYP_BYP_BYP_BYP_BYP_syn_comps.v","FALSE","FALSE"
 ENDLIST
+LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+ENDLIST
 LIST "caxi4interconnect_AddressController::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/AddressController.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_coreaxi4s_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_coreaxi4s_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_FifoDualPort::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/FifoDualPort.v","FALSE","FALSE"
@@ -2167,6 +2171,8 @@ ENDLIST
 LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_TransactionController::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/TransactionController.v","FALSE","FALSE"
+ENDLIST
+LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_DualPort_RAM_SyncWr_SyncRd::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/DualPort_Ram_SyncWr_SyncRd.v","FALSE","FALSE"
 ENDLIST
@@ -2232,19 +2238,19 @@ SUBBLOCK "block_fifo::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_fi
 SUBBLOCK "block_serializer::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd","FALSE","FALSE"
 SUBBLOCK "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd","FALSE","FALSE"
 ENDLIST
-LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
-ENDLIST
-LIST "TOP::work","component/work/TOP/TOP.cxf","TRUE","FALSE"
+LIST "TOP::work","component/work/TOP/TOP.vhd","TRUE","FALSE"
 SUBBLOCK "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
-SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
 SUBBLOCK "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
 SUBBLOCK "INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR.v","TRUE","FALSE"
 SUBBLOCK "MSS_simple::work","component/work/MSS_simple/MSS_simple.v","TRUE","FALSE"
 SUBBLOCK "PF_CCC_C0::work","component/work/PF_CCC_C0/PF_CCC_C0.v","TRUE","FALSE"
-SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
-SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "axi_led_reg::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd","FALSE","FALSE"
+SUBBLOCK "block_arbiter::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd","FALSE","FALSE"
+SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
+SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
+SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_IntrProtocolConverter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/IntrProtocolConverter.v","FALSE","FALSE"
 ENDLIST

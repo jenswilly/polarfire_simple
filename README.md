@@ -21,12 +21,14 @@ The RPi header pins are in Bank1 (3.3 V). GPIO numbers are BCM numbers; the pin 
 
 ## Design overview
 
-Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock with `FABRIC_RESET_N` from `CORERESET_PF`. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and `test_block_producer` → `spi_tx_path` → SPI.
+Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock with `FABRIC_RESET_N` from `CORERESET_PF`. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
 
 ### SPI TX path
 `spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 7` so SCLK = 125 MHz / 14 ≈ 8.93 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
 
-For now the blocks come from `test_block_producer`: each pulse from SWITCH2 or a write to DEBUG sends one block `A5 <seq> 02 03 04 05 06 07 08 09`, where `<seq>` counts blocks since reset.
+Several producers share `spi_tx_path` through `block_arbiter` (in TOP, in front of `spi_tx_path`). It is round-robin and moves one whole block per handshake, so blocks from different producers never interleave. Only the selected producer sees `s_ready`; the others hold their block. The mux is combinational (no extra latency), and once a block is offered the selection is held until it is taken. SmartDesign has no array ports, so the inputs are flattened: producer *i* is `s_data((i+1)*80-1 downto i*80)`, `s_valid(i)`, `s_ready(i)`.
+
+For now the blocks come from two `test_block_producer` instances (HDL+ cores, so the generics are set per instance) on `block_arbiter`. Each pulse from SWITCH2 or a write to DEBUG makes each of them send one block `<id> <seq> 02 03 04 05 06 07 08 09`, where `<id>` is the `FIRST_BYTE` generic (`F0` for `test_block_producer_0`, `AA` for `test_block_producer_1`) and `<seq>` counts that producer's blocks since reset. So every pulse gives two SPI frames, `F0 <seq> …` first, then `AA <seq> …`.
 
 ### Register map (`axi_led_reg`, base `0x6000_0000`)
 
@@ -57,7 +59,8 @@ hdl/                Hand-written VHDL, linked into Libero:
                       block_fifo.vhd       valid/ready wrapper around the CoreFIFO BLOCK_FIFO_CORE (80 bit x 512)
                       block_serializer.vhd 80-bit block -> 10 AXI4-Stream bytes, MSB byte first, tlast on the last
                       spi_tx_path.vhd      block_fifo + block_serializer + axis_spi_wo_master: 80-bit blocks in, SPI frames out
-                      test_block_producer.vhd  Test source for spi_tx_path: N blocks (A5 <seq> 02..09) per start pulse
+                      block_arbiter.vhd    Round-robin arbiter: NUM_PORTS block producers -> one block consumer
+                      test_block_producer.vhd  Test source for spi_tx_path: N blocks (<id> <seq> 02..09) per start pulse
 documentation/      Board PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
@@ -111,7 +114,9 @@ The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (g
 
 `tb_spi_tx_path` tests the whole path at the SPI pins (`-- run_tb cores: BLOCK_FIFO_CORE`). A behavioural SPI slave turns every CS_N assertion into an 80-bit word (first bit = bit 79) and checks it against the written blocks, so order, content, bit order and framing are checked together. 40 blocks with random gaps let the FIFO run empty; 600 back-to-back blocks overfill it, so `s_ready` must go low and every block must still arrive. `frame_err_out` must never pulse, and a reset with blocks in the FIFO and a frame in progress must leave the path idle. `CPOL_I`, `CPHA_I`, `CLK_DIV`, `NSPARSE` and `NBURST` can be overridden.
 
-`tb_test_block_producer` uses `BLOCKS_PER_PRESS = 3` (override with `-gBLOCKS_PER_PRESS=<n>`) and a consumer with random `m_ready`. It checks: each start pulse gives exactly `BLOCKS_PER_PRESS` blocks with the right content; `m_data`/`m_valid` stay stable while stalled; a start pulse during a burst is ignored; the sequence number continues across bursts and wraps from FF to 00; and a reset during a burst stops it and restarts the sequence.
+`tb_block_arbiter` uses `NUM_PORTS = 3` (override with `-gNUM_PORTS=<n>`). Producers with random gaps offer numbered blocks and a consumer with random `m_ready` takes them. It checks: at most one `s_ready` is high, and only for a valid producer; every handshake on `m_*` is exactly one handshake on `s_*` with that producer's block; every block of every producer arrives once and in order; `m_*` stays stable while stalled; with all producers valid they are served in turn; after a reset port 0 goes first.
+
+`tb_test_block_producer` uses `BLOCKS_PER_PRESS = 3` and `FIRST_BYTE = C3` (override with `-gBLOCKS_PER_PRESS=<n>` / `-gFIRST_BYTE=<n>`) and a consumer with random `m_ready`. It checks: each start pulse gives exactly `BLOCKS_PER_PRESS` blocks with the right content; `m_data`/`m_valid` stay stable while stalled; a start pulse during a burst is ignored; the sequence number continues across bursts and wraps from FF to 00; and a reset during a burst stops it and restarts the sequence.
 
 ## Software (SoftConsole)
 
@@ -162,5 +167,5 @@ For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-hart
 - [x] Standalone boot from eNVM (boot mode 1): everything works after a power cycle, without a PC.
 - [x] SWITCH2 debounce → LED4 works.
 - [ ] DEBUG pulse (1 ms) on RPi header pin 40: check on the scope.
-- [ ] SPI TX path: simulated (`tb_spi_tx_path`); check the frames on header pins 35–37 with a logic analyser.
-- [ ] Software: write blocks to the SPI TX path from the MSS instead of `test_block_producer`.
+- [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
+- [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).

@@ -1,5 +1,5 @@
 -- Self-checking testbench for test_block_producer
---   A consumer with random m_ready accepts blocks and checks their content (A5, sequence
+--   A consumer with random m_ready accepts blocks and checks their content (FIRST_BYTE, sequence
 --   number, 02..09) and that m_data/m_valid stay stable while m_ready is low. Checks:
 --     - each start pulse gives exactly BLOCKS_PER_PRESS blocks, then m_valid goes low;
 --     - a start pulse during a burst is ignored;
@@ -14,7 +14,8 @@ use ieee.math_real.all;
 
 entity tb_test_block_producer is
     generic (
-        BLOCKS_PER_PRESS : positive := 3
+        BLOCKS_PER_PRESS : positive := 3;
+        FIRST_BYTE       : natural  := 16#C3#     -- Not the default, so the generic is tested
     );
 end entity tb_test_block_producer;
 
@@ -24,7 +25,7 @@ architecture sim of tb_test_block_producer is
 
     function blk(seq : natural) return std_logic_vector is
     begin
-        return x"A5" & std_logic_vector(to_unsigned(seq mod 256, 8)) & x"0203040506070809";
+        return std_logic_vector(to_unsigned(FIRST_BYTE, 8)) & std_logic_vector(to_unsigned(seq mod 256, 8)) & x"0203040506070809";
     end function;
 
     signal clk     : std_logic := '0';
@@ -41,7 +42,7 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     dut : entity work.test_block_producer
-        generic map (BLOCKS_PER_PRESS => BLOCKS_PER_PRESS)
+        generic map (BLOCKS_PER_PRESS => BLOCKS_PER_PRESS, FIRST_BYTE => FIRST_BYTE)
         port map (clk => clk, reset_n => rstn, start_in => start,
                   m_data => m_data, m_valid => m_valid, m_ready => m_ready);
 

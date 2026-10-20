@@ -2,8 +2,9 @@
 --
 --   start_in (e.g. a debounced button pulse) --> BLOCKS_PER_PRESS blocks on m_* (valid/ready)
 --
---   Every block is   A5  <seq>  02 03 04 05 06 07 08 09   (byte 0 = bits 79:72, sent first),
---   where <seq> counts blocks since reset and wraps at 255. The fixed bytes make the frames
+--   Every block is   <id>  <seq>  02 03 04 05 06 07 08 09   (byte 0 = bits 79:72, sent first),
+--   where <id> is FIRST_BYTE (A5 by default; give each instance its own to tell them apart)
+--   and <seq> counts blocks since reset and wraps at 255. The fixed bytes make the frames
 --   easy to recognize on a logic analyser. A start pulse while blocks are still being sent
 --   is ignored.
 
@@ -13,7 +14,8 @@ use ieee.numeric_std.all;
 
 entity test_block_producer is
     generic (
-        BLOCKS_PER_PRESS : positive := 1
+        BLOCKS_PER_PRESS : positive := 1;
+        FIRST_BYTE       : natural range 0 to 255 := 16#A5#   -- Byte 0 of every block
     );
     port (
         clk      : in  std_logic;
@@ -58,7 +60,7 @@ begin
     end process;
 
     -- Only changes on a handshake, so it is stable while m_ready is low
-    m_data  <= x"A5" & std_logic_vector(seq) & x"0203040506070809";
+    m_data  <= std_logic_vector(to_unsigned(FIRST_BYTE, 8)) & std_logic_vector(seq) & x"0203040506070809";
     m_valid <= valid_r;
 
 end architecture rtl;

@@ -17,21 +17,15 @@
 
         <!-- Producers -->
         <mxCell id="prod0" value="&lt;b&gt;Producer 0&lt;/b&gt;&lt;br&gt;custom VHDL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="40" y="90" width="160" height="60" as="geometry" />
+          <mxGeometry x="40" y="130" width="160" height="60" as="geometry" />
         </mxCell>
         <mxCell id="prod1" value="&lt;b&gt;Producer 1&lt;/b&gt;&lt;br&gt;custom VHDL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="40" y="190" width="160" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="dots" value="⋮" style="text;html=1;align=center;verticalAlign=middle;fontSize=20;" vertex="1" parent="1">
-          <mxGeometry x="100" y="255" width="40" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="prodN" value="&lt;b&gt;Producer N&lt;/b&gt;&lt;br&gt;custom VHDL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="40" y="290" width="160" height="60" as="geometry" />
+          <mxGeometry x="40" y="250" width="160" height="60" as="geometry" />
         </mxCell>
 
         <!-- Arbiter -->
-        <mxCell id="arb" value="&lt;b&gt;Block arbiter&lt;/b&gt;&lt;br&gt;round-robin&lt;br&gt;1 handshake = 1 block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="300" y="90" width="160" height="260" as="geometry" />
+        <mxCell id="arb" value="&lt;b&gt;block_arbiter&lt;/b&gt;&lt;br&gt;round-robin&lt;br&gt;NUM_PORTS producers&lt;br&gt;1 handshake = 1 block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="140" width="160" height="160" as="geometry" />
         </mxCell>
 
         <!-- FIFO -->
@@ -55,13 +49,10 @@
         </mxCell>
 
         <!-- Connections -->
-        <mxCell id="e_p0" value="80 b block&lt;br&gt;valid/ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.1538;entryDx=0;entryDy=0;" edge="1" parent="1" source="prod0" target="arb">
+        <mxCell id="e_p0" value="80 b block&lt;br&gt;valid/ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.125;entryDx=0;entryDy=0;" edge="1" parent="1" source="prod0" target="arb">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_p1" value="80 b block&lt;br&gt;valid/ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5385;entryDx=0;entryDy=0;" edge="1" parent="1" source="prod1" target="arb">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_pN" value="80 b block&lt;br&gt;valid/ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.8462;entryDx=0;entryDy=0;" edge="1" parent="1" source="prodN" target="arb">
+        <mxCell id="e_p1" value="80 b block&lt;br&gt;valid/ready" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.875;entryDx=0;entryDy=0;" edge="1" parent="1" source="prod1" target="arb">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e_arb_fifo" value="80 b" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="arb" target="fifo">
