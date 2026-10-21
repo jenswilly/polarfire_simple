@@ -68,6 +68,7 @@ hdl/                Hand-written VHDL, linked into Libero:
                       qspi_init.vhd        QSPI memory init: reset, ID check, configuration, quad-path check
                       qspi_read_ctrl.vhd   QSPI read requests {len, addr} -> EBh commands, credit-based flow control
                       qspi_write.vhd       QSPI write requests (test/calibration): W25Q erase + page program, AS D2h
+                      qspi_mram_ctrl.vhd   QSPI controller top: init + read + write + arbiter + qspi_xact/qspi_phy
 documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
                       qspi_controller.drawio (planned QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
@@ -77,7 +78,8 @@ sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSi
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
-tools/              Libero license-server start/stop scripts (see tools/README.md) and the udev rule for the board's UARTs
+tools/              Libero license-server start/stop scripts (see tools/README.md), syn_check.sh (batch Synplify check),
+                    and the udev rule for the board's UARTs
 ```
 
 ## Building
@@ -128,6 +130,8 @@ The script rebuilds the work library in `sim/out/` (git-ignored) and compiles (V
 
 `tb_qspi_phy` feeds a table of transactions (Read ID, an EBh read with mode byte and dummy cycles, a quad write, odd lengths, SPI1 latency, 1-cycle phases) to the PHY in 10 runs: SCLK divider 1 and 2 × sample delay 1–4, one run with gaps between descriptors, and one run whose device delay doesn't match the sample delay and must return wrong data. A pin-level device stub checks at every SCLK edge: the CS#/SCLK timing (first edge, exact high/low times, number of cycles per CS#, CS# high only after the last delayed sample, CS# high time), the TX bit order in SPI1 and QUAD4, and the OE pattern (IO2/IO3 high in SPI1, released in QUAD4 RX/dummy). It drives RX data a round-trip delay after each launching falling edge, and every RX word and `rx_last` is compared. A monitor checks that SCLK toggles only while CS# is low, that CS# and OE change only while SCLK is low, that OE doesn't change while CS# is high (after a quad read the device may still be driving), and that `sclk(1)`/`cs_n(1)` follow `sclk(0)`/`cs_n(0)`. `-gDIE2_I=0` runs it with `DIE2_PRESENT = false` (IO7:4 undriven, their RX nibble 0). A 1 ms watchdog ends a hung run with `TB FAILED`.
 
+`tb_qspi_mram_ctrl` is the full-system test of `qspi_mram_ctrl` for the W25Q128JV and the AS308G208 with 1 and 2 dies: init, then 8 blocks of 880 host bytes written (with a read requested during the first write, which must wait for it, and a write requested while a read is still delivering data, which must not cut the read short), then the 8 blocks read back to back (144.5 µs on the W25Q128JV, 145.5 µs on the AS308G208). The `SAMPLE_DLY` generic is set to 3, which doesn't fit the 3 ns board delay: the test runs with `sample_dly_ovr = 2`, and one read without the override must return wrong data. Finally `init_restart`: requests during the rerun give `rd_req_err`/`wr_req_err`, and a read after it works. All data is checked against the written data, erased flash or the preload, and the models must report no protocol errors.
+
 `tb_qspi_write` runs `qspi_write` and `qspi_read_ctrl` on one shared `qspi_xact` (the testbench switches the command port between them) against preloaded models for the W25Q128JV and the AS308G208 with 1 and 2 dies. Requests before `init_done` and bad requests give `req_err` and write nothing. It writes 880 host bytes (on the W25Q128JV across a sector boundary and three pages), reads them back, checks on the W25Q128JV that the rest of both erased sectors reads FFh, writes an overlapping 64-byte block and reads the whole area back, and on the AS308G208 checks that the bytes around the block still hold the preload. With one die, the upper nibble of each written byte must be ignored. The models must report no protocol errors (WEL/WREN, BUSY, CS# high times, byte boundaries).
 
 `tb_qspi_read_ctrl` runs `qspi_read_ctrl` + `qspi_xact` against preloaded models for the W25Q128JV and the AS308G208 with 1 and 2 dies (`init_done` driven by the testbench). It checks that requests before `init_done` and bad requests (odd address or length, length 0, past the end of the device) give `req_err` and no data; reads 8 non-contiguous blocks of 880 host bytes and reports the time (144.5 µs on the W25Q128JV, 145.5 µs on the AS308G208; the check allows 140.8–150 µs); and repeats reads into a 1000-byte downstream buffer drained at a quarter of the read rate, where requests must wait for space (including bytes of earlier requests still in flight) and the buffer must never overflow. Every byte and `tlast` is compared with the preload pattern.
@@ -143,6 +147,17 @@ The script rebuilds the work library in `sim/out/` (git-ignored) and compiles (V
 `tb_qspi_pkg` has no DUT either. It checks the `qspi_pkg` device parameters (the timings the controller converts with `ns_to_cycles` at 100 MHz, address widths), the EBh overhead per device (20 and 26 clocks), and `id_ok` (W25Q128JV `EF 40 18`; AS308G208 with 4 Gb and 8 Gb density codes; wrong IDs rejected).
 
 `tb_test_block_producer` uses `BLOCKS_PER_PRESS = 3` and `FIRST_BYTE = C3` (override with `-gBLOCKS_PER_PRESS=<n>` / `-gFIRST_BYTE=<n>`) and a consumer with random `m_ready`. It checks: each start pulse gives exactly `BLOCKS_PER_PRESS` blocks with the right content; `m_data`/`m_valid` stay stable while stalled; a start pulse during a burst is ignored; the sequence number continues across bursts and wraps from FF to 00; and a reset during a burst stops it and restarts the sequence.
+
+### Synthesis check (Synplify batch)
+
+`tools/syn_check.sh <top> <config> [GENERIC=value ...]` runs Synplify Pro in batch on hand-written HDL in `sim/out/syn/<config>/`, outside the Libero project (target MPFS095T FCSG325 -1, VHDL-2008, no I/O insertion). By default it takes `hdl/util_pkg.vhd`, `hdl/qspi_pkg.vhd` and `hdl/qspi_*.vhd`. It prints errors, latches, multiple drivers and combinational loops, plus the resource summary, and exits with 1 if it found any. Example:
+
+```bash
+tools/syn_check.sh qspi_mram_ctrl w25
+tools/syn_check.sh qspi_mram_ctrl as2 DEVICE=DEV_AS308G208 DIE2_PRESENT=true
+```
+
+`qspi_mram_ctrl` is about 1.5k LUTs and 700 (W25Q128JV) / 815 (AS308G208, 2 dies) flip-flops.
 
 ## Software (SoftConsole)
 

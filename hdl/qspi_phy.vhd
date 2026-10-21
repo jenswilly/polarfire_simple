@@ -164,6 +164,14 @@ architecture rtl of qspi_phy is
     signal io_oe_r   : std_logic_vector(7 downto 0) := (others => '0');
     signal io_i_r    : std_logic_vector(7 downto 0) := (others => '0');
 
+    -- Every pad gets its own flip-flop so it can be packed into its I/O cell. Synthesis would
+    -- otherwise merge equal ones (sclk(1) with sclk(0), the OEs of IO0/IO2/IO3, ...).
+    attribute syn_preserve : boolean;
+    attribute syn_preserve of sclk_r  : signal is true;
+    attribute syn_preserve of cs_n_r  : signal is true;
+    attribute syn_preserve of io_o_r  : signal is true;
+    attribute syn_preserve of io_oe_r : signal is true;
+
     signal rx_valid_r : std_logic := '0';
     signal rx_data_r  : std_logic_vector(7 downto 0) := (others => '0');
     signal rx_last_r  : std_logic := '0';

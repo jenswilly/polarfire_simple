@@ -184,6 +184,8 @@ architecture rtl of qspi_xact is
     signal acc_n      : natural range 0 to 7 := 0;
     type fifo_t is array (0 to 3) of std_logic_vector(8 downto 0);
     signal fifo       : fifo_t := (others => (others => '0'));
+    attribute syn_ramstyle : string;
+    attribute syn_ramstyle of fifo : signal is "registers";      -- 4 entries: flip-flops, not RAM
     signal f_rd, f_wr : unsigned(1 downto 0) := (others => '0');
     signal f_cnt      : natural range 0 to 4 := 0;
     signal ovf        : std_logic := '0';

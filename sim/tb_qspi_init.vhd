@@ -188,9 +188,8 @@ begin
             init_restart <= '1';
             wait until rising_edge(clk);
             init_restart <= '0';
-            wait until rising_edge(clk);
-            wait until rising_edge(clk);
-            check(init_done = '0' and init_err = '0', "restart clears done/err");
+            wait for 1 ns;
+            check(init_done = '0' and init_err = '0', "restart must clear done/err in the same cycle");
             check_result("after restart");
 
             wait until rising_edge(clk) and xact_busy = '0';

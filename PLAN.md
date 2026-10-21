@@ -123,7 +123,7 @@ Sequence, adjusted to the Step 1 facts:
 - **Done when:** `tb_qspi_write` writes a pattern, reads it back with Step 7 and compares (W25Q128JV; AS308G208 with 1 and 2 dies).
 
 ### Step 9 — Controller top `qspi_mram_ctrl`
-- Wraps init, read, write and xact/phy, with an arbiter for the `qspi_xact` command port and its TX/RX streams: `qspi_init` owns it until `init_done`, then read and write requests take turns. The owner only changes while `qspi_xact` is idle, so RX bytes always reach the source that issued the command (`tb_qspi_write` uses a simple testbench switch for this). Generics: `DEVICE`, `DIE2_PRESENT`, `CLK_CTRL_HZ`, `SCLK_DIV`, `SAMPLE_DLY`, `MAX_LEN`.
+- Wraps init, read, write and xact/phy, with an arbiter for the `qspi_xact` command port and its TX/RX streams: `qspi_init` owns it until `init_done`, then read and write requests take turns. The owner only changes while `qspi_xact` is idle, so RX bytes always reach the source that issued the command (`tb_qspi_write` uses a simple testbench switch for this). Generics: `DEVICE`, `DIE2_PRESENT`, `CLK_CTRL_HZ`, `SCLK_DIV`, `SAMPLE_DLY`, `SPACE_W` (and `T_POWERUP_NS`/`T_RESET_NS` for simulation). No `MAX_LEN`: lengths are limited by the 16-bit `len` and buffering by `rd_space`.
 - Pin-level ports: `sclk(1 downto 0)`, `cs_n(1 downto 0)`, `io_o(7 downto 0)`, `io_oe(7 downto 0)`, `io_i(7 downto 0)`, `mem_reset_n` (AS308G208 RESET#, unused with the W25Q128JV). No tristates inside.
 - Runtime `sample_dly_ovr` input (valid flag + value) for calibration.
 - **Done when:** a full-system TB (init → write → 8 × 880 read) passes for the W25Q128JV and for the AS308G208 with 1 and 2 dies, and a Libero synthesis run (Synplify, with `qspi_mram_ctrl` temporarily as root or via Step 11's wrapper) shows no latches and no multi-driven nets.
@@ -178,7 +178,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 6 | Init FSM | done | `hdl/qspi_init.vhd`, `tb_qspi_init` (8 configurations incl. faults, each run twice); 6 deliberate DUT faults all caught. Model got fault-injection generics (`W25_ID`, `AS_SR_INIT`, `AS_CR2_INIT`, `REG_WRITE_IGNORE`) |
 | 7 | Read front end | done | `hdl/qspi_read_ctrl.vhd`, `tb_qspi_read_ctrl`. 8 × 880 host bytes: 144.5 µs (W25Q), 145.5 µs (AS, 1 and 2 dies). 5 deliberate DUT faults all caught (after making the starvation test stricter) |
 | 8 | Write path | done | `hdl/qspi_write.vhd`, `tb_qspi_write`. W25Q erases every 4 KB sector the request touches; `wr_done` pulse when written. 5 deliberate DUT faults all caught. 880 host bytes: 18.8 µs (AS), 42.9 µs (W25Q with the model's shortened erase/program times; real tSE is 45 ms typ.) |
-| 9 | Controller top | todo | |
+| 9 | Controller top | done | `hdl/qspi_mram_ctrl.vhd`, `tb_qspi_mram_ctrl`. Fixed in `qspi_init`: `init_done` now drops in the same cycle as `init_restart`. Synplify (`tools/syn_check.sh`, W25Q and AS 2 dies): no errors/latches/multi-drivers, ~1.5k LUTs, 700/815 FFs; pad flops kept separate with `syn_preserve` |
 | 10 | BIST | todo | |
 | 11 | Integration into TOP | todo | |
 | 12 | Constraints | todo | |

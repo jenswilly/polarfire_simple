@@ -316,7 +316,11 @@ begin
 
                 when S_DONE | S_ERROR =>
                     if init_restart = '1' then
-                        cur <= S_IDLE;
+                        -- Drop init_done at once, so no request is accepted during the rerun
+                        done_r <= '0';
+                        err_r  <= '0';
+                        code_r <= ERR_NONE;
+                        cur    <= S_IDLE;
                     end if;
 
                 when others =>
@@ -368,8 +372,8 @@ begin
                         when U_RX =>
                             if rx_tvalid = '1' then
                                 if n_rx < 8 then
-                                    buf(n_rx) <= rx_tdata;
-                                    n_rx      <= n_rx + 1;
+                                    buf(n_rx mod 8) <= rx_tdata;   -- mod: index range for synthesis
+                                    n_rx            <= n_rx + 1;
                                 end if;
                                 if rx_tlast = '1' then
                                     sub <= U_CHECK;
