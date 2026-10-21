@@ -13,7 +13,7 @@ use ieee.std_logic_1164.all;
 entity spi_tx_path is
     generic (
         BLOCK_BYTES : positive  := 10;     -- Must match the CoreFIFO width / 8 (checked in block_fifo)
-        CLK_DIV     : positive  := 7;      -- Clk cycles per sclk half-period (8.93 MHz at 125 MHz)
+        CLK_DIV     : positive  := 3;      -- Clk cycles per sclk half-period (20.83 MHz at 125 MHz)
         CPOL        : std_logic := '0';    -- Sclk idle level
         CPHA        : std_logic := '0';    -- 0: slave samples on leading edge, 1: on trailing edge
         CS_SETUP    : natural   := 1;      -- Extra half-periods cs_n low before the first edge
