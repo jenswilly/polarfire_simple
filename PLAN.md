@@ -77,7 +77,7 @@ Create `documentation/device_facts.md` with one section per device (W25Q128JV, A
 ### Step 3 — PHY / bit engine `qspi_phy`
 Low level only: no knowledge of commands.
 - Inputs: a phase descriptor stream `{lane_mode, dir, nclk, tx_data (up to 32 bits per die)}` plus `start`/`end_cs`.
-- Generates SCLK (toggles every `SCLK_DIV` `clk_ctrl` cycles while a phase is active, idle low), CS# (both dies identical), IO out per die, IO OE.
+- Generates SCLK (toggles every `sclk_div` `clk_ctrl` cycles while a phase is active, idle low). `sclk_div` is a **per-transaction input** (1 or 2), defaulting to the `SCLK_DIV` generic: the AS308G208's 05h and 9Fh are limited to 40 MHz (device_facts.md §3.2), so init runs those at 25 MHz, CS# (both dies identical), IO out per die, IO OE.
 - In SPI1 phases, IO2/IO3 (and IO6/IO7) are driven to the level Step 1 requires for WP#/HOLD#.
 - RX: samples IO `SAMPLE_DLY` cycles after the launch edge and produces per-clock 8-bit words `{die2_nib, die1_nib}`. In SPI1 mode it extracts IO1 (die 1) and IO5 (die 2). Holds CS# low until the last delayed sample is taken.
 - Releases OE for the turnaround at the start of latency cycles. Drives IO[7:4] to 0 on the last driven cycle when `DIE2_PRESENT=false`.
@@ -86,11 +86,11 @@ Low level only: no knowledge of commands.
 
 ### Step 4 — Behavioural device model `qspi_mem_model`
 - `sim/models/qspi_mem_model.vhd`: one die, generic `DEVICE`. Supports the Step 1 command subset: reset, Read JEDEC ID, status/config register R/W, Write Enable, EBh with the device's latency and mode-byte handling, the write command, and for the W25Q128JV sector erase with BUSY for a (generic, shortened) time and page-wrap on program. Sparse memory (associative array or hashed) so the full address space works in simulation.
-- Quad commands are rejected unless quad is enabled (QE) where the device requires it.
+- W25Q128JV model: QE reads as 1 (W25Q128JVSSIQ, fixed). A generic `QE_INIT` (default 1) lets a test start with QE = 0 to check the init error path; quad commands are rejected while QE = 0.
 - Output timing: drives data `tCLQV` after the falling SCLK edge and keeps it until `tCLQX` after the next falling edge (generics, defaulting to the datasheet values).
 - Asserts on protocol violations: wrong latency, illegal address, write without WEL, command while busy, SCLK above the max frequency, wrong mode bits (continuous-read entered unintentionally).
 - Optional generic for board delay (SCLK out + IO back) to exercise `SAMPLE_DLY`.
-- **Done when:** `tb_qspi_mem_model` drives the model with hand-written stimulus for both devices and checks Read ID, register write/readback, QE handling, erase/program/busy (W25Q) and EBh reads (both latency settings for the AS308G208).
+- **Done when:** `tb_qspi_mem_model` drives the model with hand-written stimulus for both devices and checks Read ID, register write/readback, erase/program/busy (W25Q) and EBh reads (both latency settings for the AS308G208).
 
 ### Step 5 — Transaction engine `qspi_xact`
 - Turns a high-level command (`opcode`, `addr`, `addr_bytes`, `mode_byte`, `latency`, `dir`, `nbytes`, `lanes` 1-1-1 / 1-4-4 / 1-1-4) into PHY phase descriptors.
@@ -100,13 +100,13 @@ Low level only: no knowledge of commands.
 ### Step 6 — Init/configuration FSM `qspi_init`
 Sequence, adjusted to the Step 1 facts:
 1. Wait the power-up time after reset release (cycles from ns).
-2. Reset (reset enable + reset; for the AS308G208 also in the QPI form if Step 1 says it can be left in QPI). Wait the reset recovery time.
+2. Reset. W25Q128JV: 66h + 99h, wait tRST. AS308G208: it has **no software reset**, so pulse the `mem_reset_n` output (RESET# pin), then wait tPU (25 ms). No QPI recovery is needed because we never enter QPI.
 3. Read JEDEC ID in 1-1-1. Compare die 1 (and die 2 if present) against the expected ID for `DEVICE`. Mismatch → `init_err` with code `ERR_ID`.
-4. Configure: W25Q128JV — set QE only if it isn't already set (non-volatile bit, so avoid a write on every boot) and poll BUSY. AS308G208 — address mode and read latency for the chosen SCLK, plus any other required bits.
+4. Configure: W25Q128JV — nothing to write: check that nothing is protected and that QE = 1 (fixed on the W25Q128JVSSIQ; QE = 0 → `ERR_CFG`). AS308G208 — address mode and read latency for the chosen SCLK, plus any other required bits.
 5. Read back the configuration registers and verify. Mismatch → `ERR_CFG`.
 6. Do one EBh read of a few bytes as a quad-path check (data not compared) and assert `init_done`.
 - An `init_restart` input reruns the sequence. A status output gives the state and the error code.
-- **Done when:** `tb_qspi_init` passes for the W25Q128JV (QE initially 0 and 1) and for 1 and 2 AS308G208 models, including injected faults: wrong ID, a model ignoring a config write.
+- **Done when:** `tb_qspi_init` passes for the W25Q128JV (including QE = 0 → `ERR_CFG`) and for 1 and 2 AS308G208 models, including injected faults: wrong ID, a model ignoring a config write.
 
 ### Step 7 — Read front end `qspi_read_ctrl`
 - Request input: AXI4-Stream, `tdata = {len[15:0], addr[31:0]}` (host bytes, even values only).
@@ -124,7 +124,7 @@ Sequence, adjusted to the Step 1 facts:
 
 ### Step 9 — Controller top `qspi_mram_ctrl`
 - Wraps init, read, write and xact/phy. Generics: `DEVICE`, `DIE2_PRESENT`, `CLK_CTRL_HZ`, `SCLK_DIV`, `SAMPLE_DLY`, `MAX_LEN`.
-- Pin-level ports: `sclk(1 downto 0)`, `cs_n(1 downto 0)`, `io_o(7 downto 0)`, `io_oe(7 downto 0)`, `io_i(7 downto 0)`. No tristates inside.
+- Pin-level ports: `sclk(1 downto 0)`, `cs_n(1 downto 0)`, `io_o(7 downto 0)`, `io_oe(7 downto 0)`, `io_i(7 downto 0)`, `mem_reset_n` (AS308G208 RESET#, unused with the W25Q128JV). No tristates inside.
 - Runtime `sample_dly_ovr` input (valid flag + value) for calibration.
 - **Done when:** a full-system TB (init → write → 8 × 880 read) passes for the W25Q128JV and for the AS308G208 with 1 and 2 dies, and a Libero synthesis run (Synplify, with `qspi_mram_ctrl` temporarily as root or via Step 11's wrapper) shows no latches and no multi-driven nets.
 
@@ -170,7 +170,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 
 | Step | Title | Status | Notes |
 |---|---|---|---|
-| 1 | Device facts | todo | |
+| 1 | Device facts | in review | `documentation/device_facts.md` written. Q‑W1 answered (W25Q128JVSSIQ). Waiting for user review and acceptance of the Q‑W2/Q‑A* assumptions |
 | 2 | Package + run_tb.sh | todo | |
 | 3 | PHY | todo | |
 | 4 | Device model | todo | |
