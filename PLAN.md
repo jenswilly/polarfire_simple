@@ -69,10 +69,10 @@ Create `documentation/device_facts.md` with one section per device (W25Q128JV, A
 - **Done when:** the user has reviewed the file and all values needed for Steps 2–8 are filled in or explicitly accepted as TBD.
 
 ### Step 2 — Package `qspi_pkg` and simulation script support
-- `hdl/qspi_pkg.vhd`: `device_t`, per-device constants or functions (opcodes, address bytes, mode byte, latency, timing in ns, write method), helper functions (ns → `clk_ctrl` cycles, clog2).
-- Types: `lane_mode_t` (SPI1, QUAD4), `dir_t` (TX, RX, NONE).
+- `hdl/qspi_pkg.vhd`: `device_t`, per-device constants or functions (opcodes, address bytes, mode byte, latency, timing in ns, write method). Generic helpers (ns → `clk_ctrl` cycles, clog2) are in `hdl/util_pkg.vhd`, shared with the rest of `hdl/`.
+- Types: `lane_mode_t` (SPI1, QUAD4), `dir_t` (DIR_NONE, DIR_TX, DIR_RX; prefixed so they don't clash with signal names).
 - **Extend `sim/run_tb.sh`:** it compiles `hdl/*.vhd` in one alphabetical `vcom` call, which breaks once `qspi_*` files depend on `qspi_pkg` (and e.g. `qspi_mram_ctrl` sorts before `qspi_phy`). Compile `hdl/*_pkg.vhd` first and make the rest order-independent (e.g. retry loop or an explicit order list). Also add a header line `-- run_tb models: <file> ...` that compiles files from `sim/models/` before the testbench, like `-- run_tb cores:`. Update the script header, CLAUDE.md and README.
-- **Done when:** the package compiles, `tb_qspi_pkg` checks the ns→cycles conversions at 100 MHz and 50 MHz, and all existing testbenches still pass.
+- **Done when:** the package compiles, `tb_util_pkg` checks the ns→cycles conversions at 100 MHz and 50 MHz, `tb_qspi_pkg` the device parameters, and all existing testbenches still pass.
 
 ### Step 3 — PHY / bit engine `qspi_phy`
 Low level only: no knowledge of commands.
@@ -170,8 +170,8 @@ Checklist in `documentation/bringup.md`, filled in with results:
 
 | Step | Title | Status | Notes |
 |---|---|---|---|
-| 1 | Device facts | in review | `documentation/device_facts.md` written. Q‑W1 answered (W25Q128JVSSIQ). Waiting for user review and acceptance of the Q‑W2/Q‑A* assumptions |
-| 2 | Package + run_tb.sh | todo | |
+| 1 | Device facts | done | `documentation/device_facts.md`. Part is W25Q128JVSSIQ; Q‑W2/Q‑A* assumptions accepted |
+| 2 | Package + run_tb.sh | done | `hdl/qspi_pkg.vhd`, `hdl/util_pkg.vhd` (clog2/reverse/ns_to_cycles, also used by the SPI masters), `tb_qspi_pkg`, `tb_util_pkg`. `run_tb.sh`: packages first, dependency-order retry, fresh work library, `-- run_tb models:`. All 12 testbenches pass |
 | 3 | PHY | todo | |
 | 4 | Device model | todo | |
 | 5 | Transaction engine | todo | |

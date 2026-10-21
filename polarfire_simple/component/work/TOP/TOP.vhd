@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Tue Oct 20 14:45:40 2026
+-- Created by SmartDesign Wed Oct 21 12:33:12 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -686,13 +686,13 @@ block_arbiter_0 : entity work.block_arbiter
         -- Inputs
         clk     => PF_CCC_C0_0_OUT0_FABCLK_0,
         reset_n => CORERESET_0_FABRIC_RESET_N,
+        m_ready => spi_tx_path_0_s_ready,
         s_data  => s_data_net_0,
         s_valid => s_valid_net_0,
-        m_ready => spi_tx_path_0_s_ready,
         -- Outputs
+        m_valid => block_arbiter_0_m_valid,
         s_ready => s_ready_net_0,
-        m_data  => block_arbiter_0_m_data,
-        m_valid => block_arbiter_0_m_valid 
+        m_data  => block_arbiter_0_m_data 
         );
 -- button_debounce_0
 button_debounce_0 : button_debounce
@@ -891,8 +891,8 @@ test_block_producer_0 : entity work.test_block_producer
         start_in => OR2_1_Y,
         m_ready  => block_arbiter_0_s_ready0to0(0),
         -- Outputs
-        m_data   => test_block_producer_0_m_data,
-        m_valid  => test_block_producer_0_m_valid 
+        m_valid  => test_block_producer_0_m_valid,
+        m_data   => test_block_producer_0_m_data 
         );
 -- test_block_producer_1
 test_block_producer_1 : entity work.test_block_producer
@@ -907,8 +907,8 @@ test_block_producer_1 : entity work.test_block_producer
         start_in => OR2_1_Y,
         m_ready  => block_arbiter_0_s_ready1to1(1),
         -- Outputs
-        m_data   => test_block_producer_1_m_data,
-        m_valid  => test_block_producer_1_m_valid 
+        m_valid  => test_block_producer_1_m_valid,
+        m_data   => test_block_producer_1_m_data 
         );
 
 end RTL;

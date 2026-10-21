@@ -61,10 +61,12 @@ hdl/                Hand-written VHDL, linked into Libero:
                       spi_tx_path.vhd      block_fifo + block_serializer + axis_spi_wo_master: 80-bit blocks in, SPI frames out
                       block_arbiter.vhd    Round-robin arbiter: NUM_PORTS block producers -> one block consumer
                       test_block_producer.vhd  Test source for spi_tx_path: N blocks (<id> <seq> 02..09) per start pulse
+                      util_pkg.vhd         Shared helpers: clog2, reverse (byte bit order), ns_to_cycles
+                      qspi_pkg.vhd         QSPI controller (PLAN.md): device_t, opcodes, per-device parameters
 documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
                       qspi_controller.drawio (planned QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
-sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
+sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim; models/ holds simulation-only device models
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
@@ -91,7 +93,7 @@ Testbenches live in `sim/` and are self-checking. Run one from the command line 
 sim/run_tb.sh tb_axi_led_reg
 ```
 
-The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (git-ignored). The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. Any further arguments go to `vsim`, so generics can be overridden, e.g. `sim/run_tb.sh tb_axis_spi_master -gCPOL_I=1 -gCPHA_I=1`. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
+The script rebuilds the work library in `sim/out/` (git-ignored) and compiles (VHDL-2008) `hdl/*_pkg.vhd` first, then the other `hdl/*.vhd` files, any models named in a `-- run_tb models: <name>` header line (from `sim/models/<name>.vhd`) and the testbench. Files are compiled in dependency order: a file that fails because a unit it uses isn't compiled yet is retried after the others. The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. Any further arguments go to `vsim`, so generics can be overridden, e.g. `sim/run_tb.sh tb_axis_spi_master -gCPOL_I=1 -gCPHA_I=1`. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
 
 ```bash
 /usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_led_reg.wlf
@@ -116,6 +118,10 @@ The script compiles `hdl/*.vhd` and the testbench (VHDL-2008) into `sim/out/` (g
 `tb_spi_tx_path` tests the whole path at the SPI pins (`-- run_tb cores: BLOCK_FIFO_CORE`). A behavioural SPI slave turns every CS_N assertion into an 80-bit word (first bit = bit 79) and checks it against the written blocks, so order, content, bit order and framing are checked together. 40 blocks with random gaps let the FIFO run empty; 600 back-to-back blocks overfill it, so `s_ready` must go low and every block must still arrive. `frame_err_out` must never pulse, and a reset with blocks in the FIFO and a frame in progress must leave the path idle. `CPOL_I`, `CPHA_I`, `CLK_DIV`, `NSPARSE` and `NBURST` can be overridden.
 
 `tb_block_arbiter` uses `NUM_PORTS = 3` (override with `-gNUM_PORTS=<n>`). Producers with random gaps offer numbered blocks and a consumer with random `m_ready` takes them. It checks: at most one `s_ready` is high, and only for a valid producer; every handshake on `m_*` is exactly one handshake on `s_*` with that producer's block; every block of every producer arrives once and in order; `m_*` stays stable while stalled; with all producers valid they are served in turn; after a reset port 0 goes first.
+
+`tb_util_pkg` has no DUT; it calls the `util_pkg` functions. It checks `clog2` (including 0 and 1), `reverse` for all 256 byte values, and `ns_to_cycles` at 100 MHz and 50 MHz (exact values and rounding up).
+
+`tb_qspi_pkg` has no DUT either. It checks the `qspi_pkg` device parameters (the timings the controller converts with `ns_to_cycles` at 100 MHz, address widths), the EBh overhead per device (20 and 26 clocks), and `id_ok` (W25Q128JV `EF 40 18`; AS308G208 with 4 Gb and 8 Gb density codes; wrong IDs rejected).
 
 `tb_test_block_producer` uses `BLOCKS_PER_PRESS = 3` and `FIRST_BYTE = C3` (override with `-gBLOCKS_PER_PRESS=<n>` / `-gFIRST_BYTE=<n>`) and a consumer with random `m_ready`. It checks: each start pulse gives exactly `BLOCKS_PER_PRESS` blocks with the right content; `m_data`/`m_valid` stay stable while stalled; a start pulse during a burst is ignored; the sequence number continues across bursts and wraps from FF to 00; and a reset during a burst stops it and restarts the sequence.
 
