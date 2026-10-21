@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Sun Oct 18 12:12:15 2026
+-- Created by SmartDesign Tue Oct 20 14:45:40 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -46,6 +46,10 @@ entity TOP is
         ODT0          : out   std_logic;
         RAS_N         : out   std_logic;
         RESET_N       : out   std_logic;
+        RPi_GPIO16    : out   std_logic;
+        RPi_GPIO19    : out   std_logic;
+        RPi_GPIO20    : out   std_logic;
+        RPi_GPIO26    : out   std_logic;
         UART0_TX      : out   std_logic;
         WE_N          : out   std_logic;
         -- Inouts
@@ -147,6 +151,8 @@ component AXI_IC
 end component;
 -- axi_led_reg
 -- using entity instantiation for component axi_led_reg
+-- block_arbiter
+-- using entity instantiation for component block_arbiter
 -- button_debounce
 component button_debounce
     -- Port list
@@ -319,17 +325,27 @@ component PF_CCC_C0
         );
 end component;
 -- pulse_stretch
-component pulse_stretch
+-- using entity instantiation for component pulse_stretch
+-- spi_tx_path
+component spi_tx_path
     -- Port list
     port(
         -- Inputs
-        clk       : in  std_logic;
-        pulse_in  : in  std_logic;
-        reset_n   : in  std_logic;
+        clk           : in  std_logic;
+        reset_n       : in  std_logic;
+        s_data        : in  std_logic_vector(79 downto 0);
+        s_valid       : in  std_logic;
         -- Outputs
-        pulse_out : out std_logic
+        busy_out      : out std_logic;
+        frame_err_out : out std_logic;
+        s_ready       : out std_logic;
+        spi_cs_n      : out std_logic;
+        spi_mosi      : out std_logic;
+        spi_sclk      : out std_logic
         );
 end component;
+-- test_block_producer
+-- using entity instantiation for component test_block_producer
 ----------------------------------------------------------------------
 -- Signal declarations
 ----------------------------------------------------------------------
@@ -358,6 +374,10 @@ signal AXI_IC_0_AXI4Lmtarget0_WVALID             : std_logic;
 signal axi_led_reg_0_DEBUG_PULSE                 : std_logic;
 signal BA_net_0                                  : std_logic_vector(1 downto 0);
 signal BG0_net_0                                 : std_logic;
+signal block_arbiter_0_m_data                    : std_logic_vector(79 downto 0);
+signal block_arbiter_0_m_valid                   : std_logic;
+signal block_arbiter_0_s_ready0to0               : std_logic_vector(0 to 0);
+signal block_arbiter_0_s_ready1to1               : std_logic_vector(1 to 1);
 signal button_debounce_0_pulse_out               : std_logic;
 signal CAS_N_net_0                               : std_logic;
 signal CK0_net_0                                 : std_logic;
@@ -422,6 +442,14 @@ signal PF_CCC_C0_0_OUT0_FABCLK_0                 : std_logic;
 signal PF_CCC_C0_0_PLL_LOCK_0                    : std_logic;
 signal RAS_N_net_0                               : std_logic;
 signal RESET_N_net_0                             : std_logic;
+signal RPi_GPIO16_net_0                          : std_logic;
+signal RPi_GPIO19_net_0                          : std_logic;
+signal RPi_GPIO26_net_0                          : std_logic;
+signal spi_tx_path_0_s_ready                     : std_logic;
+signal test_block_producer_0_m_data              : std_logic_vector(79 downto 0);
+signal test_block_producer_0_m_valid             : std_logic;
+signal test_block_producer_1_m_data              : std_logic_vector(79 downto 0);
+signal test_block_producer_1_m_valid             : std_logic;
 signal UART0_TX_net_0                            : std_logic;
 signal WE_N_net_0                                : std_logic;
 signal RESET_N_net_1                             : std_logic;
@@ -440,10 +468,16 @@ signal UART0_TX_net_1                            : std_logic;
 signal LED2_net_1                                : std_logic;
 signal LED3_net_1                                : std_logic;
 signal LED4_net_1                                : std_logic;
+signal DEBUG_net_1                               : std_logic;
+signal RPi_GPIO16_net_1                          : std_logic;
+signal RPi_GPIO19_net_1                          : std_logic;
+signal RPi_GPIO26_net_1                          : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
-signal DEBUG_net_1                               : std_logic;
+signal s_data_net_0                              : std_logic_vector(159 downto 0);
+signal s_valid_net_0                             : std_logic_vector(1 downto 0);
+signal s_ready_net_0                             : std_logic_vector(1 downto 0);
 ----------------------------------------------------------------------
 -- TiedOff Signals
 ----------------------------------------------------------------------
@@ -463,52 +497,69 @@ begin
 ----------------------------------------------------------------------
 -- TieOff assignments
 ----------------------------------------------------------------------
- LED5           <= '0';
- LED6           <= '0';
- LED7           <= '0';
+ LED5             <= '0';
+ LED6             <= '0';
+ LED7             <= '0';
+ RPi_GPIO20       <= '0';
 ----------------------------------------------------------------------
 -- Top level output port assignments
 ----------------------------------------------------------------------
- RESET_N_net_1  <= RESET_N_net_0;
- RESET_N        <= RESET_N_net_1;
- CKE0_net_1     <= CKE0_net_0;
- CKE0           <= CKE0_net_1;
- CS0_N_net_1    <= CS0_N_net_0;
- CS0_N          <= CS0_N_net_1;
- ODT0_net_1     <= ODT0_net_0;
- ODT0           <= ODT0_net_1;
- CK0_net_1      <= CK0_net_0;
- CK0            <= CK0_net_1;
- CK0_N_net_1    <= CK0_N_net_0;
- CK0_N          <= CK0_N_net_1;
- RAS_N_net_1    <= RAS_N_net_0;
- RAS_N          <= RAS_N_net_1;
- WE_N_net_1     <= WE_N_net_0;
- WE_N           <= WE_N_net_1;
- CAS_N_net_1    <= CAS_N_net_0;
- CAS_N          <= CAS_N_net_1;
- ACT_N_net_1    <= ACT_N_net_0;
- ACT_N          <= ACT_N_net_1;
- BG0_net_1      <= BG0_net_0;
- BG0            <= BG0_net_1;
- LED1_net_1     <= LED1_net_0;
- LED1           <= LED1_net_1;
- UART0_TX_net_1 <= UART0_TX_net_0;
- UART0_TX       <= UART0_TX_net_1;
- LED2_net_1     <= LED2_net_0;
- LED2           <= LED2_net_1;
- LED3_net_1     <= LED3_net_0;
- LED3           <= LED3_net_1;
- LED4_net_1     <= LED4_net_0;
- LED4           <= LED4_net_1;
- BA_net_1       <= BA_net_0;
- BA(1 downto 0) <= BA_net_1;
- DM_net_1       <= DM_net_0;
- DM(1 downto 0) <= DM_net_1;
- A_net_1        <= A_net_0;
- A(13 downto 0) <= A_net_1;
- DEBUG_net_1    <= DEBUG_net_0;
- DEBUG          <= DEBUG_net_1;
+ RESET_N_net_1    <= RESET_N_net_0;
+ RESET_N          <= RESET_N_net_1;
+ CKE0_net_1       <= CKE0_net_0;
+ CKE0             <= CKE0_net_1;
+ CS0_N_net_1      <= CS0_N_net_0;
+ CS0_N            <= CS0_N_net_1;
+ ODT0_net_1       <= ODT0_net_0;
+ ODT0             <= ODT0_net_1;
+ CK0_net_1        <= CK0_net_0;
+ CK0              <= CK0_net_1;
+ CK0_N_net_1      <= CK0_N_net_0;
+ CK0_N            <= CK0_N_net_1;
+ RAS_N_net_1      <= RAS_N_net_0;
+ RAS_N            <= RAS_N_net_1;
+ WE_N_net_1       <= WE_N_net_0;
+ WE_N             <= WE_N_net_1;
+ CAS_N_net_1      <= CAS_N_net_0;
+ CAS_N            <= CAS_N_net_1;
+ ACT_N_net_1      <= ACT_N_net_0;
+ ACT_N            <= ACT_N_net_1;
+ BG0_net_1        <= BG0_net_0;
+ BG0              <= BG0_net_1;
+ LED1_net_1       <= LED1_net_0;
+ LED1             <= LED1_net_1;
+ UART0_TX_net_1   <= UART0_TX_net_0;
+ UART0_TX         <= UART0_TX_net_1;
+ LED2_net_1       <= LED2_net_0;
+ LED2             <= LED2_net_1;
+ LED3_net_1       <= LED3_net_0;
+ LED3             <= LED3_net_1;
+ LED4_net_1       <= LED4_net_0;
+ LED4             <= LED4_net_1;
+ DEBUG_net_1      <= DEBUG_net_0;
+ DEBUG            <= DEBUG_net_1;
+ RPi_GPIO16_net_1 <= RPi_GPIO16_net_0;
+ RPi_GPIO16       <= RPi_GPIO16_net_1;
+ RPi_GPIO19_net_1 <= RPi_GPIO19_net_0;
+ RPi_GPIO19       <= RPi_GPIO19_net_1;
+ RPi_GPIO26_net_1 <= RPi_GPIO26_net_0;
+ RPi_GPIO26       <= RPi_GPIO26_net_1;
+ BA_net_1         <= BA_net_0;
+ BA(1 downto 0)   <= BA_net_1;
+ DM_net_1         <= DM_net_0;
+ DM(1 downto 0)   <= DM_net_1;
+ A_net_1          <= A_net_0;
+ A(13 downto 0)   <= A_net_1;
+----------------------------------------------------------------------
+-- Slices assignments
+----------------------------------------------------------------------
+ block_arbiter_0_s_ready0to0(0) <= s_ready_net_0(0);
+ block_arbiter_0_s_ready1to1(1) <= s_ready_net_0(1);
+----------------------------------------------------------------------
+-- Concatenation assignments
+----------------------------------------------------------------------
+ s_data_net_0  <= ( test_block_producer_1_m_data & test_block_producer_0_m_data );
+ s_valid_net_0 <= ( test_block_producer_1_m_valid & test_block_producer_0_m_valid );
 ----------------------------------------------------------------------
 -- Component instances
 ----------------------------------------------------------------------
@@ -624,6 +675,24 @@ axi_led_reg_0 : entity work.axi_led_reg
         BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
         RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
         RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP 
+        );
+-- block_arbiter_0
+block_arbiter_0 : entity work.block_arbiter
+    generic map( 
+        BLOCK_BYTES => ( 10 ),
+        NUM_PORTS   => ( 2 )
+        )
+    port map( 
+        -- Inputs
+        clk     => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n => CORERESET_0_FABRIC_RESET_N,
+        s_data  => s_data_net_0,
+        s_valid => s_valid_net_0,
+        m_ready => spi_tx_path_0_s_ready,
+        -- Outputs
+        s_ready => s_ready_net_0,
+        m_data  => block_arbiter_0_m_data,
+        m_valid => block_arbiter_0_m_valid 
         );
 -- button_debounce_0
 button_debounce_0 : button_debounce
@@ -781,7 +850,10 @@ PF_CCC_C0_0 : PF_CCC_C0
         PLL_LOCK_0        => PF_CCC_C0_0_PLL_LOCK_0 
         );
 -- pulse_stretch_0
-pulse_stretch_0 : pulse_stretch
+pulse_stretch_0 : entity work.pulse_stretch
+    generic map( 
+        STRETCH_CYCLES => ( 125000 )
+        )
     port map( 
         -- Inputs
         clk       => PF_CCC_C0_0_OUT0_FABCLK_0,
@@ -789,6 +861,54 @@ pulse_stretch_0 : pulse_stretch
         pulse_in  => OR2_1_Y,
         -- Outputs
         pulse_out => DEBUG_net_0 
+        );
+-- spi_tx_path_0
+spi_tx_path_0 : spi_tx_path
+    port map( 
+        -- Inputs
+        clk           => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n       => CORERESET_0_FABRIC_RESET_N,
+        s_valid       => block_arbiter_0_m_valid,
+        s_data        => block_arbiter_0_m_data,
+        -- Outputs
+        s_ready       => spi_tx_path_0_s_ready,
+        spi_sclk      => RPi_GPIO19_net_0,
+        spi_mosi      => RPi_GPIO16_net_0,
+        spi_cs_n      => RPi_GPIO26_net_0,
+        busy_out      => OPEN,
+        frame_err_out => OPEN 
+        );
+-- test_block_producer_0
+test_block_producer_0 : entity work.test_block_producer
+    generic map( 
+        BLOCKS_PER_PRESS => ( 1 ),
+        FIRST_BYTE       => ( 240 )
+        )
+    port map( 
+        -- Inputs
+        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n  => CORERESET_0_FABRIC_RESET_N,
+        start_in => OR2_1_Y,
+        m_ready  => block_arbiter_0_s_ready0to0(0),
+        -- Outputs
+        m_data   => test_block_producer_0_m_data,
+        m_valid  => test_block_producer_0_m_valid 
+        );
+-- test_block_producer_1
+test_block_producer_1 : entity work.test_block_producer
+    generic map( 
+        BLOCKS_PER_PRESS => ( 1 ),
+        FIRST_BYTE       => ( 170 )
+        )
+    port map( 
+        -- Inputs
+        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n  => CORERESET_0_FABRIC_RESET_N,
+        start_in => OR2_1_Y,
+        m_ready  => block_arbiter_0_s_ready1to1(1),
+        -- Outputs
+        m_data   => test_block_producer_1_m_data,
+        m_valid  => test_block_producer_1_m_valid 
         );
 
 end RTL;

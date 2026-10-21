@@ -1,0 +1,21 @@
+# Project definition file for VHDL-LS extension
+
+# Specify the VHDL standard used in your project (defaults to 2008 if omitted)
+standard = "2008"
+
+[libraries]
+# 1. Map your own source code to the default library
+defaultlib.files = [
+    "hdl/*.vhd",
+    "sim/tb_*.vhd"
+]
+
+# 2. Map separate custom or reusable local libraries if your project has them
+my_custom_lib.files = [
+]
+
+# 3. Reference vendor-specific simulation libraries (like Xilinx Vivado or Intel Quartus)
+# Marking them as third-party disables annoying style/unused warnings for these files.
+UNISIM.files = [
+]
+UNISIM.is_third_party = true

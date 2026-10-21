@@ -1,0 +1,50 @@
+Microchip Technology Inc. - Microchip Libero Software Release 2026.1 (Version 2026.1.0.17)
+
+Date      :  Mon Oct 19 13:44:17 2026
+Project   :  /home/jenswilly/Projs/polarfire_simple/polarfire_simple
+Component :  BLOCK_FIFO_CORE
+Family    :  PolarFireSoC
+
+
+HDL source files for all Synthesis and Simulation tools:
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO_ram_wrapper.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/COREFIFO.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_ram_wrapper.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_sync.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_sync_scntr.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_async.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_NstagesSync.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_grayToBinConv.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_lsram_hs.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_lsram_lp.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_reg.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_usram_hs.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_usram_lp.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_lsram_hs.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_lsram_lp.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_reg.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_usram_hs.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_usram_lp.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_fwft.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.v
+
+Stimulus files for all Simulation tools:
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/mti/scripts/wave.do
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/mti/scripts/runall.do
+
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/coreparameters.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/test/user/top_define.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/clock_driver.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/fifo_driver.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/fifo_monitor.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/g4_dp_ext_mem.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/test/user/testbench.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WeqR.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WgtR.v
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WltR.v
+
+Constraint files:
+    /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.sdc
