@@ -110,7 +110,7 @@ Sequence, adjusted to the Step 1 facts:
 
 ### Step 7 — Read front end `qspi_read_ctrl`
 - Request input: AXI4-Stream, `tdata = {len[15:0], addr[31:0]}` (host bytes, even values only).
-- Credit input `rx_space` (free bytes downstream). A request starts only when `rx_space ≥ len` and `init_done = '1'`.
+- Credit input `rx_space` (free bytes downstream). A request starts only when `rx_space ≥ in_flight + len` (`in_flight` = bytes of started requests not yet delivered) and `init_done = '1'`.
 - Issues EBh via `qspi_xact`, with die address = addr/2 and data clock count = len.
 - Output: `m_axis` 8-bit, `tlast` on the final byte. `req_err` for odd addr/len, an address beyond the device size, or a request before init.
 - Handles back-to-back requests (e.g. 8 × 880 bytes) with minimal gaps.
@@ -176,7 +176,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 4 | Device model | done | `sim/models/qspi_mem_model.vhd` + `qspi_model_pkg.vhd`, `tb_qspi_mem_model`. Found and fixed in `qspi_phy`: it re-drove IO0/2/3 at CS# high while the device was still driving after a quad read; pads now change only with CS# low |
 | 5 | Transaction engine | done | `hdl/qspi_xact.vhd` (contains `qspi_phy`), `tb_qspi_xact` (W25Q, AS 1 die, AS 2 dies in one run); 6 deliberate DUT faults all caught. Stream format: 4-line data = host bytes `{die2_nib, die1_nib}`, 1-line data = die 1 byte then die 2 byte |
 | 6 | Init FSM | done | `hdl/qspi_init.vhd`, `tb_qspi_init` (8 configurations incl. faults, each run twice); 6 deliberate DUT faults all caught. Model got fault-injection generics (`W25_ID`, `AS_SR_INIT`, `AS_CR2_INIT`, `REG_WRITE_IGNORE`) |
-| 7 | Read front end | todo | |
+| 7 | Read front end | done | `hdl/qspi_read_ctrl.vhd`, `tb_qspi_read_ctrl`. 8 × 880 host bytes: 144.5 µs (W25Q), 145.5 µs (AS, 1 and 2 dies). 5 deliberate DUT faults all caught (after making the starvation test stricter) |
 | 8 | Write path | todo | |
 | 9 | Controller top | todo | |
 | 10 | BIST | todo | |
