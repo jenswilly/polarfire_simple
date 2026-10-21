@@ -47,8 +47,9 @@
 --   of the last SCLK cycle of the current phase. If no descriptor is valid then, SCLK stays low
 --   (CS# low) until one arrives. Keep the next descriptor valid to get a gap-free SCLK.
 --
--- All pad-facing signals (sclk, cs_n, io_o, io_oe and the io_i capture) are single registers,
--- intended for I/O-register packing (PLAN.md Step 11).
+-- All pad-facing signals (sclk, cs_n, io_o, io_oe and the io_i capture) are single registers
+-- with the same clock and synchronous reset, kept separate (syn_preserve) so each one can be
+-- combined into its I/O cell (set_ioff in constraints/qspi_ioreg.ndc).
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -336,6 +337,8 @@ begin
                 cs_cnt   <= (others => '0');
                 tok_v    <= (others => '0');
                 rx_valid_r <= '0';
+                io_i_r     <= (others => '0');   -- Same reset as the output/OE registers, so all
+                                                 -- three can be combined into one I/O cell
                 set_pads('0', DIR_NONE, (others => '0'), (others => '0'));
             end if;
         end if;

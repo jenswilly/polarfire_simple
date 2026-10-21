@@ -138,7 +138,7 @@ The project's top level is the SmartDesign `TOP`, so there's no separate HDL boa
 - `hdl/qspi_board.vhd`: `qspi_mram_ctrl` + `qspi_bist` + the tristate IO buffers (inout `io(3 downto 0)` for the prototype; `io(7 downto 4)` and the second `cs_n`/`sclk` only when `DIE2_PRESENT = true`). Make it an **HDL+ core** so `DEVICE`, `SCLK_DIV`, etc. can be set per instance (plain HDL modules lose their generics in SmartDesign).
 - **User actions (GUI):** add `OUT1` = 100 MHz to `PF_CCC_C0` (see Clocking); add a second `CORERESET_PF` instance for `clk_ctrl`; place `qspi_board` in `TOP`, connect clock/reset, LED5/LED6 (remove their tie-low) and promote the QSPI pins to top-level ports; Generate Component.
 - **User action:** pick the pins for the breakout: CS#, SCLK, IO0–IO3 (6 pins), 3.3 V. Candidates are the RPi header (Bank1; full pin list in the reference design's `MPFS_DISCOVERY_RPi.pdc`) or the mikroBUS connector. On the RPi header avoid the pins already used: E13 (40), B19 (35), B15 (36), B17 (37), B14 (38). Confirm from the board schematic. Keep the wires short.
-- Determine and apply the I/O-register packing method (see Sampling).
+- I/O-register packing on PolarFire: `syn_useioff` is not supported (Synplify lists it for other vendors only). Libero uses `set_ioff` in an NDC file (`constraints/qspi_ioreg.ndc`, linked in Constraint Manager → Netlist Attributes). Its rules (same clock/enable/reset for in/out/OE registers, fanout 1) are met by `qspi_phy`; `syn_preserve` keeps every pad register separate.
 - Verify `TOP.vhd`, the `PF_CCC_C0` netlist (VCO 4000, dividers 8/10) and the new core's `.cxf`.
 - **Done when:** the design synthesises and places in Libero with no I/O-register packing warnings on the pad flops, and README + `top_level.drawio` show the new block.
 
@@ -180,8 +180,42 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 8 | Write path | done | `hdl/qspi_write.vhd`, `tb_qspi_write`. W25Q erases every 4 KB sector the request touches; `wr_done` pulse when written. 5 deliberate DUT faults all caught. 880 host bytes: 18.8 µs (AS), 42.9 µs (W25Q with the model's shortened erase/program times; real tSE is 45 ms typ.) |
 | 9 | Controller top | done | `hdl/qspi_mram_ctrl.vhd`, `tb_qspi_mram_ctrl`. Fixed in `qspi_init`: `init_done` now drops in the same cycle as `init_restart`. Synplify (`tools/syn_check.sh`, W25Q and AS 2 dies): no errors/latches/multi-drivers, ~1.5k LUTs, 700/815 FFs; pad flops kept separate with `syn_preserve` |
 | 10 | BIST | done | `hdl/qspi_bist.vhd`, `tb_qspi_bist` (5 configurations incl. calibration windows {1,2} and {2}, init retry, data and ID faults); 4 deliberate DUT faults all caught. Synplify clean, ~190 LUTs. Model got `MEM_WRITE_IGNORE` |
-| 11 | Integration into TOP | todo | |
+| 11 | Integration into TOP | in progress | RTL done: `hdl/qspi_board.vhd` (single die, integer generics for HDL+), `tb_qspi_board`, `constraints/qspi_ioreg.ndc` (`set_ioff`; `syn_useioff` is not supported for PolarFire). Waiting for: pin choice, Libero GUI steps |
 | 12 | Constraints | todo | |
 | 13 | Bring-up, W25Q128JV | todo | |
 | 14 | AS308G208 dual die | todo | |
 | 15 | QPI reads (optional) | todo | |
+
+---
+
+## Open tasks (handoff, 2026-10-21)
+
+Step 11 is in progress: the RTL is done and all testbenches pass. Remaining, in order:
+
+**User (any machine)**
+1. Commit and push the Step 11 work-in-progress (`hdl/qspi_board.vhd`, `sim/tb_qspi_board.vhd`, `constraints/qspi_ioreg.ndc`, the `qspi_phy`/`qspi_xact`/`tools/syn_check.sh` changes, README, PLAN, and the `constraints/io.pdc` pin notes).
+2. On the new machine: the `.prjx` stores linked files as absolute paths, so re-link them if the repo path differs. Start Libero with `tools/start_libero.sh` (license server, working directory).
+3. Choose the breakout pins and look up the ball numbers in the reference design's `MPFS_DISCOVERY_RPi.pdc` (or the schematic):
+   - RPi SPI0 group: pin 24 (GPIO8) CS#, 23 (GPIO11) SCLK, 19 (GPIO10) IO0, 21 (GPIO9) IO1, 22 (GPIO25) IO2, 26 (GPIO7) IO3; 3.3 V on pin 17, GND on pin 20/25. Or:
+   - mikroBUS: CS, SCK, MOSI → IO0, MISO → IO1, two of PWM/INT/RST → IO2/IO3.
+   - Avoid E13, B19, B15, B17, B14 (already used).
+
+**User (Libero GUI)**
+4. Files → hdl → Link Files: `qspi_pkg`, `qspi_phy`, `qspi_xact`, `qspi_init`, `qspi_read_ctrl`, `qspi_write`, `qspi_mram_ctrl`, `qspi_bist`, `qspi_board` (`util_pkg` is already linked). Build Hierarchy.
+5. Right-click `qspi_board` → Create Core from HDL (no bus interfaces).
+6. `PF_CCC_C0`: enable Output 1 = 100 MHz, keep Output 0 = 125 MHz (both exact). Generate.
+7. SmartDesign `TOP`:
+   - Add `CORERESET_1`, wired like `CORERESET_0` but with `CLK` → `PF_CCC_C0_0:OUT1_FABCLK_0`; `EXT_RST_N` → `AND2_0:Y`, `PLL_LOCK` → `PLL_LOCK_0`, `INIT_DONE` → `INIT_MONITOR_0:DEVICE_INIT_DONE`, `FPGA_POR_N` → `INIT_MONITOR_0:FABRIC_POR_N`; BANK_x/y_VDDI_STATUS high, SS_BUSY/FF_US_RESTORE low, `PLL_POWERDOWN_B` unused.
+   - Add `qspi_board_0` (default generics: DEVICE_SEL 0, CALIBRATE 1). `clk` → `OUT1_FABCLK_0`, `reset_n` → `CORERESET_1:FABRIC_RESET_N`.
+   - Promote the pins and name them exactly `QSPI_SCLK`, `QSPI_CS_N`, `QSPI_IO` (the NDC uses these names).
+   - Remove the LED5/LED6 tie-low; `bist_pass` → LED5, `bist_fail` → LED6.
+   - Generate Component.
+8. Constraint Manager → Netlist Attributes → link `constraints/qspi_ioreg.ndc`, tick it for Compile.
+9. Synthesize (works without pins). Place & Route waits for the `io.pdc` entries.
+
+**Claude (after the GUI steps and the pin choice)**
+10. Add the QSPI pins to `constraints/io.pdc` (`-io_std LVCMOS33`, weak pull-ups on CS#/IO2/IO3).
+11. Verify `TOP.vhd`, the `PF_CCC_C0` netlist (VCO 4000 MHz, dividers 8/10), the `qspi_board` `.cxf`, the synthesis log and the I/O register combining report.
+12. Update `top_level.drawio`, `qspi_controller.drawio` (RESET# note), README; mark Step 11 done.
+
+Then Step 12 (timing constraints, `timing_budget.md`) and Step 13 (bring-up).

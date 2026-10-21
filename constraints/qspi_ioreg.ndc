@@ -1,0 +1,12 @@
+# I/O register combining for the QSPI pins (qspi_board in TOP)
+# Puts the PHY's pad registers (qspi_phy: sclk_r, cs_n_r, io_o_r, io_oe_r, io_i_r) into the
+# I/O cells, so clock-to-out and input setup don't depend on fabric routing.
+# Rules (Libero help, set_ioff): each register drives / is driven by its pin with fanout 1, and the
+# in/out/OE registers of one pin share clock, enable and reset. qspi_phy is written for that.
+# Port names: the TOP ports promoted from qspi_board.
+set_ioff {QSPI_SCLK} -out_reg yes
+set_ioff {QSPI_CS_N} -out_reg yes
+set_ioff {QSPI_IO[0]} -in_reg yes -out_reg yes -en_reg yes
+set_ioff {QSPI_IO[1]} -in_reg yes -out_reg yes -en_reg yes
+set_ioff {QSPI_IO[2]} -in_reg yes -out_reg yes -en_reg yes
+set_ioff {QSPI_IO[3]} -in_reg yes -out_reg yes -en_reg yes

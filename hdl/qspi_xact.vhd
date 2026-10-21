@@ -155,7 +155,6 @@ architecture rtl of qspi_xact is
 
     -- TX chunk collector (4-line: units = host bytes, max 8; 1-line: units = bytes per die, max 4)
     signal col_active : std_logic := '0';
-    signal col_left   : unsigned(15 downto 0) := (others => '0');  -- Units not yet in a chunk
     signal col_target : natural range 0 to 8 := 0;                 -- Units in the current chunk
     signal col_k      : natural range 0 to 8 := 0;                 -- Units collected
     signal col_die    : std_logic := '0';                          -- 1-line: next beat is die 2
@@ -327,7 +326,6 @@ begin
                         -- Start collecting the first TX chunk now
                         if cmd_dir = DIR_TX then
                             col_active <= '1';
-                            col_left   <= cmd_len;
                             col_k      <= 0;
                             col_die    <= '0';
                             chunk_full <= '0';
@@ -347,7 +345,6 @@ begin
                             n_units := col_target;
                             left  := data_left - n_units;
                             data_left <= left;
-                            col_left  <= col_left - n_units;
                             chunk_full <= '0';
                             col_k      <= 0;
                             col_die    <= '0';

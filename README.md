@@ -70,9 +70,11 @@ hdl/                Hand-written VHDL, linked into Libero:
                       qspi_write.vhd       QSPI write requests (test/calibration): W25Q erase + page program, AS D2h
                       qspi_mram_ctrl.vhd   QSPI controller top: init + read + write + arbiter + qspi_xact/qspi_phy
                       qspi_bist.vhd        Built-in self-test for qspi_mram_ctrl: write once, read/compare forever, pass/fail
+                      qspi_board.vhd       qspi_mram_ctrl + qspi_bist + tristate pads, single die (HDL+ core in TOP)
 documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
                       qspi_controller.drawio (planned QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
+constraints/qspi_ioreg.ndc  I/O register combining (set_ioff) for the QSPI pins (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
   models/           Simulation-only models: qspi_mem_model.vhd (one W25Q128JV / AS308G208 die),
                     qspi_model_pkg.vhd (sparse memory, preload pattern)
@@ -130,6 +132,8 @@ The script rebuilds the work library in `sim/out/` (git-ignored) and compiles (V
 `tb_block_arbiter` uses `NUM_PORTS = 3` (override with `-gNUM_PORTS=<n>`). Producers with random gaps offer numbered blocks and a consumer with random `m_ready` takes them. It checks: at most one `s_ready` is high, and only for a valid producer; every handshake on `m_*` is exactly one handshake on `s_*` with that producer's block; every block of every producer arrives once and in order; `m_*` stays stable while stalled; with all producers valid they are served in turn; after a reset port 0 goes first.
 
 `tb_qspi_phy` feeds a table of transactions (Read ID, an EBh read with mode byte and dummy cycles, a quad write, odd lengths, SPI1 latency, 1-cycle phases) to the PHY in 10 runs: SCLK divider 1 and 2 × sample delay 1–4, one run with gaps between descriptors, and one run whose device delay doesn't match the sample delay and must return wrong data. A pin-level device stub checks at every SCLK edge: the CS#/SCLK timing (first edge, exact high/low times, number of cycles per CS#, CS# high only after the last delayed sample, CS# high time), the TX bit order in SPI1 and QUAD4, and the OE pattern (IO2/IO3 high in SPI1, released in QUAD4 RX/dummy). It drives RX data a round-trip delay after each launching falling edge, and every RX word and `rx_last` is compared. A monitor checks that SCLK toggles only while CS# is low, that CS# and OE change only while SCLK is low, that OE doesn't change while CS# is high (after a quad read the device may still be driving), and that `sclk(1)`/`cs_n(1)` follow `sclk(0)`/`cs_n(0)`. `-gDIE2_I=0` runs it with `DIE2_PRESENT = false` (IO7:4 undriven, their RX nibble 0). A 1 ms watchdog ends a hung run with `TB FAILED`.
+
+`tb_qspi_board` runs `qspi_board` with a W25Q128JV model directly on its `qspi_io` pins (datasheet power-up time, calibration on, 2 blocks of 64 host bytes) and checks that `bist_pass` comes on and stays on and that the model sees no protocol errors. It covers the tristate wiring and the generic mapping.
 
 `tb_qspi_bist` runs `qspi_bist` + `qspi_mram_ctrl` against the models in five configurations (4 blocks of 880 host bytes): W25Q128JV without calibration (pass); W25Q128JV with calibration and a board delay where sample delays 1 and 2 work (window `0011`, picks 1, pass); AS308G208 with 2 dies, calibration, `SAMPLE_DLY` = 1 and a board delay where only 2 works (init fails with 1 and is retried, window `0010`, pass); AS308G208 with a model that ignores array writes (fail); AS308G208 with a wrong ID (all init retries fail, fail). It checks that `pass` only comes on after a complete round, that `pass` and `fail` are never on together, that passing configurations keep passing (`pass_count` ≥ 3) and that `fail` stays latched.
 
