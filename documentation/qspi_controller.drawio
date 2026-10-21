@@ -76,11 +76,11 @@
         <mxCell id="xact" value="&lt;b&gt;qspi_xact&lt;/b&gt;&lt;br&gt;&lt;br&gt;command →&lt;br&gt;phase descriptors&lt;br&gt;&lt;br&gt;opcode, address,&lt;br&gt;mode byte, latency,&lt;br&gt;data&lt;br&gt;&lt;br&gt;1-1-1 / 1-1-4 / 1-4-4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
           <mxGeometry x="720" y="310" width="140" height="330" as="geometry" />
         </mxCell>
-        <mxCell id="phy" value="&lt;b&gt;qspi_phy&lt;/b&gt;&lt;br&gt;&lt;br&gt;SCLK = clk_ctrl /&lt;br&gt;(2 × SCLK_DIV)&lt;br&gt;&lt;br&gt;CS#, IO out/OE,&lt;br&gt;OE turnaround&lt;br&gt;&lt;br&gt;samples IO&lt;br&gt;SAMPLE_DLY cycles&lt;br&gt;after launch edge&lt;br&gt;&lt;br&gt;min. CS# high time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="phy" value="&lt;b&gt;qspi_phy&lt;/b&gt;&lt;br&gt;&lt;br&gt;SCLK = clk_ctrl /&lt;br&gt;(2 × SCLK_DIV)&lt;br&gt;&lt;br&gt;CS#, IO out/OE,&lt;br&gt;OE turnaround&lt;br&gt;&lt;br&gt;samples IO&lt;br&gt;SAMPLE_DLY cycles&lt;br&gt;after launch edge&lt;br&gt;&lt;br&gt;min. CS# high time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="900" y="310" width="140" height="330" as="geometry" />
         </mxCell>
 
-        <mxCell id="pkg" value="&lt;b&gt;qspi_pkg&lt;/b&gt; (used by all qspi blocks): device_t, opcodes, address width, mode byte, latency, timing in ns, ns → cycles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;dashed=1;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="pkg" value="&lt;b&gt;qspi_pkg&lt;/b&gt; (used by all qspi blocks): device_t, opcodes, address width, mode byte, latency, timing in ns, ns → cycles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;dashed=1;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="460" y="730" width="580" height="40" as="geometry" />
         </mxCell>
 

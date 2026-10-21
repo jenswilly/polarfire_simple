@@ -76,11 +76,11 @@ Create `documentation/device_facts.md` with one section per device (W25Q128JV, A
 
 ### Step 3 — PHY / bit engine `qspi_phy`
 Low level only: no knowledge of commands.
-- Inputs: a phase descriptor stream `{lane_mode, dir, nclk, tx_data (up to 32 bits per die)}` plus `start`/`end_cs`.
+- Inputs: a phase descriptor stream (valid/ready) `{lanes, dir, nclk, tx1, tx2 (32 bits per die), last, sclk_div, cs_high}`. A transaction starts with the first descriptor after idle; `last` ends it (CS# high).
 - Generates SCLK (toggles every `sclk_div` `clk_ctrl` cycles while a phase is active, idle low). `sclk_div` is a **per-transaction input** (1 or 2), defaulting to the `SCLK_DIV` generic: the AS308G208's 05h and 9Fh are limited to 40 MHz (device_facts.md §3.2), so init runs those at 25 MHz, CS# (both dies identical), IO out per die, IO OE.
 - In SPI1 phases, IO2/IO3 (and IO6/IO7) are driven to the level Step 1 requires for WP#/HOLD#.
 - RX: samples IO `SAMPLE_DLY` cycles after the launch edge and produces per-clock 8-bit words `{die2_nib, die1_nib}`. In SPI1 mode it extracts IO1 (die 1) and IO5 (die 2). Holds CS# low until the last delayed sample is taken.
-- Releases OE for the turnaround at the start of latency cycles. Drives IO[7:4] to 0 on the last driven cycle when `DIE2_PRESENT=false`.
+- Releases OE for the turnaround at the start of latency cycles. With `DIE2_PRESENT=false`, IO[7:4] are never driven and read as `0000`.
 - Enforces minimum CS# high time between transactions.
 - **Done when:** `tb_qspi_phy` checks waveforms with a pin-level checker: CS/SCLK relationship, bit order in SPI1 and QUAD4, OE turnaround, `SAMPLE_DLY` 1–4, `SCLK_DIV` 1 and 2, CS# high time.
 
@@ -172,7 +172,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 |---|---|---|---|
 | 1 | Device facts | done | `documentation/device_facts.md`. Part is W25Q128JVSSIQ; Q‑W2/Q‑A* assumptions accepted |
 | 2 | Package + run_tb.sh | done | `hdl/qspi_pkg.vhd`, `hdl/util_pkg.vhd` (clog2/reverse/ns_to_cycles, also used by the SPI masters), `tb_qspi_pkg`, `tb_util_pkg`. `run_tb.sh`: packages first, dependency-order retry, fresh work library, `-- run_tb models:`. All 12 testbenches pass |
-| 3 | PHY | todo | |
+| 3 | PHY | done | `hdl/qspi_phy.vhd`, `tb_qspi_phy` (also with `-gDIE2_I=0`); 6 deliberate DUT faults all caught. `SCLK_DIV_MAX`/`SAMPLE_DLY_MAX` = 4 in `qspi_pkg` |
 | 4 | Device model | todo | |
 | 5 | Transaction engine | todo | |
 | 6 | Init FSM | todo | |

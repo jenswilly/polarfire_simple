@@ -21,6 +21,10 @@ package qspi_pkg is
     type lane_mode_t is (SPI1, QUAD4);                   -- 1 IO line (IO0 out, IO1 in) or 4 IO lines
     type dir_t       is (DIR_NONE, DIR_TX, DIR_RX);      -- NONE = dummy/latency clocks, IO not driven
 
+    -- PHY ranges (in clk_ctrl cycles)
+    constant SCLK_DIV_MAX   : positive := 4;   -- SCLK half-period: SCLK = clk_ctrl / (2 * sclk_div)
+    constant SAMPLE_DLY_MAX : positive := 4;   -- RX sample point after the SCLK falling edge
+
     -- Opcodes used on both devices ([W] p.22-23, [A] Table 34)
     constant OP_WREN     : byte_t := x"06";   -- Write Enable
     constant OP_RDSR     : byte_t := x"05";   -- Read Status Register (-1 on the W25Q)
