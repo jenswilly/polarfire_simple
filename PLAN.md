@@ -174,7 +174,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 2 | Package + run_tb.sh | done | `hdl/qspi_pkg.vhd`, `hdl/util_pkg.vhd` (clog2/reverse/ns_to_cycles, also used by the SPI masters), `tb_qspi_pkg`, `tb_util_pkg`. `run_tb.sh`: packages first, dependency-order retry, fresh work library, `-- run_tb models:`. All 12 testbenches pass |
 | 3 | PHY | done | `hdl/qspi_phy.vhd`, `tb_qspi_phy` (also with `-gDIE2_I=0`); 6 deliberate DUT faults all caught. `SCLK_DIV_MAX`/`SAMPLE_DLY_MAX` = 4 in `qspi_pkg` |
 | 4 | Device model | done | `sim/models/qspi_mem_model.vhd` + `qspi_model_pkg.vhd`, `tb_qspi_mem_model`. Found and fixed in `qspi_phy`: it re-drove IO0/2/3 at CS# high while the device was still driving after a quad read; pads now change only with CS# low |
-| 5 | Transaction engine | todo | |
+| 5 | Transaction engine | done | `hdl/qspi_xact.vhd` (contains `qspi_phy`), `tb_qspi_xact` (W25Q, AS 1 die, AS 2 dies in one run); 6 deliberate DUT faults all caught. Stream format: 4-line data = host bytes `{die2_nib, die1_nib}`, 1-line data = die 1 byte then die 2 byte |
 | 6 | Init FSM | todo | |
 | 7 | Read front end | todo | |
 | 8 | Write path | todo | |
