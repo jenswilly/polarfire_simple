@@ -68,7 +68,7 @@
         <mxCell id="write" value="&lt;b&gt;qspi_write&lt;/b&gt;&lt;br&gt;WREN + write per device&lt;br&gt;(W25Q: erase, 256 B pages, BUSY polling)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
           <mxGeometry x="460" y="430" width="180" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="init" value="&lt;b&gt;qspi_init&lt;/b&gt;&lt;br&gt;power-up wait, reset,&lt;br&gt;JEDEC ID, configure,&lt;br&gt;verify, init_done" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="init" value="&lt;b&gt;qspi_init&lt;/b&gt;&lt;br&gt;power-up wait, reset,&lt;br&gt;JEDEC ID, configure,&lt;br&gt;verify, init_done" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="460" y="550" width="180" height="90" as="geometry" />
         </mxCell>
 

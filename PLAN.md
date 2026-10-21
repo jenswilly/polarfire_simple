@@ -102,8 +102,8 @@ Sequence, adjusted to the Step 1 facts:
 1. Wait the power-up time after reset release (cycles from ns).
 2. Reset. W25Q128JV: 66h + 99h, wait tRST. AS308G208: it has **no software reset**, so pulse the `mem_reset_n` output (RESET# pin), then wait tPU (25 ms). No QPI recovery is needed because we never enter QPI.
 3. Read JEDEC ID in 1-1-1. Compare die 1 (and die 2 if present) against the expected ID for `DEVICE`. Mismatch → `init_err` with code `ERR_ID`.
-4. Configure: W25Q128JV — nothing to write: check that nothing is protected and that QE = 1 (fixed on the W25Q128JVSSIQ; QE = 0 → `ERR_CFG`). AS308G208 — address mode and read latency for the chosen SCLK, plus any other required bits.
-5. Read back the configuration registers and verify. Mismatch → `ERR_CFG`.
+4. Configure: W25Q128JV — nothing to write: check that nothing is protected and that QE = 1 (fixed on the W25Q128JVSSIQ; QE = 0 → `ERR_CFG`). AS308G208 — always write CR2 = 08h (latency 8) with WRAR and SR = 00h (no protection) with WRSR: register volatility is unknown (Q‑A3) and RDAR itself depends on CR2, so reading first isn't safe. Addresses are always 4 bytes, so there is no address mode to set.
+5. Read back the configuration registers and verify (AS: CR2 = 08h, CR1 WRENS = 00, SR not protected). Mismatch → `ERR_CFG`.
 6. Do one EBh read of a few bytes as a quad-path check (data not compared) and assert `init_done`.
 - An `init_restart` input reruns the sequence. A status output gives the state and the error code.
 - **Done when:** `tb_qspi_init` passes for the W25Q128JV (including QE = 0 → `ERR_CFG`) and for 1 and 2 AS308G208 models, including injected faults: wrong ID, a model ignoring a config write.
@@ -175,7 +175,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 3 | PHY | done | `hdl/qspi_phy.vhd`, `tb_qspi_phy` (also with `-gDIE2_I=0`); 6 deliberate DUT faults all caught. `SCLK_DIV_MAX`/`SAMPLE_DLY_MAX` = 4 in `qspi_pkg` |
 | 4 | Device model | done | `sim/models/qspi_mem_model.vhd` + `qspi_model_pkg.vhd`, `tb_qspi_mem_model`. Found and fixed in `qspi_phy`: it re-drove IO0/2/3 at CS# high while the device was still driving after a quad read; pads now change only with CS# low |
 | 5 | Transaction engine | done | `hdl/qspi_xact.vhd` (contains `qspi_phy`), `tb_qspi_xact` (W25Q, AS 1 die, AS 2 dies in one run); 6 deliberate DUT faults all caught. Stream format: 4-line data = host bytes `{die2_nib, die1_nib}`, 1-line data = die 1 byte then die 2 byte |
-| 6 | Init FSM | todo | |
+| 6 | Init FSM | done | `hdl/qspi_init.vhd`, `tb_qspi_init` (8 configurations incl. faults, each run twice); 6 deliberate DUT faults all caught. Model got fault-injection generics (`W25_ID`, `AS_SR_INIT`, `AS_CR2_INIT`, `REG_WRITE_IGNORE`) |
 | 7 | Read front end | todo | |
 | 8 | Write path | todo | |
 | 9 | Controller top | todo | |

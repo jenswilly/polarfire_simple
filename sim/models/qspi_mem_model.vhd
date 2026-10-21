@@ -34,6 +34,7 @@
 --   contention.
 --
 -- Time generics set to 0 ns use the datasheet value (use short values in testbenches).
+-- W25_ID, AS_SR_INIT, AS_CR2_INIT and REG_WRITE_IGNORE inject faults / non-default states.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -48,6 +49,11 @@ entity qspi_mem_model is
         PRELOAD_SEED : natural   := 0;          -- 0: unwritten bytes read FFh; else pattern_byte
         QE_INIT      : std_logic := '1';        -- W25Q: QE at power-up (fixed when '1')
         AS_ID        : std_logic_vector(31 downto 0) := x"E6212C01";
+        W25_ID       : std_logic_vector(23 downto 0) := x"EF4018";
+        -- Fault injection / non-default state (testbenches)
+        AS_SR_INIT   : std_logic_vector(7 downto 0) := x"00";   -- SR after power-up/RESET#
+        AS_CR2_INIT  : natural range 0 to 15 := 8;               -- MLATS after power-up/RESET#
+        REG_WRITE_IGNORE : boolean := false;                     -- Silently ignore register writes
         T_BOARD      : time := 0 ns;            -- Added to the output timing
         T_OUT_VALID  : time := 0 ns;            -- tCLQV / tCO
         T_OUT_HOLD   : time := 0 ns;            -- tCLQX / tOH
@@ -207,9 +213,9 @@ begin
             sr2 := x"00";
             sr2(W25_SR2_QE) := QE_INIT;
             sr3 := x"60";                       -- DRV1-0 = 11 (25 %)
-            sr  := x"00";
+            sr  := AS_SR_INIT;
             cr1 := x"60";                       -- ODSEL = 011 (Table 23)
-            cr2 := std_logic_vector(to_unsigned(AS_CR2_MLATS, 8));
+            cr2 := std_logic_vector(to_unsigned(AS_CR2_INIT, 8));
             wel := false;
         end procedure;
 
@@ -404,7 +410,9 @@ begin
 
         procedure write_reg(b : reg_t) is
         begin
-            if W25 then
+            if REG_WRITE_IGNORE then
+                info("register write ignored (REG_WRITE_IGNORE)");
+            elsif W25 then
                 case op is
                     when 16#01# =>                     -- SRP, SEC, TB, BP2-0
                         sr1(7 downto 2) := b(7 downto 2);
@@ -533,8 +541,9 @@ begin
                     set_src_regs(sr3);
                     send(false);
                 when 16#9F# =>
-                    src := SRC_REGS;  src_bytes(0) := x"EF";  src_bytes(1) := x"40";
-                    src_bytes(2) := x"18";  src_len := 3;  src_idx := 0;
+                    src := SRC_REGS;  src_bytes(0) := W25_ID(23 downto 16);
+                    src_bytes(1) := W25_ID(15 downto 8);  src_bytes(2) := W25_ID(7 downto 0);
+                    src_len := 3;  src_idx := 0;
                     send(false);
                 when 16#01# | 16#31# | 16#11# =>
                     is_write := true;
