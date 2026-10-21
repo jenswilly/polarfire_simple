@@ -57,7 +57,7 @@
         </mxCell>
 
         <!-- BIST -->
-        <mxCell id="bist" value="&lt;b&gt;qspi_bist&lt;/b&gt;&lt;br&gt;&lt;br&gt;after init_done:&lt;br&gt;write counter pattern,&lt;br&gt;read back, compare,&lt;br&gt;repeat&lt;br&gt;&lt;br&gt;optional: SAMPLE_DLY&lt;br&gt;sweep 1–4, pick the&lt;br&gt;centre of the window" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="bist" value="&lt;b&gt;qspi_bist&lt;/b&gt;&lt;br&gt;&lt;br&gt;after init_done:&lt;br&gt;write counter pattern once,&lt;br&gt;then read back and&lt;br&gt;compare, repeatedly&lt;br&gt;&lt;br&gt;CALIBRATE: retry init and&lt;br&gt;sweep SAMPLE_DLY 1–4,&lt;br&gt;pick the window centre" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="70" y="300" width="200" height="320" as="geometry" />
         </mxCell>
 

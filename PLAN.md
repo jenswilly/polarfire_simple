@@ -129,8 +129,8 @@ Sequence, adjusted to the Step 1 facts:
 - **Done when:** a full-system TB (init → write → 8 × 880 read) passes for the W25Q128JV and for the AS308G208 with 1 and 2 dies, and a Libero synthesis run (Synplify, with `qspi_mram_ctrl` temporarily as root or via Step 11's wrapper) shows no latches and no multi-driven nets.
 
 ### Step 10 — Built-in self-test `qspi_bist`
-- Fabric-only test, no software needed: after `init_done`, write a counter pattern to N blocks, read them back, compare, and repeat. Two LEDs, no error codes: LED5 = pass (on after at least one complete pass and no failure since reset), LED6 = fail (init error or data mismatch; latched until reset). Both off while init and the first pass are running. LED5–7 are currently tied low; LED1–4 are in use, LED7 stays tied low.
-- Optional calibration mode: sweep `SAMPLE_DLY` 1–4, record which values pass and select the centre of the passing window.
+- Fabric-only test, no software needed: after `init_done`, write a counter pattern to N blocks once per reset (flash endurance), then read them back and compare, again and again. Two LEDs, no error codes: LED5 = pass (on after at least one complete pass and no failure since reset), LED6 = fail (init error or data mismatch; latched until reset). Both off while init and the first pass are running. LED5–7 are currently tied low; LED1–4 are in use, LED7 stays tied low.
+- Optional calibration mode: if init fails, retry it with sample delays 1–4 (init reads ID/registers too). Then sweep `SAMPLE_DLY` 1–4 over the read rounds, record which values pass and select the centre of the passing window (lower middle for an even width).
 - **Done when:** `tb_qspi_bist` passes with model board delays set so only some `SAMPLE_DLY` values work, and the calibration picks a passing value.
 
 ### Step 11 — Integration into `TOP`
@@ -154,7 +154,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 2. If it fails: read the init status/error code with SmartDebug (Live Probe on `qspi_init`'s status output), or rebuild with `SCLK_DIV = 2` (SCLK 25 MHz) and scope CS#/SCLK/IO1 on the header pins.
 3. Run BIST at 25 MHz, then 50 MHz. Run calibration and record the passing `SAMPLE_DLY` window.
 4. Optional: SmartDebug/Identify probes on the PHY.
-- Note: the BIST erases and programs flash on every run, so limit the number of passes (flash endurance) or run it once per reset.
+- Note: the BIST erases and programs the flash once per reset (write once, then read-only rounds), so flash endurance is not an issue.
 - **Done when:** BIST passes repeatedly at 50 MHz SCLK on the breakout, and the passing window is documented.
 
 ### Step 14 — AS308G208 dual-die board (later)
@@ -179,7 +179,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 7 | Read front end | done | `hdl/qspi_read_ctrl.vhd`, `tb_qspi_read_ctrl`. 8 × 880 host bytes: 144.5 µs (W25Q), 145.5 µs (AS, 1 and 2 dies). 5 deliberate DUT faults all caught (after making the starvation test stricter) |
 | 8 | Write path | done | `hdl/qspi_write.vhd`, `tb_qspi_write`. W25Q erases every 4 KB sector the request touches; `wr_done` pulse when written. 5 deliberate DUT faults all caught. 880 host bytes: 18.8 µs (AS), 42.9 µs (W25Q with the model's shortened erase/program times; real tSE is 45 ms typ.) |
 | 9 | Controller top | done | `hdl/qspi_mram_ctrl.vhd`, `tb_qspi_mram_ctrl`. Fixed in `qspi_init`: `init_done` now drops in the same cycle as `init_restart`. Synplify (`tools/syn_check.sh`, W25Q and AS 2 dies): no errors/latches/multi-drivers, ~1.5k LUTs, 700/815 FFs; pad flops kept separate with `syn_preserve` |
-| 10 | BIST | todo | |
+| 10 | BIST | done | `hdl/qspi_bist.vhd`, `tb_qspi_bist` (5 configurations incl. calibration windows {1,2} and {2}, init retry, data and ID faults); 4 deliberate DUT faults all caught. Synplify clean, ~190 LUTs. Model got `MEM_WRITE_IGNORE` |
 | 11 | Integration into TOP | todo | |
 | 12 | Constraints | todo | |
 | 13 | Bring-up, W25Q128JV | todo | |

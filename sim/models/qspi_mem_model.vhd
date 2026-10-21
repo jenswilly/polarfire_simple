@@ -34,7 +34,8 @@
 --   contention.
 --
 -- Time generics set to 0 ns use the datasheet value (use short values in testbenches).
--- W25_ID, AS_SR_INIT, AS_CR2_INIT and REG_WRITE_IGNORE inject faults / non-default states.
+-- W25_ID, AS_SR_INIT, AS_CR2_INIT, REG_WRITE_IGNORE and MEM_WRITE_IGNORE inject faults /
+-- non-default states.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -54,6 +55,7 @@ entity qspi_mem_model is
         AS_SR_INIT   : std_logic_vector(7 downto 0) := x"00";   -- SR after power-up/RESET#
         AS_CR2_INIT  : natural range 0 to 15 := 8;               -- MLATS after power-up/RESET#
         REG_WRITE_IGNORE : boolean := false;                     -- Silently ignore register writes
+        MEM_WRITE_IGNORE : boolean := false;                     -- Silently ignore array writes/erases
         T_BOARD      : time := 0 ns;            -- Added to the output timing
         T_OUT_VALID  : time := 0 ns;            -- tCLQV / tCO
         T_OUT_HOLD   : time := 0 ns;            -- tCLQX / tOH
@@ -451,7 +453,9 @@ begin
                     page_data((page_off + sink_count) mod 256)  := b;
                     page_valid((page_off + sink_count) mod 256) := true;
                 when SINK_MEM =>
-                    mem.write((sink_addr + sink_count) mod SIZE, to_integer(unsigned(b)));
+                    if not MEM_WRITE_IGNORE then
+                        mem.write((sink_addr + sink_count) mod SIZE, to_integer(unsigned(b)));
+                    end if;
                 when SINK_REG =>
                     if sink_count = 0 then
                         write_reg(b);
@@ -581,9 +585,11 @@ begin
                             report_write_refused;
                         else
                             info("erase sector " & to_hstring(to_unsigned(addr - addr mod 4096, 24)) & "h");
-                            for i in 0 to 4095 loop
-                                mem.write(addr - addr mod 4096 + i, 255);
-                            end loop;
+                            if not MEM_WRITE_IGNORE then
+                                for i in 0 to 4095 loop
+                                    mem.write(addr - addr mod 4096 + i, 255);
+                                end loop;
+                            end if;
                             new_busy  := TSE;
                             clear_wel := true;
                         end if;
@@ -612,7 +618,7 @@ begin
                                     info("more than 256 bytes: wrapped within the page");
                                 end if;
                                 for i in 0 to 255 loop
-                                    if page_valid(i) then
+                                    if page_valid(i) and not MEM_WRITE_IGNORE then
                                         old_b := std_logic_vector(to_unsigned(mem.read(page_base + i), 8));
                                         mem.write(page_base + i,
                                                   to_integer(unsigned(old_b and page_data(i))));
