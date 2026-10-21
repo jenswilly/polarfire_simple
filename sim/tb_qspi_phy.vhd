@@ -13,7 +13,8 @@
 --   PHY must return exactly that data; a run with a mismatched T must give wrong data.
 --   One run inserts gaps between descriptors (SCLK pauses, PHY state S_WAIT).
 --   A monitor checks on every pin event: SCLK toggles only while CS# is low, CS# and OE change
---   only while SCLK is low, and sclk(1)/cs_n(1) equal sclk(0)/cs_n(0).
+--   only while SCLK is low, OE does not change while CS# is high (pads are only re-driven
+--   together with CS# low), and sclk(1)/cs_n(1) equal sclk(0)/cs_n(0).
 --   DIE2_I = 1 (default) runs with DIE2_PRESENT = true; -gDIE2_I=0 with false (IO7:4 must stay
 --   undriven and their RX nibble must read 0).
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
@@ -444,6 +445,11 @@ begin
             end if;
             if io_oe'event and sclk(0) /= '0' then
                 report "MONITOR: OE changed while SCLK high" severity error;
+                errors := errors + 1;
+            end if;
+            if io_oe'event and cs_n(0) /= '0' then
+                report "MONITOR: OE changed while CS# high (the device may still drive IO)"
+                       severity error;
                 errors := errors + 1;
             end if;
             mon_errors <= errors;

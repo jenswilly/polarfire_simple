@@ -19,8 +19,11 @@
 --   change together with the SCLK falling edge (and with CS# going low), so the device sees
 --   sclk_div clk cycles of setup and hold around each rising edge. CS# goes low together with
 --   the first data bit, and high at least one clk cycle after the last SCLK falling edge.
---   In SPI1 phases (and while CS# is high) IO2/IO3 and IO6/IO7 are driven high (WP#/HOLD#
---   inactive, device_facts.md §4.7) and IO0/IO4 are driven ('0' when not transmitting).
+--   In SPI1 phases IO2/IO3 and IO6/IO7 are driven high (WP#/HOLD# inactive, device_facts.md
+--   §4.7) and IO0/IO4 are driven ('0' when not transmitting). After reset the pads have this
+--   SPI1 pattern. When CS# goes high the pads keep the state of the last cycle, so after a
+--   QUAD4 read IO3:0 stay released (no contention while the device turns its outputs off)
+--   until the next transaction drives them again together with CS# low.
 --   QUAD4 RX/NONE phases release OE on all four lanes; the release happens on the falling edge
 --   that starts the phase (the turnaround before latency cycles).
 --   sclk(1)/cs_n(1) are copies of sclk(0)/cs_n(0) with their own pad flops.
@@ -309,8 +312,10 @@ begin
                         end if;
                     end loop;
                     if not pending then
+                        -- The pads keep their state: after a QUAD4 read the device needs its
+                        -- output disable time (tSHQZ/tHZCS) before IO may be driven again.
+                        -- The next transaction sets them together with CS# low.
                         cs_n_r <= "11";
-                        set_pads('0', DIR_NONE, (others => '0'), (others => '0'));
                         cs_cnt <= cs_high_l - 1;
                         state  <= S_IDLE;
                     end if;

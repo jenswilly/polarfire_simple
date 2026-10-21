@@ -143,7 +143,7 @@ The project's top level is the SmartDesign `TOP`, so there's no separate HDL boa
 - **Done when:** the design synthesises and places in Libero with no I/O-register packing warnings on the pad flops, and README + `top_level.drawio` show the new block.
 
 ### Step 12 — Constraints
-- `constraints/io.pdc`: QSPI pin assignments with `-io_std LVCMOS33` (Bank1, see CLAUDE.md), drive strength/slew, and pull-ups on CS# / IO2 / IO3 if Step 1 recommends them.
+- `constraints/io.pdc`: QSPI pin assignments with `-io_std LVCMOS33` (Bank1, see CLAUDE.md), drive strength/slew, and weak pull-ups on CS# (both datasheets recommend one) and IO2/IO3 (IO6/IO7): after a QUAD4 read the PHY leaves IO3:0 released while CS# is high, and the AS308G208's WP# has no internal pull-up.
 - `constraints/timing.sdc` (new, linked into the project as a timing constraint): the CCC clocks come from Libero's derived constraints; add `set_clock_groups -asynchronous` between `OUT0` (125 MHz) and `OUT1` (100 MHz), `create_generated_clock` for SCLK at the output pin, `set_output_delay` (tSU/tH) and `set_input_delay` (tCLQV/tCLQX + estimated board delay) relative to SCLK, and multicycle settings matching `SAMPLE_DLY`.
 - `documentation/timing_budget.md`: a short budget that justifies the default `SAMPLE_DLY` at 50 MHz SCLK for the breakout wiring.
 - **Done when:** the Libero flow completes with timing met at 100 MHz `clk_ctrl`, no unconstrained I/O paths, and no timed paths between the two clock domains.
@@ -173,7 +173,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 1 | Device facts | done | `documentation/device_facts.md`. Part is W25Q128JVSSIQ; Q‑W2/Q‑A* assumptions accepted |
 | 2 | Package + run_tb.sh | done | `hdl/qspi_pkg.vhd`, `hdl/util_pkg.vhd` (clog2/reverse/ns_to_cycles, also used by the SPI masters), `tb_qspi_pkg`, `tb_util_pkg`. `run_tb.sh`: packages first, dependency-order retry, fresh work library, `-- run_tb models:`. All 12 testbenches pass |
 | 3 | PHY | done | `hdl/qspi_phy.vhd`, `tb_qspi_phy` (also with `-gDIE2_I=0`); 6 deliberate DUT faults all caught. `SCLK_DIV_MAX`/`SAMPLE_DLY_MAX` = 4 in `qspi_pkg` |
-| 4 | Device model | todo | |
+| 4 | Device model | done | `sim/models/qspi_mem_model.vhd` + `qspi_model_pkg.vhd`, `tb_qspi_mem_model`. Found and fixed in `qspi_phy`: it re-drove IO0/2/3 at CS# high while the device was still driving after a quad read; pads now change only with CS# low |
 | 5 | Transaction engine | todo | |
 | 6 | Init FSM | todo | |
 | 7 | Read front end | todo | |
