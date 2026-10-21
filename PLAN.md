@@ -123,7 +123,7 @@ Sequence, adjusted to the Step 1 facts:
 - **Done when:** `tb_qspi_write` writes a pattern, reads it back with Step 7 and compares (W25Q128JV; AS308G208 with 1 and 2 dies).
 
 ### Step 9 — Controller top `qspi_mram_ctrl`
-- Wraps init, read, write and xact/phy. Generics: `DEVICE`, `DIE2_PRESENT`, `CLK_CTRL_HZ`, `SCLK_DIV`, `SAMPLE_DLY`, `MAX_LEN`.
+- Wraps init, read, write and xact/phy, with an arbiter for the `qspi_xact` command port and its TX/RX streams: `qspi_init` owns it until `init_done`, then read and write requests take turns. The owner only changes while `qspi_xact` is idle, so RX bytes always reach the source that issued the command (`tb_qspi_write` uses a simple testbench switch for this). Generics: `DEVICE`, `DIE2_PRESENT`, `CLK_CTRL_HZ`, `SCLK_DIV`, `SAMPLE_DLY`, `MAX_LEN`.
 - Pin-level ports: `sclk(1 downto 0)`, `cs_n(1 downto 0)`, `io_o(7 downto 0)`, `io_oe(7 downto 0)`, `io_i(7 downto 0)`, `mem_reset_n` (AS308G208 RESET#, unused with the W25Q128JV). No tristates inside.
 - Runtime `sample_dly_ovr` input (valid flag + value) for calibration.
 - **Done when:** a full-system TB (init → write → 8 × 880 read) passes for the W25Q128JV and for the AS308G208 with 1 and 2 dies, and a Libero synthesis run (Synplify, with `qspi_mram_ctrl` temporarily as root or via Step 11's wrapper) shows no latches and no multi-driven nets.
@@ -177,7 +177,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 5 | Transaction engine | done | `hdl/qspi_xact.vhd` (contains `qspi_phy`), `tb_qspi_xact` (W25Q, AS 1 die, AS 2 dies in one run); 6 deliberate DUT faults all caught. Stream format: 4-line data = host bytes `{die2_nib, die1_nib}`, 1-line data = die 1 byte then die 2 byte |
 | 6 | Init FSM | done | `hdl/qspi_init.vhd`, `tb_qspi_init` (8 configurations incl. faults, each run twice); 6 deliberate DUT faults all caught. Model got fault-injection generics (`W25_ID`, `AS_SR_INIT`, `AS_CR2_INIT`, `REG_WRITE_IGNORE`) |
 | 7 | Read front end | done | `hdl/qspi_read_ctrl.vhd`, `tb_qspi_read_ctrl`. 8 × 880 host bytes: 144.5 µs (W25Q), 145.5 µs (AS, 1 and 2 dies). 5 deliberate DUT faults all caught (after making the starvation test stricter) |
-| 8 | Write path | todo | |
+| 8 | Write path | done | `hdl/qspi_write.vhd`, `tb_qspi_write`. W25Q erases every 4 KB sector the request touches; `wr_done` pulse when written. 5 deliberate DUT faults all caught. 880 host bytes: 18.8 µs (AS), 42.9 µs (W25Q with the model's shortened erase/program times; real tSE is 45 ms typ.) |
 | 9 | Controller top | todo | |
 | 10 | BIST | todo | |
 | 11 | Integration into TOP | todo | |
