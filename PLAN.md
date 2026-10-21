@@ -5,7 +5,7 @@
 Work through the steps **in order**, one step per session/PR. At the end of every step:
 
 1. All testbenches written so far must pass with `sim/run_tb.sh` (see CLAUDE.md).
-2. Update README.md (repository layout, Simulation section with one paragraph per new testbench) and, when TOP changes, `documentation/top_level.drawio`.
+2. Update README.md (repository layout, Simulation section with one paragraph per new testbench) `documentation/qspi_controller.drawio` (block diagram of this plan; mark blocks as existing once built), and, when TOP changes, `documentation/top_level.drawio`.
 3. Update the **Status** table at the bottom of this file.
 4. Stop and report. The user commits to Git. Do not start the next step without being asked.
 
