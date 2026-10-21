@@ -29,7 +29,11 @@
       </spirit:signal>
     </spirit:signals>
     <spirit:hwParameters>
+<<<<<<< Updated upstream
       <spirit:hwParameter spirit:id="STRETCH_CYCLES" spirit:name="STRETCH_CYCLES" spirit:prompt="STRETCH_CYCLES:" spirit:dataType="int" spirit:resolve="user">125000</spirit:hwParameter>
+=======
+      <spirit:hwParameter spirit:id="STRETCH_CYCLES" spirit:name="STRETCH_CYCLES" spirit:prompt="STRETCH_CYCLES:" spirit:dataType="int" spirit:resolve="user">125</spirit:hwParameter>
+>>>>>>> Stashed changes
     </spirit:hwParameters>
     <spirit:deletedhwParameters>
     </spirit:deletedhwParameters>
