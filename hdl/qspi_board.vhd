@@ -5,7 +5,7 @@
 --                     tristate buffers --> qspi_sclk, qspi_cs_n, qspi_io(3:0)
 --
 --   Runs qspi_bist on its own after reset: init, write the pattern once, (calibrate,) then read
---   and compare repeatedly. bist_pass / bist_fail drive LEDs (see qspi_bist).
+--   and compare once (qspi_bist's LOOP_ROUNDS default). bist_pass / bist_fail drive LEDs (see qspi_bist).
 --   Single die only (IO[3:0]); a dual-die AS308G208 board needs a wrapper with the die-2 pins
 --   and RESET# (PLAN.md Step 14). With DEVICE_SEL = 1 (AS308G208 die), RESET# must be tied high
 --   on the board.

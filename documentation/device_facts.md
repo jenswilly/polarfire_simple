@@ -90,7 +90,7 @@ EBh details ([W] p.23 note 11, p.33):
 | CS# not-active hold / setup | tCHSL / tSHCH | ≥ 3 ns / ≥ 3 ns | [W] p.64 |
 | Data in setup / hold | tDVCH / tCHDX | ≥ 1 ns / ≥ 2 ns | [W] p.64 |
 | CS# high time after read | tSHSL1 | ≥ 10 ns | [W] p.64 |
-| CS# high time after erase/program/write | tSHSL2 | ≥ 50 ns | [W] p.64 |
+| CS# high time after erase/program/write, **including WREN (06h)** | tSHSL2 | ≥ 50 ns | [W] p.64; on hardware, 10 ns after WREN left WEL set but the next 20h/32h was ignored |
 | Clock low to output valid | tCLQV | ≤ 6 ns | [W] p.64 |
 | Output hold | tCLQX | ≥ 1.5 ns | [W] p.64 |
 | Output disable after CS# high | tSHQZ | ≤ 7 ns | [W] p.64 |

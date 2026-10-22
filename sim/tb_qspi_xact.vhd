@@ -272,7 +272,7 @@ begin
                 issue(x"EB", L144, 16#000123#, 3, '1', 4, DIR_RX, 10);
                 expect(host_bytes(pat(16#123#, 5, SEED1), pat(0, 5, 1)), "EBh read");
 
-                issue(x"06", L111, 0, 0, '0', 0, DIR_NONE, 0);
+                issue(x"06", L111, 0, 0, '0', 0, DIR_NONE, 0, wr => '1');
                 issue(x"20", L111, 16#001000#, 3, '0', 0, DIR_NONE, 0, wr => '1');
                 w25_wait_busy;
                 issue(x"EB", L144, 16#0010FE#, 3, '1', 4, DIR_RX, 4);
@@ -280,7 +280,7 @@ begin
 
                 -- Quad page program of 4 bytes at 0x10FE: the last 2 wrap to 0x1000. The upper
                 -- nibble of each host byte (die 2) must be ignored.
-                issue(x"06", L111, 0, 0, '0', 0, DIR_NONE, 0);
+                issue(x"06", L111, 0, 0, '0', 0, DIR_NONE, 0, wr => '1');
                 issue(x"32", L114, 16#0010FE#, 3, '0', 0, DIR_TX, 8, wr => '1');
                 send((x"A1", x"B2", x"C3", x"D4", x"E5", x"F6", x"97", x"88"));
                 w25_wait_busy;
@@ -290,7 +290,7 @@ begin
                 expect(host_bytes((x"56", x"78", x"FF"), (x"00", x"00", x"00")), "programmed, wrapped");
 
                 -- 1-1-1 program of 6 bytes (two TX chunks)
-                issue(x"06", L111, 0, 0, '0', 0, DIR_NONE, 0);
+                issue(x"06", L111, 0, 0, '0', 0, DIR_NONE, 0, wr => '1');
                 issue(x"02", L111, 16#001010#, 3, '0', 0, DIR_TX, 6, wr => '1');
                 send(S1);
                 w25_wait_busy;

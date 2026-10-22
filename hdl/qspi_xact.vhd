@@ -25,8 +25,8 @@
 --   TX: the next 32-bit chunk per die is collected while the previous one is sent; if the TX
 --   stream is late, SCLK pauses (CS# stays low).
 --
--- CS# high time after the command: the device's write value if cmd_write = '1' (writes, erase,
--- register writes), else the read value (device_facts.md §1), converted with CLK_HZ.
+-- CS# high time after the command: the device's write value if cmd_write = '1' (WREN, writes,
+-- erase, register writes), else the read value (device_facts.md §1), converted with CLK_HZ.
 --
 -- cmd_ready is high when idle. A command with RX data is finished after its last RX byte, a
 -- command without RX data after its last phase has gone to the PHY, so the next command's
@@ -90,8 +90,10 @@ end entity qspi_xact;
 architecture rtl of qspi_xact is
 
     constant P     : dev_params_t := dev_params(DEVICE);
-    constant CS_RD : positive := maximum(1, ns_to_cycles(P.t_cs_rd_ns, CLK_HZ));
-    constant CS_WR : positive := maximum(1, ns_to_cycles(P.t_cs_wr_ns, CLK_HZ));
+    -- +1 cycle margin: CS# rises slower than it falls at the device pin, so the high time there
+    -- is a few ns shorter than in the fabric (hardware: 6-8 ns for 10 ns, 46-48 ns for 50 ns)
+    constant CS_RD : positive := ns_to_cycles(P.t_cs_rd_ns, CLK_HZ) + 1;
+    constant CS_WR : positive := ns_to_cycles(P.t_cs_wr_ns, CLK_HZ) + 1;
     constant BEATS_PER_BYTE1 : positive := 2 - boolean'pos(not DIE2_PRESENT);  -- 1-line data
 
     type state_t is (X_IDLE, X_ISSUE, X_RXWAIT);

@@ -528,6 +528,7 @@ begin
         begin
             case op is
                 when 16#06# =>
+                    is_write := true;                   -- tSHSL2 after WREN (seen on hardware)
                     if now < write_at then
                         err("WREN before tPUW (" & time'image(write_at) & ")");
                     else

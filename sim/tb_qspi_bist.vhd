@@ -4,13 +4,16 @@
 --   short model times). Sample points are 10 ns apart; the device data is valid from
 --   tCO/tCLQV + board delay to one SCLK period + tOH/tCLQX + board delay after the falling edge.
 --     0  W25Q128JV, no calibration, SAMPLE_DLY 2, board 3 ns          -> pass
---     1  W25Q128JV, calibration, board 3.5 ns (valid 9.5..25 ns)      -> window {1,2}, delay 1, pass
+--     1  W25Q128JV, calibration, board 3.5 ns (valid 9.5..25 ns), one round only (no LOOP_ROUNDS)
+--                                                                     -> window {1,2}, delay 1, pass
 --     2  AS308G208, 2 dies, calibration, SAMPLE_DLY 1, board 8 ns
 --        (valid 17..29 ns): init fails with delay 1, retried with 2   -> window {2}, delay 2, pass
 --     3  AS308G208, 1 die, model ignores array writes, no calibration -> fail (data mismatch)
 --     4  AS308G208, 1 die, wrong ID, calibration                      -> fail (all init retries)
 --   Checks: pass and fail stay off until the first round ends (pass_count >= 1 when pass rises); pass and fail are never both on;
---   passing configurations keep passing (pass_count grows to 3 with fail off); fail stays latched;
+--   passing configurations with LOOP_ROUNDS keep passing (pass_count grows to 3 with fail off);
+--   without LOOP_ROUNDS pass stays on, pass_count stays 1 and no more reads are requested;
+--   fail stays latched;
 --   cal_window and cal_dly as expected; no model protocol errors in the passing configurations.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
@@ -29,6 +32,7 @@ architecture sim of tb_qspi_bist is
         dev       : device_t;
         die2      : boolean;
         calibrate : boolean;
+        loop_rd   : boolean;                       -- LOOP_ROUNDS
         smp_dly   : positive;
         t_board   : time;
         mem_ign   : boolean;
@@ -39,11 +43,11 @@ architecture sim of tb_qspi_bist is
     end record;
     type cfg_arr_t is array (natural range <>) of cfg_t;
     constant CFGS : cfg_arr_t := (
-        (DEV_W25Q128JV, false, false, 2, 3 ns,   false, x"E6212C01", true,  "0000", 1),
-        (DEV_W25Q128JV, false, true,  2, 3.5 ns, false, x"E6212C01", true,  "0011", 1),
-        (DEV_AS308G208, true,  true,  1, 8 ns,   false, x"E6212C01", true,  "0010", 2),
-        (DEV_AS308G208, false, false, 2, 3 ns,   true,  x"E6212C01", false, "0000", 1),
-        (DEV_AS308G208, false, true,  2, 3 ns,   false, x"E6212801", false, "0000", 1)
+        (DEV_W25Q128JV, false, false, true,  2, 3 ns,   false, x"E6212C01", true,  "0000", 1),
+        (DEV_W25Q128JV, false, true,  false, 2, 3.5 ns, false, x"E6212C01", true,  "0011", 1),
+        (DEV_AS308G208, true,  true,  true,  1, 8 ns,   false, x"E6212C01", true,  "0010", 2),
+        (DEV_AS308G208, false, false, true,  2, 3 ns,   true,  x"E6212C01", false, "0000", 1),
+        (DEV_AS308G208, false, true,  true,  2, 3 ns,   false, x"E6212801", false, "0000", 1)
     );
     constant NCFG : positive := CFGS'length;
 
@@ -81,7 +85,8 @@ begin
     begin
         bist : entity work.qspi_bist
             generic map (DIE2_PRESENT => C.die2, NBLK => 4, BLK_LEN => 880, BLK_STRIDE => 16#4000#,
-                         BASE_ADDR => 0, CALIBRATE => C.calibrate, SPACE_W => 16)
+                         BASE_ADDR => 0, CALIBRATE => C.calibrate, LOOP_ROUNDS => C.loop_rd,
+                         SPACE_W => 16)
             port map (
                 clk => clk, reset_n => rstn,
                 init_restart => init_restart, init_done => init_done, init_err => init_err,
@@ -164,9 +169,17 @@ begin
                     check(cal_dly = C.dly, "cal_dly: expected " & integer'image(C.dly)
                           & ", got " & integer'image(cal_dly));
                 end if;
-                wait until pass_count >= 3 or fail = '1' for 2 ms;
-                check(pass_count >= 3 and pass = '1' and fail = '0', "should keep passing (count "
-                      & integer'image(to_integer(pass_count)) & ")");
+                if C.loop_rd then
+                    wait until pass_count >= 3 or fail = '1' for 2 ms;
+                    check(pass_count >= 3 and pass = '1' and fail = '0', "should keep passing (count "
+                          & integer'image(to_integer(pass_count)) & ")");
+                else
+                    -- One round only: no further read requests, result stays
+                    wait until rd_req_tvalid = '1' or fail = '1' for 500 us;
+                    check(rd_req_tvalid = '0' and pass_count = 1 and pass = '1' and fail = '0',
+                          "should stop after one round (count "
+                          & integer'image(to_integer(pass_count)) & ")");
+                end if;
                 check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
             end if;
             tb_errors(g) <= errors;

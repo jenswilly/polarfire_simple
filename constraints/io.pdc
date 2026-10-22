@@ -24,29 +24,29 @@ set_io -port_name LED7 -pin_name U15 -fixed true -DIRECTION OUTPUT
 
 # --------------------------------
 # QSPI Pins on Raspberry Pi header
-
-# Pin 9: GND
-# Pin 17: 3.3V
 # Weak pull-ups on CS# (both datasheets recommend one) and IO2/IO3: after a quad read the PHY
 # releases IO3:0 while CS# is high, and the AS308G208's WP# has no internal pull-up.
 
+# Pin 9: GND
+# Pin 17: 3.3V
+
 # Pin 11: RPi_GPIO17_GEN0: QSPI SCLK
-set_io -port_name QSPI_SCLK -pin_name G18 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
+set_io -port_name QSPI_SCLK -pin_name G18 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT -OUT_DRIVE 4
 
 # Pin 13: RPi_GPIO27_GEN2: QSPI nCS
 set_io -port_name QSPI_CS_N -pin_name F21 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION OUTPUT
 
 # Pin 15: RPi_GPIO22_GEN3: QSPI IO0
-set_io -port_name {QSPI_IO[0]} -pin_name F20 -fixed true -io_std LVCMOS33 -DIRECTION INOUT
+set_io -port_name {QSPI_IO[0]} -pin_name F20 -fixed true -io_std LVCMOS33 -DIRECTION INOUT -OUT_DRIVE 4
 
 # Pin 16: RPi_GPIO23_GEN4: QSPI IO1
-set_io -port_name {QSPI_IO[1]} -pin_name E21 -fixed true -io_std LVCMOS33 -DIRECTION INOUT
+set_io -port_name {QSPI_IO[1]} -pin_name E21 -fixed true -io_std LVCMOS33 -DIRECTION INOUT -OUT_DRIVE 4
 
 # Pin 18: RPi_GPIO24_GEN5: QSPI IO2
-set_io -port_name {QSPI_IO[2]} -pin_name F19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT
+set_io -port_name {QSPI_IO[2]} -pin_name F19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT -OUT_DRIVE 4
 
 # Pin 22: RPi_GPIO25_GEN6: QSPI IO3
-set_io -port_name {QSPI_IO[3]} -pin_name A19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT
+set_io -port_name {QSPI_IO[3]} -pin_name A19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT -OUT_DRIVE 4
 
 
 # ---------------------

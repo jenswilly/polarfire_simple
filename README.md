@@ -18,10 +18,15 @@ Outputs:
 | SPI MOSI | `spi_tx_path` | B15, RPi header pin 36 (GPIO16) |
 | SPI CS_N | `spi_tx_path` | B17, RPi header pin 37 (GPIO26) |
 | (unused) | Tied low | B14, RPi header pin 38 (GPIO20) |
-| QSPI SCLK | `qspi_board` | G18, RPi header pin 11 (GPIO17) |
-| QSPI CS# | `qspi_board`, pull-up | F21, RPi header pin 13 (GPIO27) |
-| QSPI IO0 / IO1 | `qspi_board` | F20 / E21, RPi header pins 15 / 16 (GPIO22 / GPIO23) |
-| QSPI IO2 / IO3 | `qspi_board`, pull-ups | F19 / A19, RPi header pins 18 / 22 (GPIO24 / GPIO25) |
+| QSPI SCLK | `qspi_board` | G18, RPi header pin 11 (GPIO17), yellow wire |
+| QSPI CS# | `qspi_board`, pull-up | F21, RPi header pin 13 (GPIO27), orange wire |
+| QSPI IO0 | `qspi_board` | F20, RPi header pin 15 (GPIO22), green wire |
+| QSPI IO1 | `qspi_board` | E21, RPi header pin 16 (GPIO23), gray wire |
+| QSPI IO2 | `qspi_board`, pull-ups | F19, RPi header pin 18 (GPIO24), purple wire |
+| QSPI IO3 | `qspi_board`, pull-ups | A19, RPi header pin 22 (GPIO25), blue wire |
+| QSPI VCC | 3.3 V | RPi header pin 17, red wire |
+| QSPI GND | GND | RPi header pin 9, brown wire |
+
 
 The RPi header pins are in Bank1 (3.3 V). The QSPI breakout (W25Q128JV) gets 3.3 V from header pin 17 and GND from pin 9. GPIO numbers are BCM numbers; the pin numbers are the physical header pins.
 
@@ -37,7 +42,7 @@ Several producers share `spi_tx_path` through `block_arbiter` (in TOP, in front 
 For now the blocks come from two `test_block_producer` instances (HDL+ cores, so the generics are set per instance) on `block_arbiter`. Each pulse from SWITCH2 or a write to DEBUG makes each of them send one block `<id> <seq> 02 03 04 05 06 07 08 09`, where `<id>` is the `FIRST_BYTE` generic (`F0` for `test_block_producer_0`, `AA` for `test_block_producer_1`) and `<seq>` counts that producer's blocks since reset. So every pulse gives two SPI frames, `F0 <seq> …` first, then `AA <seq> …`.
 
 ### QSPI controller and BIST
-`qspi_board` (HDL+ core) contains `qspi_mram_ctrl` (the QSPI controller for the W25Q128JV prototype and, later, the dual-die AS308G208 MRAM) and `qspi_bist`. After reset the BIST initialises the memory, writes a test pattern once, calibrates the RX sample delay and then reads and compares 8 × 880 bytes repeatedly: LED5 = pass, LED6 = fail. SCLK is 50 MHz, reads are 1-4-4 (EBh). The SCLK/CS# output registers and the IO3:0 input registers are packed into the I/O cells (`constraints/qspi_ioreg.ndc`). Design, steps and status: `PLAN.md`; block diagram: `documentation/qspi_controller.drawio`; device facts: `documentation/device_facts.md`.
+`qspi_board` (HDL+ core) contains `qspi_mram_ctrl` (the QSPI controller for the W25Q128JV prototype and, later, the dual-die AS308G208 MRAM) and `qspi_bist`. After reset the BIST initialises the memory, writes a test pattern once, calibrates the RX sample delay and then reads and compares 8 × 880 bytes once and stops: LED5 = pass, LED6 = fail (the `LOOP_ROUNDS` generic of `qspi_bist` repeats the read rounds until reset). SCLK is 50 MHz, reads are 1-4-4 (EBh). The SCLK/CS# output registers and the IO3:0 input registers are packed into the I/O cells (`constraints/qspi_ioreg.ndc`). Design, steps and status: `PLAN.md`; block diagram: `documentation/qspi_controller.drawio`; device facts: `documentation/device_facts.md`.
 
 ### Register map (`axi_led_reg`, base `0x6000_0000`)
 
@@ -78,10 +83,10 @@ hdl/                Hand-written VHDL, linked into Libero:
                       qspi_read_ctrl.vhd   QSPI read requests {len, addr} -> EBh commands, credit-based flow control
                       qspi_write.vhd       QSPI write requests (test/calibration): W25Q erase + page program, AS D2h
                       qspi_mram_ctrl.vhd   QSPI controller top: init + read + write + arbiter + qspi_xact/qspi_phy
-                      qspi_bist.vhd        Built-in self-test for qspi_mram_ctrl: write once, read/compare forever, pass/fail
+                      qspi_bist.vhd        Built-in self-test for qspi_mram_ctrl: write once, read/compare (once or looped), pass/fail
                       qspi_board.vhd       qspi_mram_ctrl + qspi_bist + tristate pads, single die (HDL+ core in TOP)
 documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
-                      qspi_controller.drawio (QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references); timing_budget.md (QSPI I/O timing budget behind timing.sdc)
+                      qspi_controller.drawio (QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references); timing_budget.md (QSPI I/O timing budget behind timing.sdc); bringup.md (QSPI hardware bring-up log)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 constraints/qspi_ioreg.ndc  I/O register combining (set_ioff) for the QSPI pins (linked into Libero)
 constraints/timing.sdc      QSPI timing (SCLK generated clock, I/O delays), clock groups (linked, after the derived SDC)
@@ -145,7 +150,7 @@ The script rebuilds the work library in `sim/out/` (git-ignored) and compiles (V
 
 `tb_qspi_board` runs `qspi_board` with a W25Q128JV model directly on its `qspi_io` pins (datasheet power-up time, calibration on, 2 blocks of 64 host bytes) and checks that `bist_pass` comes on and stays on and that the model sees no protocol errors. It covers the tristate wiring and the generic mapping.
 
-`tb_qspi_bist` runs `qspi_bist` + `qspi_mram_ctrl` against the models in five configurations (4 blocks of 880 host bytes): W25Q128JV without calibration (pass); W25Q128JV with calibration and a board delay where sample delays 1 and 2 work (window `0011`, picks 1, pass); AS308G208 with 2 dies, calibration, `SAMPLE_DLY` = 1 and a board delay where only 2 works (init fails with 1 and is retried, window `0010`, pass); AS308G208 with a model that ignores array writes (fail); AS308G208 with a wrong ID (all init retries fail, fail). It checks that `pass` only comes on after a complete round, that `pass` and `fail` are never on together, that passing configurations keep passing (`pass_count` ≥ 3) and that `fail` stays latched.
+`tb_qspi_bist` runs `qspi_bist` + `qspi_mram_ctrl` against the models in five configurations (4 blocks of 880 host bytes): W25Q128JV without calibration (pass); W25Q128JV with calibration and a board delay where sample delays 1 and 2 work (window `0011`, picks 1, pass, one round only); AS308G208 with 2 dies, calibration, `SAMPLE_DLY` = 1 and a board delay where only 2 works (init fails with 1 and is retried, window `0010`, pass); AS308G208 with a model that ignores array writes (fail); AS308G208 with a wrong ID (all init retries fail, fail). It checks that `pass` only comes on after a complete round, that `pass` and `fail` are never on together, that passing configurations with `LOOP_ROUNDS` keep passing (`pass_count` ≥ 3), that without it the BIST stops after one round (no further read requests, `pass` stays on) and that `fail` stays latched.
 
 `tb_qspi_mram_ctrl` is the full-system test of `qspi_mram_ctrl` for the W25Q128JV and the AS308G208 with 1 and 2 dies: init, then 8 blocks of 880 host bytes written (with a read requested during the first write, which must wait for it, and a write requested while a read is still delivering data, which must not cut the read short), then the 8 blocks read back to back (144.5 µs on the W25Q128JV, 145.5 µs on the AS308G208). The `SAMPLE_DLY` generic is set to 3, which doesn't fit the 3 ns board delay: the test runs with `sample_dly_ovr = 2`, and one read without the override must return wrong data. Finally `init_restart`: requests during the rerun give `rd_req_err`/`wr_req_err`, and a read after it works. All data is checked against the written data, erased flash or the preload, and the models must report no protocol errors.
 
@@ -227,5 +232,6 @@ For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-hart
 - [ ] DEBUG pulse (1 ms) on RPi header pin 40: check on the scope.
 - [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
 - [x] QSPI controller + BIST integrated into `TOP` (PLAN.md Step 11): synthesis, place and route and timing pass.
-- [ ] QSPI: timing constraints (Step 12) and hardware bring-up on the W25Q128JV breakout (Step 13).
+- [x] QSPI timing constraints (Step 12).
+- [ ] QSPI hardware bring-up on the W25Q128JV breakout (Step 13): BIST passes at 12.5 and 25 MHz SCLK; 50 MHz to do (`documentation/bringup.md`).
 - [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).

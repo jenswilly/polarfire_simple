@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Thu Oct 22 11:04:59 2026
+-- Created by SmartDesign Thu Oct 22 16:54:59 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -505,11 +505,11 @@ signal DEBUG_net_1                               : std_logic;
 signal RPi_GPIO16_net_1                          : std_logic;
 signal RPi_GPIO19_net_1                          : std_logic;
 signal RPi_GPIO26_net_1                          : std_logic;
+signal QSPI_SCLK_net_1                           : std_logic;
+signal QSPI_CS_N_net_1                           : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
-signal QSPI_SCLK_net_1                           : std_logic;
-signal QSPI_CS_N_net_1                           : std_logic;
 signal s_data_net_0                              : std_logic_vector(159 downto 0);
 signal s_valid_net_0                             : std_logic_vector(1 downto 0);
 signal s_ready_net_0                             : std_logic_vector(1 downto 0);
@@ -581,16 +581,16 @@ begin
  RPi_GPIO19       <= RPi_GPIO19_net_1;
  RPi_GPIO26_net_1 <= RPi_GPIO26_net_0;
  RPi_GPIO26       <= RPi_GPIO26_net_1;
+ QSPI_SCLK_net_1  <= QSPI_SCLK_net_0;
+ QSPI_SCLK        <= QSPI_SCLK_net_1;
+ QSPI_CS_N_net_1  <= QSPI_CS_N_net_0;
+ QSPI_CS_N        <= QSPI_CS_N_net_1;
  BA_net_1         <= BA_net_0;
  BA(1 downto 0)   <= BA_net_1;
  DM_net_1         <= DM_net_0;
  DM(1 downto 0)   <= DM_net_1;
  A_net_1          <= A_net_0;
  A(13 downto 0)   <= A_net_1;
- QSPI_SCLK_net_1  <= QSPI_SCLK_net_0;
- QSPI_SCLK        <= QSPI_SCLK_net_1;
- QSPI_CS_N_net_1  <= QSPI_CS_N_net_0;
- QSPI_CS_N        <= QSPI_CS_N_net_1;
 ----------------------------------------------------------------------
 -- Slices assignments
 ----------------------------------------------------------------------
@@ -930,7 +930,7 @@ qspi_board_0 : entity work.qspi_board
         DEVICE_SEL => ( 0 ),
         NBLK       => ( 8 ),
         SAMPLE_DLY => ( 2 ),
-        SCLK_DIV   => ( 1 )
+        SCLK_DIV   => ( 2 )
         )
     port map( 
         -- Inputs

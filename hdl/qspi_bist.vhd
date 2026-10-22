@@ -11,7 +11,8 @@
 --   3. With CALIBRATE: read all blocks once with each sample delay 1..4, record which delays
 --      return the pattern (cal_window(d)) and use the middle of the first passing run
 --      (lower middle for an even width) from then on (cal_dly).
---   4. Read all blocks and compare, again and again (reads don't wear the flash).
+--   4. Read all blocks and compare. With LOOP_ROUNDS, again and again until reset (reads don't wear the
+--      flash); without, once, then stop (B_DONE, no more QSPI traffic).
 --
 --   pass: on after the first complete correct read round, while no failure has occurred.
 --   fail: init error (after all retries), request error, no passing sample delay, or a data
@@ -32,6 +33,7 @@ entity qspi_bist is
         BLK_STRIDE   : positive := 16#4000#;        -- Host bytes between block starts (W25Q: 2 sectors)
         BASE_ADDR    : natural  := 0;               -- Host address of block 0 (even)
         CALIBRATE    : boolean  := false;
+        LOOP_ROUNDS  : boolean  := false;           -- Keep reading and comparing until reset
         SPACE_W      : positive := 16
     );
     port (
@@ -76,7 +78,7 @@ end entity qspi_bist;
 architecture rtl of qspi_bist is
 
     type state_t is (B_INIT, B_INIT_RETRY, B_WREQ, B_WDATA, B_WDONE, B_CAL_SET, B_ROUND,
-                     B_CAL_NEXT, B_CAL_PICK, B_LOOP, B_FAIL);
+                     B_CAL_NEXT, B_CAL_PICK, B_LOOP, B_DONE, B_FAIL);
 
     -- Expected host byte i of block k
     function pattern(k, i : natural) return std_logic_vector is
@@ -298,11 +300,15 @@ begin
                                 if count /= x"FFFF" then
                                     count <= count + 1;
                                 end if;
-                                state <= B_LOOP;
+                                if LOOP_ROUNDS then
+                                    state <= B_LOOP;
+                                else
+                                    state <= B_DONE;
+                                end if;
                             end if;
                         end if;
 
-                    when B_FAIL =>
+                    when B_DONE | B_FAIL =>
                         null;
                 end case;
             end if;

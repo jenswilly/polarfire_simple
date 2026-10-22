@@ -129,7 +129,7 @@ Sequence, adjusted to the Step 1 facts:
 - **Done when:** a full-system TB (init → write → 8 × 880 read) passes for the W25Q128JV and for the AS308G208 with 1 and 2 dies, and a Libero synthesis run (Synplify, with `qspi_mram_ctrl` temporarily as root or via Step 11's wrapper) shows no latches and no multi-driven nets.
 
 ### Step 10 — Built-in self-test `qspi_bist`
-- Fabric-only test, no software needed: after `init_done`, write a counter pattern to N blocks once per reset (flash endurance), then read them back and compare, again and again. Two LEDs, no error codes: LED5 = pass (on after at least one complete pass and no failure since reset), LED6 = fail (init error or data mismatch; latched until reset). Both off while init and the first pass are running. LED5–7 are currently tied low; LED1–4 are in use, LED7 stays tied low.
+- Fabric-only test, no software needed: after `init_done`, write a counter pattern to N blocks once per reset (flash endurance), then read them back and compare (once by default; `LOOP_ROUNDS` repeats until reset). Two LEDs, no error codes: LED5 = pass (on after at least one complete pass and no failure since reset), LED6 = fail (init error or data mismatch; latched until reset). Both off while init and the first pass are running. LED5–7 are currently tied low; LED1–4 are in use, LED7 stays tied low.
 - Optional calibration mode: if init fails, retry it with sample delays 1–4 (init reads ID/registers too). Then sweep `SAMPLE_DLY` 1–4 over the read rounds, record which values pass and select the centre of the passing window (lower middle for an even width).
 - **Done when:** `tb_qspi_bist` passes with model board delays set so only some `SAMPLE_DLY` values work, and the calibration picks a passing value.
 
@@ -182,7 +182,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 10 | BIST | done | `hdl/qspi_bist.vhd`, `tb_qspi_bist` (5 configurations incl. calibration windows {1,2} and {2}, init retry, data and ID faults); 4 deliberate DUT faults all caught. Synplify clean, ~190 LUTs. Model got `MEM_WRITE_IGNORE` |
 | 11 | Integration into TOP | done | `hdl/qspi_board.vhd` (single die, integer generics for HDL+), `tb_qspi_board`, `constraints/qspi_ioreg.ndc`. PolarFire combines only one register per I/O: SCLK/CS# output, IO3:0 input registers. Pins on the RPi header: SCLK G18 (11), CS# F21 (13), IO0–3 F20/E21/F19/A19 (15/16/18/22), pull-ups on CS#/IO2/IO3. `PF_CCC_C0` OUT1 = 100 MHz (VCO 4000), `CORERESET_1`. P&R + timing met: OUT1 worst setup slack 5.5 ns, hold 0.066 ns; QSPI I/O still unconstrained (Step 12) |
 | 12 | Constraints | done | `constraints/timing.sdc` (async clock groups, `qspi_sclk` generated clock on the pin, I/O delays relative to SCLK for the worst of both devices, 2-cycle input setup, LED5/6 false paths), `documentation/timing_budget.md`. Pins and pull-ups were done in Step 11. Timing met in all corners; worst QSPI slacks: input setup 2.15 ns, output setup 3.14 ns (CS#), hold ≥ 3.45 ns. OUT1/`qspi_sclk` fully constrained. `SAMPLE_DLY` = 2 is the only valid setting at 50 MHz |
-| 13 | Bring-up, W25Q128JV | todo | |
+| 13 | Bring-up, W25Q128JV | in progress | `documentation/bringup.md`. Fixed: WREN needs the write CS# time (tSHSL2), CS# high +1 cycle margin, `-OUT_DRIVE 4` on SCLK/IO, IO1 jumper. BIST now runs once (`LOOP_ROUNDS`). Pass at 12.5 MHz (window {2,3,4}, delay 3) and 25 MHz; 50 MHz next |
 | 14 | AS308G208 dual die | todo | |
 | 15 | QPI reads (optional) | todo | |
 

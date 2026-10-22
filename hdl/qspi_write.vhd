@@ -136,9 +136,11 @@ begin
             cmd_sclk_div   <= div;
         end procedure;
 
+        -- WREN counts as a write for the CS# high time (W25Q tSHSL2 50 ns): with 10 ns the
+        -- W25Q128JV kept WEL but ignored the following 20h/32h (seen on hardware)
         procedure issue_wren is
         begin
-            issue(OP_WREN, L111, (others => '0'), 0, '0', DIR_NONE, to_unsigned(1, 16), '0', SCLK_DIV);
+            issue(OP_WREN, L111, (others => '0'), 0, '0', DIR_NONE, to_unsigned(1, 16), '1', SCLK_DIV);
         end procedure;
 
         procedure issue_poll is
