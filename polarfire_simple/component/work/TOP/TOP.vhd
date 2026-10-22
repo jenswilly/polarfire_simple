@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Wed Oct 21 12:33:12 2026
+-- Created by SmartDesign Thu Oct 22 11:04:59 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -44,6 +44,8 @@ entity TOP is
         LED6          : out   std_logic;
         LED7          : out   std_logic;
         ODT0          : out   std_logic;
+        QSPI_CS_N     : out   std_logic;
+        QSPI_SCLK     : out   std_logic;
         RAS_N         : out   std_logic;
         RESET_N       : out   std_logic;
         RPi_GPIO16    : out   std_logic;
@@ -55,7 +57,8 @@ entity TOP is
         -- Inouts
         DQ            : inout std_logic_vector(15 downto 0);
         DQS           : inout std_logic_vector(1 downto 0);
-        DQS_N         : inout std_logic_vector(1 downto 0)
+        DQS_N         : inout std_logic_vector(1 downto 0);
+        QSPI_IO       : inout std_logic_vector(3 downto 0)
         );
 end TOP;
 ----------------------------------------------------------------------
@@ -178,6 +181,25 @@ component CLKINT
 end component;
 -- CORERESET
 component CORERESET
+    -- Port list
+    port(
+        -- Inputs
+        BANK_x_VDDI_STATUS : in  std_logic;
+        BANK_y_VDDI_STATUS : in  std_logic;
+        CLK                : in  std_logic;
+        EXT_RST_N          : in  std_logic;
+        FF_US_RESTORE      : in  std_logic;
+        FPGA_POR_N         : in  std_logic;
+        INIT_DONE          : in  std_logic;
+        PLL_LOCK           : in  std_logic;
+        SS_BUSY            : in  std_logic;
+        -- Outputs
+        FABRIC_RESET_N     : out std_logic;
+        PLL_POWERDOWN_B    : out std_logic
+        );
+end component;
+-- CORERESET_1
+component CORERESET_1
     -- Port list
     port(
         -- Inputs
@@ -321,11 +343,14 @@ component PF_CCC_C0
         REF_CLK_0         : in  std_logic;
         -- Outputs
         OUT0_FABCLK_0     : out std_logic;
+        OUT1_FABCLK_0     : out std_logic;
         PLL_LOCK_0        : out std_logic
         );
 end component;
 -- pulse_stretch
 -- using entity instantiation for component pulse_stretch
+-- qspi_board
+-- using entity instantiation for component qspi_board
 -- spi_tx_path
 component spi_tx_path
     -- Port list
@@ -386,6 +411,7 @@ signal CKE0_net_0                                : std_logic;
 signal CLKINT_0_Y                                : std_logic;
 signal CORERESET_0_FABRIC_RESET_N                : std_logic;
 signal CORERESET_0_PLL_POWERDOWN_B               : std_logic;
+signal CORERESET_1_0_FABRIC_RESET_N              : std_logic;
 signal CS0_N_net_0                               : std_logic;
 signal DEBUG_net_0                               : std_logic;
 signal DM_net_0                                  : std_logic_vector(1 downto 0);
@@ -395,6 +421,8 @@ signal LED1_net_0                                : std_logic;
 signal LED2_net_0                                : std_logic;
 signal LED3_net_0                                : std_logic;
 signal LED4_net_0                                : std_logic;
+signal LED5_net_0                                : std_logic;
+signal LED6_net_0                                : std_logic;
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR  : std_logic_vector(37 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST : std_logic_vector(1 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE : std_logic_vector(3 downto 0);
@@ -439,7 +467,10 @@ signal MSS_simple_0_MSS_RESET_N_M2F              : std_logic;
 signal ODT0_net_0                                : std_logic;
 signal OR2_1_Y                                   : std_logic;
 signal PF_CCC_C0_0_OUT0_FABCLK_0                 : std_logic;
+signal PF_CCC_C0_0_OUT1_FABCLK_0                 : std_logic;
 signal PF_CCC_C0_0_PLL_LOCK_0                    : std_logic;
+signal QSPI_CS_N_net_0                           : std_logic;
+signal QSPI_SCLK_net_0                           : std_logic;
 signal RAS_N_net_0                               : std_logic;
 signal RESET_N_net_0                             : std_logic;
 signal RPi_GPIO16_net_0                          : std_logic;
@@ -468,6 +499,8 @@ signal UART0_TX_net_1                            : std_logic;
 signal LED2_net_1                                : std_logic;
 signal LED3_net_1                                : std_logic;
 signal LED4_net_1                                : std_logic;
+signal LED5_net_1                                : std_logic;
+signal LED6_net_1                                : std_logic;
 signal DEBUG_net_1                               : std_logic;
 signal RPi_GPIO16_net_1                          : std_logic;
 signal RPi_GPIO19_net_1                          : std_logic;
@@ -475,6 +508,8 @@ signal RPi_GPIO26_net_1                          : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
+signal QSPI_SCLK_net_1                           : std_logic;
+signal QSPI_CS_N_net_1                           : std_logic;
 signal s_data_net_0                              : std_logic_vector(159 downto 0);
 signal s_valid_net_0                             : std_logic_vector(1 downto 0);
 signal s_ready_net_0                             : std_logic_vector(1 downto 0);
@@ -497,8 +532,6 @@ begin
 ----------------------------------------------------------------------
 -- TieOff assignments
 ----------------------------------------------------------------------
- LED5             <= '0';
- LED6             <= '0';
  LED7             <= '0';
  RPi_GPIO20       <= '0';
 ----------------------------------------------------------------------
@@ -536,6 +569,10 @@ begin
  LED3             <= LED3_net_1;
  LED4_net_1       <= LED4_net_0;
  LED4             <= LED4_net_1;
+ LED5_net_1       <= LED5_net_0;
+ LED5             <= LED5_net_1;
+ LED6_net_1       <= LED6_net_0;
+ LED6             <= LED6_net_1;
  DEBUG_net_1      <= DEBUG_net_0;
  DEBUG            <= DEBUG_net_1;
  RPi_GPIO16_net_1 <= RPi_GPIO16_net_0;
@@ -550,6 +587,10 @@ begin
  DM(1 downto 0)   <= DM_net_1;
  A_net_1          <= A_net_0;
  A(13 downto 0)   <= A_net_1;
+ QSPI_SCLK_net_1  <= QSPI_SCLK_net_0;
+ QSPI_SCLK        <= QSPI_SCLK_net_1;
+ QSPI_CS_N_net_1  <= QSPI_CS_N_net_0;
+ QSPI_CS_N        <= QSPI_CS_N_net_1;
 ----------------------------------------------------------------------
 -- Slices assignments
 ----------------------------------------------------------------------
@@ -730,6 +771,23 @@ CORERESET_0 : CORERESET
         PLL_POWERDOWN_B    => CORERESET_0_PLL_POWERDOWN_B,
         FABRIC_RESET_N     => CORERESET_0_FABRIC_RESET_N 
         );
+-- CORERESET_1_0
+CORERESET_1_0 : CORERESET_1
+    port map( 
+        -- Inputs
+        CLK                => PF_CCC_C0_0_OUT1_FABCLK_0,
+        EXT_RST_N          => AND2_0_Y,
+        BANK_x_VDDI_STATUS => VCC_net,
+        BANK_y_VDDI_STATUS => VCC_net,
+        PLL_LOCK           => PF_CCC_C0_0_PLL_LOCK_0,
+        SS_BUSY            => GND_net,
+        INIT_DONE          => INIT_MONITOR_0_DEVICE_INIT_DONE,
+        FF_US_RESTORE      => GND_net,
+        FPGA_POR_N         => INIT_MONITOR_0_FABRIC_POR_N,
+        -- Outputs
+        PLL_POWERDOWN_B    => OPEN,
+        FABRIC_RESET_N     => CORERESET_1_0_FABRIC_RESET_N 
+        );
 -- INIT_MONITOR_0
 INIT_MONITOR_0 : INIT_MONITOR
     port map( 
@@ -847,6 +905,7 @@ PF_CCC_C0_0 : PF_CCC_C0
         PLL_POWERDOWN_N_0 => CORERESET_0_PLL_POWERDOWN_B,
         -- Outputs
         OUT0_FABCLK_0     => PF_CCC_C0_0_OUT0_FABCLK_0,
+        OUT1_FABCLK_0     => PF_CCC_C0_0_OUT1_FABCLK_0,
         PLL_LOCK_0        => PF_CCC_C0_0_PLL_LOCK_0 
         );
 -- pulse_stretch_0
@@ -861,6 +920,29 @@ pulse_stretch_0 : entity work.pulse_stretch
         pulse_in  => OR2_1_Y,
         -- Outputs
         pulse_out => DEBUG_net_0 
+        );
+-- qspi_board_0
+qspi_board_0 : entity work.qspi_board
+    generic map( 
+        BLK_LEN    => ( 880 ),
+        CALIBRATE  => ( 1 ),
+        CLK_HZ     => ( 100000000 ),
+        DEVICE_SEL => ( 0 ),
+        NBLK       => ( 8 ),
+        SAMPLE_DLY => ( 2 ),
+        SCLK_DIV   => ( 1 )
+        )
+    port map( 
+        -- Inputs
+        clk       => PF_CCC_C0_0_OUT1_FABCLK_0,
+        reset_n   => CORERESET_1_0_FABRIC_RESET_N,
+        -- Outputs
+        qspi_sclk => QSPI_SCLK_net_0,
+        qspi_cs_n => QSPI_CS_N_net_0,
+        bist_pass => LED5_net_0,
+        bist_fail => LED6_net_0,
+        -- Inouts
+        qspi_io   => QSPI_IO 
         );
 -- spi_tx_path_0
 spi_tx_path_0 : spi_tx_path

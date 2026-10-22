@@ -1,12 +1,14 @@
 # I/O register combining for the QSPI pins (qspi_board in TOP)
-# Puts the PHY's pad registers (qspi_phy: sclk_r, cs_n_r, io_o_r, io_oe_r, io_i_r) into the
-# I/O cells, so clock-to-out and input setup don't depend on fabric routing.
-# Rules (Libero help, set_ioff): each register drives / is driven by its pin with fanout 1, and the
-# in/out/OE registers of one pin share clock, enable and reset. qspi_phy is written for that.
+# Puts PHY pad registers (qspi_phy) into the I/O cells, so their timing doesn't depend on fabric
+# routing. Rules (Libero help, set_ioff / PDCPF-91): the register drives / is driven by its pin
+# with fanout 1, and only ONE side of an I/O can be combined (IN, OUT or EN), one option per command.
+#   SCLK, CS#: output register (sclk_r, cs_n_r).
+#   IO3:0:     input register (io_i_r). The read sample is the tightest path (data valid window of
+#              ~12-15 ns at 50 MHz SCLK); IO out and OE change half an SCLK period before the
+#              device samples, so they stay in the fabric (timed in constraints/timing.sdc).
+# PolarFire syntax: -port_name, values 1/0 (the {port} -in_reg yes form is SmartFusion2/RTG4 only
+# and fails with PDCPF-426).
 # Port names: the TOP ports promoted from qspi_board.
-set_ioff {QSPI_SCLK} -out_reg yes
-set_ioff {QSPI_CS_N} -out_reg yes
-set_ioff {QSPI_IO[0]} -in_reg yes -out_reg yes -en_reg yes
-set_ioff {QSPI_IO[1]} -in_reg yes -out_reg yes -en_reg yes
-set_ioff {QSPI_IO[2]} -in_reg yes -out_reg yes -en_reg yes
-set_ioff {QSPI_IO[3]} -in_reg yes -out_reg yes -en_reg yes
+set_ioff -port_name {QSPI_SCLK} -OUT_REG 1
+set_ioff -port_name {QSPI_CS_N} -OUT_REG 1
+set_ioff -port_name {QSPI_IO[*]} -IN_REG 1

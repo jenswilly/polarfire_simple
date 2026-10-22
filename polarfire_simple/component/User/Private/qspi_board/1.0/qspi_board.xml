@@ -1,0 +1,78 @@
+<spirit:component xmlns:actel-cc="http://www.actel.com/XMLSchema/CoreConsole" xmlns:spirit="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.spiritconsortium.org/XMLSchema/SPIRIT/1.1 http://www.spiritconsortium.org/XMLSchema/SPIRIT/1.1/component.xsd">
+  <spirit:vendor>User</spirit:vendor>
+  <spirit:library>Private</spirit:library>
+  <spirit:name>qspi_board</spirit:name>
+  <spirit:version>1.0</spirit:version>
+  <spirit:busInterfaces>
+  </spirit:busInterfaces>
+  <spirit:memoryMaps>
+  </spirit:memoryMaps>
+  <spirit:hwModel>
+    <spirit:views>
+    </spirit:views>
+    <spirit:signals>
+      <spirit:signal>
+        <spirit:name>clk</spirit:name>
+        <spirit:direction>in</spirit:direction>
+      </spirit:signal>
+      <spirit:signal>
+        <spirit:name>reset_n</spirit:name>
+        <spirit:direction>in</spirit:direction>
+      </spirit:signal>
+      <spirit:signal>
+        <spirit:name>qspi_sclk</spirit:name>
+        <spirit:direction>out</spirit:direction>
+      </spirit:signal>
+      <spirit:signal>
+        <spirit:name>qspi_cs_n</spirit:name>
+        <spirit:direction>out</spirit:direction>
+      </spirit:signal>
+      <spirit:signal>
+        <spirit:name>qspi_io</spirit:name>
+        <spirit:direction>inout</spirit:direction>
+        <spirit:left>3</spirit:left>
+        <spirit:right>0</spirit:right>
+      </spirit:signal>
+      <spirit:signal>
+        <spirit:name>bist_pass</spirit:name>
+        <spirit:direction>out</spirit:direction>
+      </spirit:signal>
+      <spirit:signal>
+        <spirit:name>bist_fail</spirit:name>
+        <spirit:direction>out</spirit:direction>
+      </spirit:signal>
+    </spirit:signals>
+    <spirit:hwParameters>
+      <spirit:hwParameter spirit:id="DEVICE_SEL" spirit:name="DEVICE_SEL" spirit:prompt="DEVICE_SEL:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="0" spirit:maximum="1">0</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="CLK_HZ" spirit:name="CLK_HZ" spirit:prompt="CLK_HZ:" spirit:dataType="int" spirit:resolve="user">100000000</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="SCLK_DIV" spirit:name="SCLK_DIV" spirit:prompt="SCLK_DIV:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="1" spirit:maximum="4">1</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="SAMPLE_DLY" spirit:name="SAMPLE_DLY" spirit:prompt="SAMPLE_DLY:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="1" spirit:maximum="4">2</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="CALIBRATE" spirit:name="CALIBRATE" spirit:prompt="CALIBRATE:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="0" spirit:maximum="1">1</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="NBLK" spirit:name="NBLK" spirit:prompt="NBLK:" spirit:dataType="int" spirit:resolve="user">8</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="BLK_LEN" spirit:name="BLK_LEN" spirit:prompt="BLK_LEN:" spirit:dataType="int" spirit:resolve="user">880</spirit:hwParameter>
+    </spirit:hwParameters>
+    <spirit:deletedhwParameters>
+    </spirit:deletedhwParameters>
+  </spirit:hwModel>
+  <spirit:choices>
+  </spirit:choices>
+  <spirit:fileSets>
+  <spirit:fileSet spirit:fileSetId="HDL_FILESET">
+    <spirit:file>
+      <spirit:name>/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd</spirit:name>
+      <spirit:fileType>VHDLSource</spirit:fileType>
+    <spirit:vendorExtensions></spirit:vendorExtensions>
+    </spirit:file>
+  <spirit:vendorExtensions></spirit:vendorExtensions>
+  </spirit:fileSet>
+  </spirit:fileSets>
+  <spirit:vendorExtensions>
+    <actel-cc:type typeName="IP"/>
+    <actel-cc:instantiateOnCreation value="false"/>
+    <actel-cc:diveInPermission value="READ_WRITE"/>
+    <actel-cc:categories categoryName="OS" style="hidden">
+      <actel-cc:category name="PC">
+      </actel-cc:category>
+    </actel-cc:categories>
+  </spirit:vendorExtensions>
+</spirit:component>

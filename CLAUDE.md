@@ -39,10 +39,11 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
     - DEBUG: GPIO21, pin 40, E13 (`GPIO128NB1`)
     - SPI SCLK: GPIO19, pin 35, B19; MOSI: GPIO16, pin 36, B15; CS_N: GPIO26, pin 37, B17
     - GPIO20, pin 38, B14: tied low
+    - QSPI breakout: SCLK GPIO17 pin 11 G18, CS# GPIO27 pin 13 F21, IO0–3 GPIO22/23/24/25 pins 15/16/18/22 F20/E21/F19/A19; 3.3 V pin 17, GND pin 9
 - MSS reference clock is **125 MHz**. DDR4 is x16, 1 GB.
 
 ## Design notes
-- Everything in the fabric runs on the 125 MHz `PF_CCC_C0` output with `CORERESET_0_FABRIC_RESET_N`.
+- Everything in the fabric runs on the 125 MHz `PF_CCC_C0` output (OUT0) with `CORERESET_0_FABRIC_RESET_N`, except `qspi_board` (QSPI controller + BIST, PLAN.md), which runs on OUT1 = 100 MHz with `CORERESET_1`. After adding a CCC output, run Constraint Manager → Timing → **Derive Constraints** again, otherwise the new clock is not constrained.
 - **CoreFIFO `BLOCK_FIFO_CORE`** (COREFIFO 4.0.139): 80 bit × 512, single clock, sync reset, FWFT, active-high WE/RE (`WE_POLARITY`/`RE_POLARITY` = 0 in the `.cxf`). Libero generates it as Verilog, which is why `run_tb.sh` uses `vlog`. `hdl/block_fifo.vhd` wraps it and assumes exactly this configuration, so update both together.
 - Signal path and SPI TX path details are in README.md (Design overview, SPI TX path) and in `documentation/top_level.drawio` / `spi_tx_path.drawio`. Update the diagrams when TOP changes. Only `documentation/*.pdf` is in Git LFS; the `.drawio` files are plain git.
 
@@ -66,3 +67,4 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
 - **Only one tool at a time can use JTAG (interface 0).** If Libero says "No programmer connected", a SoftConsole debug session (OpenOCD) is probably still running. Terminate it first (`pgrep -a openocd`).
 - To access FIC0 from software, call `mss_config_clk_rst(MSS_PERIPH_FIC0, …, PERIPHERAL_ON)`. The HAL startup releases the fabric reset (`mss_enable_fabric`).
 - **Libero simulation silently does nothing on Ubuntu without `/etc/redhat-release`.** The generated `simulation/run.do` sources the MSS `*_compile_bfm.tcl` scripts, which `exec` `bfmtovec`. Its wrapper (`Designer/bin64/actel_setup_vars_nomotif`) runs `cat /etc/redhat-release`, which writes to stderr, and Tcl `exec` treats any stderr as failure. So `run.do` aborts at line 3 and QuestaSim opens with nothing loaded. The error is only visible in `simulation/<tb>_presynth_simulation.log`. Fix: `sudo touch /etc/redhat-release` (an empty file matches none of the script's RHEL greps). Don't edit the `*_compile_bfm.tcl` files, because Libero regenerates them.
+- **I/O register combining on PolarFire:** Synplify's `syn_useioff` is not supported. Use `set_ioff` in an NDC file (Constraint Manager → Netlist Attributes) with the PolarFire syntax `set_ioff -port_name {P} -OUT_REG 1`, with one option per command. **Only one side of an I/O can be combined** (IN, OUT or EN; PDCPF-91 "No register was combined" otherwise), and the register needs fanout 1. The `set_ioff {P} -out_reg yes` form in parts of the help is for SmartFusion2/IGLOO2/RTG4 and fails with "PDCPF-426: 'P' is not a parameter within the command set_ioff".

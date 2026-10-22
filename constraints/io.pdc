@@ -5,11 +5,15 @@ set_iobank -bank_name Bank1 -vcci 3.30 -fixed true -update_iostd true
 # 50 MHz reference clock
 set_io -port_name REF_CLK_50MHz -pin_name R18 -fixed true -io_std LVCMOS18 -DIRECTION INPUT
 
+#-------------------------
 # Push-button (active low)
+
 set_io -port_name SWITCH1 -pin_name T19 -fixed true -DIRECTION INPUT
 set_io -port_name SWITCH2 -pin_name U18 -fixed true -DIRECTION INPUT
 
+# ------------------
 # LEDs (active high)
+
 set_io -port_name LED1 -pin_name T18 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED2 -pin_name V17 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED3 -pin_name U20 -fixed true -DIRECTION OUTPUT
@@ -18,12 +22,35 @@ set_io -port_name LED5 -pin_name AA18 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED6 -pin_name V16 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED7 -pin_name U15 -fixed true -DIRECTION OUTPUT
 
-# Other RPi header pins
+# --------------------------------
+# QSPI Pins on Raspberry Pi header
+
 # Pin 9: GND
+# Pin 17: 3.3V
+# Weak pull-ups on CS# (both datasheets recommend one) and IO2/IO3: after a quad read the PHY
+# releases IO3:0 while CS# is high, and the AS308G208's WP# has no internal pull-up.
 
-# Pin 11: RPi_GPIO17_GEN0
-# Pin 13: RPi_GPIO17_GEN0
+# Pin 11: RPi_GPIO17_GEN0: QSPI SCLK
+set_io -port_name QSPI_SCLK -pin_name G18 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
 
+# Pin 13: RPi_GPIO27_GEN2: QSPI nCS
+set_io -port_name QSPI_CS_N -pin_name F21 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION OUTPUT
+
+# Pin 15: RPi_GPIO22_GEN3: QSPI IO0
+set_io -port_name {QSPI_IO[0]} -pin_name F20 -fixed true -io_std LVCMOS33 -DIRECTION INOUT
+
+# Pin 16: RPi_GPIO23_GEN4: QSPI IO1
+set_io -port_name {QSPI_IO[1]} -pin_name E21 -fixed true -io_std LVCMOS33 -DIRECTION INOUT
+
+# Pin 18: RPi_GPIO24_GEN5: QSPI IO2
+set_io -port_name {QSPI_IO[2]} -pin_name F19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT
+
+# Pin 22: RPi_GPIO25_GEN6: QSPI IO3
+set_io -port_name {QSPI_IO[3]} -pin_name A19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT
+
+
+# ---------------------
+# Other RPi header pins
 
 # Pin 35
 set_io -port_name RPi_GPIO19 -pin_name B19 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
@@ -37,9 +64,12 @@ set_io -port_name RPi_GPIO26 -pin_name B17 -fixed true -io_std LVCMOS33 -DIRECTI
 # Pin 38
 set_io -port_name RPi_GPIO20 -pin_name B14 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
 
-# Pin 39: RPi_GPIO21
+# Pin 40: RPi_GPIO21
 set_io -port_name DEBUG -pin_name E13 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT
 
+
+# ---------
+# UART pins
 
 # MMUART0 <-> FTDI (UART0_TX = MSS transmit, UART0_RX = MSS receive)
 set_io -port_name UART0_TX -pin_name Y21 -fixed true -DIRECTION OUTPUT

@@ -10,18 +10,24 @@ Outputs:
 | LED2 | MSS register write via FIC0 AXI → bit 0 | V17 |
 | LED3 | MSS register write via FIC0 AXI → bit 1 | U20 |
 | LED4 | SWITCH2, debounced (on while pressed) | U21 |
-| LED5–7 | Tied low (off) | AA18, V16, U15 |
+| LED5 | QSPI BIST pass (`qspi_board`) | AA18 |
+| LED6 | QSPI BIST fail (`qspi_board`) | V16 |
+| LED7 | Tied low (off) | U15 |
 | DEBUG | 1 ms pulse per SWITCH2 press or write to DEBUG (`0x6000_0008`) | E13, RPi header pin 40 (GPIO21) |
 | SPI SCLK | `spi_tx_path` | B19, RPi header pin 35 (GPIO19) |
 | SPI MOSI | `spi_tx_path` | B15, RPi header pin 36 (GPIO16) |
 | SPI CS_N | `spi_tx_path` | B17, RPi header pin 37 (GPIO26) |
 | (unused) | Tied low | B14, RPi header pin 38 (GPIO20) |
+| QSPI SCLK | `qspi_board` | G18, RPi header pin 11 (GPIO17) |
+| QSPI CS# | `qspi_board`, pull-up | F21, RPi header pin 13 (GPIO27) |
+| QSPI IO0 / IO1 | `qspi_board` | F20 / E21, RPi header pins 15 / 16 (GPIO22 / GPIO23) |
+| QSPI IO2 / IO3 | `qspi_board`, pull-ups | F19 / A19, RPi header pins 18 / 22 (GPIO24 / GPIO25) |
 
-The RPi header pins are in Bank1 (3.3 V). GPIO numbers are BCM numbers; the pin numbers are the physical header pins.
+The RPi header pins are in Bank1 (3.3 V). The QSPI breakout (W25Q128JV) gets 3.3 V from header pin 17 and GND from pin 9. GPIO numbers are BCM numbers; the pin numbers are the physical header pins.
 
 ## Design overview
 
-Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock with `FABRIC_RESET_N` from `CORERESET_PF`. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
+Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock (OUT0) with `FABRIC_RESET_N` from `CORERESET_0`, except `qspi_board`, which runs on OUT1 (100 MHz, `clk_ctrl`) with `CORERESET_1`. The two clocks are asynchronous; only LED5/LED6 leave the QSPI domain. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
 
 ### SPI TX path
 `spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 7` so SCLK = 125 MHz / 14 ≈ 8.93 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
@@ -29,6 +35,9 @@ Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io o
 Several producers share `spi_tx_path` through `block_arbiter` (in TOP, in front of `spi_tx_path`). It is round-robin and moves one whole block per handshake, so blocks from different producers never interleave. Only the selected producer sees `s_ready`; the others hold their block. The mux is combinational (no extra latency), and once a block is offered the selection is held until it is taken. SmartDesign has no array ports, so the inputs are flattened: producer *i* is `s_data((i+1)*80-1 downto i*80)`, `s_valid(i)`, `s_ready(i)`.
 
 For now the blocks come from two `test_block_producer` instances (HDL+ cores, so the generics are set per instance) on `block_arbiter`. Each pulse from SWITCH2 or a write to DEBUG makes each of them send one block `<id> <seq> 02 03 04 05 06 07 08 09`, where `<id>` is the `FIRST_BYTE` generic (`F0` for `test_block_producer_0`, `AA` for `test_block_producer_1`) and `<seq>` counts that producer's blocks since reset. So every pulse gives two SPI frames, `F0 <seq> …` first, then `AA <seq> …`.
+
+### QSPI controller and BIST
+`qspi_board` (HDL+ core) contains `qspi_mram_ctrl` (the QSPI controller for the W25Q128JV prototype and, later, the dual-die AS308G208 MRAM) and `qspi_bist`. After reset the BIST initialises the memory, writes a test pattern once, calibrates the RX sample delay and then reads and compares 8 × 880 bytes repeatedly: LED5 = pass, LED6 = fail. SCLK is 50 MHz, reads are 1-4-4 (EBh). The SCLK/CS# output registers and the IO3:0 input registers are packed into the I/O cells (`constraints/qspi_ioreg.ndc`). Design, steps and status: `PLAN.md`; block diagram: `documentation/qspi_controller.drawio`; device facts: `documentation/device_facts.md`.
 
 ### Register map (`axi_led_reg`, base `0x6000_0000`)
 
@@ -72,7 +81,7 @@ hdl/                Hand-written VHDL, linked into Libero:
                       qspi_bist.vhd        Built-in self-test for qspi_mram_ctrl: write once, read/compare forever, pass/fail
                       qspi_board.vhd       qspi_mram_ctrl + qspi_bist + tristate pads, single die (HDL+ core in TOP)
 documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
-                      qspi_controller.drawio (planned QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references)
+                      qspi_controller.drawio (QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 constraints/qspi_ioreg.ndc  I/O register combining (set_ioff) for the QSPI pins (linked into Libero)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
@@ -216,4 +225,6 @@ For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-hart
 - [x] SWITCH2 debounce → LED4 works.
 - [ ] DEBUG pulse (1 ms) on RPi header pin 40: check on the scope.
 - [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
+- [x] QSPI controller + BIST integrated into `TOP` (PLAN.md Step 11): synthesis, place and route and timing pass.
+- [ ] QSPI: timing constraints (Step 12) and hardware bring-up on the W25Q128JV breakout (Step 13).
 - [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).

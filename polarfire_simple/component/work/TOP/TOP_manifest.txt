@@ -1,6 +1,6 @@
 Microchip Technology Inc. - Microchip Libero Software Release 2026.1 (Version 2026.1.0.17)
 
-Date      :  Wed Oct 21 12:33:12 2026
+Date      :  Thu Oct 22 11:05:00 2026
 Project   :  /home/jenswilly/Projs/polarfire_simple/polarfire_simple
 Component :  TOP
 Family    :  PolarFireSoC

@@ -54,8 +54,14 @@ ENDLIST
 LIST FileManager
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 STATE="utd"
-TIME="1792567886"
-SIZE="1714"
+TIME="1792661104"
+SIZE="2906"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc,ndc"
+STATE="utd"
+TIME="1792660853"
+SIZE="1003"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd,hdl"
@@ -97,6 +103,51 @@ VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd,hdl"
 STATE="utd"
 TIME="1792567886"
 SIZE="1583"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd,hdl"
+STATE="utd"
+TIME="1792589952"
+SIZE="14675"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd,hdl"
+STATE="utd"
+TIME="1792590397"
+SIZE="5779"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd,hdl"
+STATE="utd"
+TIME="1792589089"
+SIZE="17158"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd,hdl"
+STATE="utd"
+TIME="1792588768"
+SIZE="12525"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd,hdl"
+STATE="utd"
+TIME="1792660861"
+SIZE="15387"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd,hdl"
+STATE="utd"
+TIME="1792582926"
+SIZE="8717"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd,hdl"
+STATE="utd"
+TIME="1792584342"
+SIZE="6741"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd,hdl"
+STATE="utd"
+TIME="1792585650"
+SIZE="12764"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd,hdl"
+STATE="utd"
+TIME="1792590450"
+SIZE="21998"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd,hdl"
 STATE="utd"
@@ -905,13 +956,14 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/CORERESET_PF/2.3.100/CORERESET_PF.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364191"
+TIME="1792657490"
 SIZE="485"
 PARENT="<project>/component/work/CORERESET/CORERESET.cxf"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1.cxf"
 ENDFILE
 VALUE "<project>/component/Actel/SgCore/PF_CCC/2.2.222/PF_CCC.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364011"
+TIME="1792657337"
 SIZE="279"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf"
 ENDFILE
@@ -1178,6 +1230,40 @@ MODULE_UNDER_TEST="corereset_pf_tb"
 SIMULATION_TIME="10000ns"
 IS_READONLY="TRUE"
 ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1.cxf,actgen_cxf"
+STATE="utd"
+TIME="1792657490"
+SIZE="3347"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1.vhd,hdl"
+STATE="utd"
+TIME="1792657490"
+SIZE="4410"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1.cxf"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd,hdl"
+STATE="utd"
+TIME="1792657490"
+SIZE="3559"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1_0/CORERESET_1_CORERESET_1_0_CORERESET_PF.cxf"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/CORERESET_1_CORERESET_1_0_CORERESET_PF.cxf,actgen_cxf"
+STATE="utd"
+TIME="1792657490"
+SIZE="864"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1.cxf"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd,tb_hdl"
+STATE="utd"
+TIME="1792657490"
+SIZE="7514"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1_0/CORERESET_1_CORERESET_1_0_CORERESET_PF.cxf"
+MODULE_UNDER_TEST="corereset_pf_tb"
+SIMULATION_TIME="10000ns"
+IS_READONLY="TRUE"
+ENDFILE
 VALUE "<project>/component/work/INIT_MONITOR/INIT_MONITOR.cxf,actgen_cxf"
 STATE="utd"
 TIME="1791364142"
@@ -1236,45 +1322,45 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364012"
-SIZE="18355"
+TIME="1792657340"
+SIZE="18515"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0.v,hdl"
 STATE="utd"
-TIME="1791364011"
-SIZE="9982"
+TIME="1792657337"
+SIZE="10230"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364011"
+TIME="1792657337"
 SIZE="457"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.v,hdl"
 STATE="utd"
-TIME="1791364011"
-SIZE="3823"
+TIME="1792657337"
+SIZE="3983"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792578792"
-SIZE="11614"
+TIME="1792659900"
+SIZE="12423"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1792578792"
-SIZE="42093"
+TIME="1792659899"
+SIZE="45144"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 STATE="utd"
-TIME="1791367251"
-SIZE="920"
+TIME="1792662016"
+SIZE="1298"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_FIC0_compile_bfm.tcl,sim"
 STATE="utd"
@@ -1331,23 +1417,23 @@ SIZE="16598"
 ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
-TIME="1792500375"
+TIME="1792660735"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
 STATE="ood"
-TIME="1792500374"
-SIZE="2813300"
+TIME="1792660734"
+SIZE="3273397"
 ENDFILE
 VALUE "<project>/synthesis/TOP_syn.prj,prj"
 STATE="utd"
-TIME="1792500375"
-SIZE="25601"
+TIME="1792660736"
+SIZE="26722"
 ENDFILE
 VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
 STATE="utd"
-TIME="1792500374"
-SIZE="1152"
+TIME="1792660735"
+SIZE="1447"
 ENDFILE
 ENDLIST
 LIST UsedFile
@@ -1381,6 +1467,12 @@ VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlo
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/testbench.v,tb_hdl"
 ENDLIST
 ENDLIST
+LIST "CORERESET_1_CORERESET_1_0_corereset_pf::work"
+FILE "<project>/component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd,hdl"
+LIST Other_Association
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd,tb_hdl"
+ENDLIST
+ENDLIST
 LIST "CORERESET_CORERESET_0_corereset_pf::work"
 FILE "<project>/component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd,hdl"
 LIST Other_Association
@@ -1411,6 +1503,7 @@ VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_pulse_stretch.vhd,tb_hdl"
 ENDLIST
 LIST SynthesisConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc,ndc"
 ENDLIST
 LIST TimingConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
@@ -1449,6 +1542,9 @@ VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlo
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/AXI4Models/AxiInitiator.v,tb_hdl"
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/AXI4Models/DualPort_Ram_SyncWr_ASyncRd_Sim.v,tb_hdl"
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/testbench.v,tb_hdl"
+ENDLIST
+LIST CORERESET_1_CORERESET_1_0_corereset_pf
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd,tb_hdl"
 ENDLIST
 LIST CORERESET_CORERESET_0_corereset_pf
 VALUE "<project>/component/work/CORERESET/CORERESET_0/test/corereset_pf_tb.vhd,tb_hdl"
@@ -1552,8 +1648,8 @@ NAME="Synplify Pro ME"
 FUNCTION="Synthesis"
 TOOL="Synplify Pro ME"
 LOCATION="/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Synplify_Pro/bin/synplify_pro"
-PARAM=""
-BATCH=0
+PARAM="-licensetype synplifypro_actel -batch -log synplify.log"
+BATCH=1
 LICENSE=""
 IS32BIT="1"
 EndProfile
@@ -1603,10 +1699,10 @@ ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
 Reports;Reports;0
-ReportsCurrentItem;Place and Route:TOP_layout_log.log
+ReportsCurrentItem;Place and Route:TOP_glb_net_report.xml
 StartPage;StartPage;0
 SmartDesign;TOP;0
-ACTIVEVIEW;TOP
+ACTIVEVIEW;StartPage
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
@@ -1912,6 +2008,11 @@ ENDLIST
 LIST "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
 SUBBLOCK "CORERESET_CORERESET_0_corereset_pf::work","component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd","FALSE","FALSE"
 ENDLIST
+LIST "CORERESET_1::work","component/work/CORERESET_1/CORERESET_1.vhd","TRUE","FALSE"
+SUBBLOCK "CORERESET_1_CORERESET_1_0_corereset_pf::work","component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd","FALSE","FALSE"
+ENDLIST
+LIST "CORERESET_1_CORERESET_1_0_corereset_pf::work","component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd","FALSE","FALSE"
+ENDLIST
 LIST "CORERESET_CORERESET_0_corereset_pf::work","component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd","FALSE","FALSE"
 ENDLIST
 LIST "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd","FALSE","FALSE"
@@ -2131,6 +2232,10 @@ LIST "caxi4interconnect_WriteDataMux::work","component/Actel/DirectCore/COREAXI4
 ENDLIST
 LIST "MSS::work","component/work/MSS_simple/MSS_NOBYP_BYP_BYP_BYP_BYP_syn_comps.v","FALSE","FALSE"
 ENDLIST
+LIST "qspi_bist::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_phy::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd","FALSE","FALSE"
+ENDLIST
 LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_AddressController::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/AddressController.v","FALSE","FALSE"
@@ -2241,6 +2346,27 @@ LIST "PF_CCC_C0_PF_CCC_C0_0_PF_CCC::work","component/work/PF_CCC_C0/PF_CCC_C0_0/
 ENDLIST
 LIST "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
 ENDLIST
+LIST "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_bist::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_mram_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_init::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_mram_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_init::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_read_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_write::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_xact::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_pkg::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_read_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_write::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_xact::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_phy::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd","FALSE","FALSE"
+ENDLIST
 LIST "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
 SUBBLOCK "block_fifo::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd","FALSE","FALSE"
 SUBBLOCK "block_serializer::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd","FALSE","FALSE"
@@ -2248,6 +2374,7 @@ SUBBLOCK "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/
 ENDLIST
 LIST "TOP::work","component/work/TOP/TOP.vhd","TRUE","FALSE"
 SUBBLOCK "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
+SUBBLOCK "CORERESET_1::work","component/work/CORERESET_1/CORERESET_1.vhd","TRUE","FALSE"
 SUBBLOCK "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
 SUBBLOCK "INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR.v","TRUE","FALSE"
 SUBBLOCK "MSS_simple::work","component/work/MSS_simple/MSS_simple.v","TRUE","FALSE"
@@ -2258,6 +2385,7 @@ SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/but
 SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
 SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
 ENDLIST
 LIST "util_pkg::work","/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd","FALSE","FALSE"
@@ -2289,6 +2417,9 @@ LIST "clock_driver::work","component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/
 ENDLIST
 LIST "corereset_pf_tb::work","component/work/CORERESET/CORERESET_0/test/corereset_pf_tb.vhd","FALSE","TRUE"
 SUBBLOCK "CORERESET_CORERESET_0_corereset_pf::work","component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd","FALSE","FALSE"
+ENDLIST
+LIST "corereset_pf_tb::work","component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd","FALSE","TRUE"
+SUBBLOCK "CORERESET_1_CORERESET_1_0_corereset_pf::work","component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd","FALSE","FALSE"
 ENDLIST
 LIST "AHBL_Initiator::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/AHBModel/AHBL_Initiator.v","FALSE","TRUE"
 ENDLIST
@@ -2415,10 +2546,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/FIFO.v","FALSE","FALSE"
@@ -2495,10 +2626,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
@@ -2519,10 +2650,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
@@ -3343,4 +3474,5 @@ VALUE "constraint/TOP_derived_constraints.sdc"
 VALUE "component/work/MSS_simple/MSS_simple.sdc"
 ENDLIST
 LIST FDCTabList
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc"
 ENDLIST

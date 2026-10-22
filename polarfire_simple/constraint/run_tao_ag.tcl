@@ -94,6 +94,8 @@ read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarf
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/TargetConvertor.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/CoreAxi4Interconnect.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/AXI_IC/AXI_IC.v}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET_1/CORERESET_1.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET.vhd}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/INIT_MONITOR/INIT_MONITOR_0/INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR.v}
@@ -102,10 +104,52 @@ read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarf
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0.v}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_NstagesSync.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_grayToBinConv.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_async.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_lsram_hs.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_lsram_lp.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_reg.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_usram_hs.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_usram_lp.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_lsram_hs.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_lsram_lp.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_reg.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_usram_hs.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_usram_lp.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_sync.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_fwft.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_sync_scntr.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO_ram_wrapper.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_ram_wrapper.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/COREFIFO.v}
+read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.v}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/TOP/TOP.vhd}
 set_top_level {TOP}
 read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/AXI_IC/AXI_IC_0/AXI_IC.sdc}
 read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.sdc}
+read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.sdc}
 read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/MSS_simple/MSS_simple.sdc}
 derive_constraints
 write_sdc {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/constraint/TOP_derived_constraints.sdc}
