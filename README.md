@@ -81,9 +81,10 @@ hdl/                Hand-written VHDL, linked into Libero:
                       qspi_bist.vhd        Built-in self-test for qspi_mram_ctrl: write once, read/compare forever, pass/fail
                       qspi_board.vhd       qspi_mram_ctrl + qspi_bist + tristate pads, single die (HDL+ core in TOP)
 documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
-                      qspi_controller.drawio (QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references)
+                      qspi_controller.drawio (QSPI controller, see PLAN.md); device_facts.md (QSPI memory facts with datasheet references); timing_budget.md (QSPI I/O timing budget behind timing.sdc)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 constraints/qspi_ioreg.ndc  I/O register combining (set_ioff) for the QSPI pins (linked into Libero)
+constraints/timing.sdc      QSPI timing (SCLK generated clock, I/O delays), clock groups (linked, after the derived SDC)
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
   models/           Simulation-only models: qspi_mem_model.vhd (one W25Q128JV / AS308G208 die),
                     qspi_model_pkg.vhd (sparse memory, preload pattern)

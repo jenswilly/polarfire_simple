@@ -181,7 +181,7 @@ Checklist in `documentation/bringup.md`, filled in with results:
 | 9 | Controller top | done | `hdl/qspi_mram_ctrl.vhd`, `tb_qspi_mram_ctrl`. Fixed in `qspi_init`: `init_done` now drops in the same cycle as `init_restart`. Synplify (`tools/syn_check.sh`, W25Q and AS 2 dies): no errors/latches/multi-drivers, ~1.5k LUTs, 700/815 FFs; pad flops kept separate with `syn_preserve` |
 | 10 | BIST | done | `hdl/qspi_bist.vhd`, `tb_qspi_bist` (5 configurations incl. calibration windows {1,2} and {2}, init retry, data and ID faults); 4 deliberate DUT faults all caught. Synplify clean, ~190 LUTs. Model got `MEM_WRITE_IGNORE` |
 | 11 | Integration into TOP | done | `hdl/qspi_board.vhd` (single die, integer generics for HDL+), `tb_qspi_board`, `constraints/qspi_ioreg.ndc`. PolarFire combines only one register per I/O: SCLK/CS# output, IO3:0 input registers. Pins on the RPi header: SCLK G18 (11), CS# F21 (13), IO0–3 F20/E21/F19/A19 (15/16/18/22), pull-ups on CS#/IO2/IO3. `PF_CCC_C0` OUT1 = 100 MHz (VCO 4000), `CORERESET_1`. P&R + timing met: OUT1 worst setup slack 5.5 ns, hold 0.066 ns; QSPI I/O still unconstrained (Step 12) |
-| 12 | Constraints | todo | |
+| 12 | Constraints | done | `constraints/timing.sdc` (async clock groups, `qspi_sclk` generated clock on the pin, I/O delays relative to SCLK for the worst of both devices, 2-cycle input setup, LED5/6 false paths), `documentation/timing_budget.md`. Pins and pull-ups were done in Step 11. Timing met in all corners; worst QSPI slacks: input setup 2.15 ns, output setup 3.14 ns (CS#), hold ≥ 3.45 ns. OUT1/`qspi_sclk` fully constrained. `SAMPLE_DLY` = 2 is the only valid setting at 50 MHz |
 | 13 | Bring-up, W25Q128JV | todo | |
 | 14 | AS308G208 dual die | todo | |
 | 15 | QPI reads (optional) | todo | |

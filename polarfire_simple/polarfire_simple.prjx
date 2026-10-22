@@ -64,6 +64,12 @@ TIME="1792660853"
 SIZE="1003"
 IS_READONLY="TRUE"
 ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
+STATE="utd"
+TIME="1792662802"
+SIZE="3836"
+IS_READONLY="TRUE"
+ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd,hdl"
 STATE="utd"
 TIME="1792578611"
@@ -1421,7 +1427,7 @@ TIME="1792660735"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
-STATE="ood"
+STATE="utd"
 TIME="1792660734"
 SIZE="3273397"
 ENDFILE
@@ -1507,14 +1513,17 @@ VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc,ndc"
 ENDLIST
 LIST TimingConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
 ENDLIST
 LIST PNRConstraints
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
 ENDLIST
 LIST ProjectState5.1
 LIST Impl1
 ideSTIMULUS=StateSuccess
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1676,6 +1685,7 @@ LIST ProjectState5.1
 LIST "TOP::work"
 LIST Impl1
 ideSTIMULUS=StateSuccess
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1700,9 +1710,10 @@ LIST OpenedFileList
 ORIENTATION;HORIZONTAL
 Reports;Reports;0
 ReportsCurrentItem;Place and Route:TOP_glb_net_report.xml
+Timing Report Explorer;Timing Report Explorer;0
 StartPage;StartPage;0
 SmartDesign;TOP;0
-ACTIVEVIEW;StartPage
+ACTIVEVIEW;Reports
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
@@ -3472,6 +3483,7 @@ ENDLIST
 LIST TimingTabList
 VALUE "constraint/TOP_derived_constraints.sdc"
 VALUE "component/work/MSS_simple/MSS_simple.sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc"
 ENDLIST
 LIST FDCTabList
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc"
