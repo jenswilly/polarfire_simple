@@ -1,0 +1,22 @@
+Active probes and values for .dprj
+
+Saved at: Fri Oct 23 08:47:26 2026
+
++-----------------------------------------------------------------+------+------------+
+| Name                                                            | Type | Read Value |
++-----------------------------------------------------------------+------+------------+
+|                                                                 |      |            |
+| qspi_board_0/bist/window_Z[4:1]                                 | DFF  | 4'h2       |
+|     qspi_board_0/bist/window_Z[4]:qspi_board_0/bist/window[4]:Q | DFF  | 0          |
+|     qspi_board_0/bist/window_Z[3]:qspi_board_0/bist/window[3]:Q | DFF  | 0          |
+|     qspi_board_0/bist/window_Z[2]:qspi_board_0/bist/window[2]:Q | DFF  | 1          |
+|     qspi_board_0/bist/window_Z[1]:qspi_board_0/bist/window[1]:Q | DFF  | 0          |
+|                                                                 |      |            |
+| qspi_board_0/ovr[2:0]                                           | DFF  | 3'h2       |
+|     qspi_board_0/ovr[2]:qspi_board_0/bist/ovr_d[2]:Q            | DFF  | 0          |
+|     qspi_board_0/ovr[1]:qspi_board_0/bist/ovr_d[1]:Q            | DFF  | 1          |
+|     qspi_board_0/ovr[0]:qspi_board_0/bist/ovr_d[0]:Q            | DFF  | 0          |
+|                                                                 |      |            |
++-----------------------------------------------------------------+------+------------+
+
+

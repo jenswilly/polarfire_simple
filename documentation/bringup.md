@@ -14,7 +14,7 @@
 | 12.5 MHz | 4 | Fail (LED6) | 0000 | Same; analyzer showed fixes 1 and 2 |
 | 12.5 MHz | 4 | **Pass (LED5)** | {2, 3, 4} → 3 | After fixes 1–4. Delay 1 (10 ns) is too early (timing budget: misses by ~6 ns) |
 | 25 MHz | 2 | **Pass (LED5)** | not read | BIST runs one round by default now (`LOOP_ROUNDS`) |
-| 50 MHz | 1 | TBD | TBD | |
+| 50 MHz | 1 | **Pass (LED5)** | {2} → 2 | 100 nF fitted at the breakout. As predicted by `timing_budget.md`: 1 is too early, 3 is past the next word |
 
 ## Problems found and fixes
 1. **Erase/program ignored: CS# high too short after WREN** (HDL).
@@ -32,11 +32,8 @@
    - Most likely ground bounce from IO0–3 switching together over one GND wire, so the chip counts an extra SCLK edge.
    - Fix: `-OUT_DRIVE 4` (default 8 mA) on SCLK and IO0–3 in `constraints/io.pdc`. A 100 nF capacitor at the breakout and more GND wires are still recommended.
 
-## Next steps
-1. Fit 100 nF between 3V and GND directly on the breakout (and preferably a second GND wire, RPi pin 14, 20 or 25).
-2. 50 MHz: `SCLK_DIV` = 1 → Generate, synthesis, P&R, **Verify Timing** (the I/O drive is now 4 mA, so recheck the output slack in `timing_budget.md`), program.
-3. Check LED5, and read `bist/window[4:1]` and `bist/ovr_d[2:0]` with Active Probe.
-4. Optional: read the 25 MHz window too for the table.
-5. Then Step 13 is done; commit. Step 14 (AS308G208 dual die) needs the target PCB.
-- Expected at 50 MHz: {2}, maybe {1, 2} (`documentation/timing_budget.md`).
+## Status
+Step 13 is done: the BIST passes at 50 MHz SCLK with calibration window {2}. Verify Timing for the 50 MHz build with 4 mA drive is met in all corners (input setup 1.91 ns is the tightest; `timing_budget.md`).
+
+Open, optional: the 25 MHz window was not read. Next is Step 14 (AS308G208 dual die), which needs the target PCB.
 - `constraints/timing.sdc` assumes SCLK_DIV = 1 (`-divide_by 2`). The timing report is only meaningful for that build.

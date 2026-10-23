@@ -13,7 +13,7 @@ The budget behind `constraints/timing.sdc`. It covers the W25Q128JV prototype an
 | Item | Value | Note |
 |---|---|---|
 | Board delay per signal | 0.3 – 1.5 ns | ≤ 15 cm jumper wires + PCB trace to the header; SCLK and data independent |
-| I/O standard | LVCMOS33, 8 mA (default), pull-ups on CS#/IO2/IO3 | `constraints/io.pdc` |
+| I/O standard | LVCMOS33, `-OUT_DRIVE 4` on SCLK and IO3:0 (CS# 8 mA default), pull-ups on CS#/IO2/IO3 | `constraints/io.pdc`; 4 mA since bring-up (`bringup.md`) |
 
 ## Device parameters used (worst of both)
 | Parameter | W25Q128JV | AS308G208 | Used |
@@ -50,18 +50,20 @@ Data launched by SCLK falling at the pin arrives within `[b_sclk + tOH + b_data,
 - With `SCLK_DIV` = 2 (25 MHz, used for 9Fh/05h on the AS308G208), data is valid for 40 ns. The 50 MHz case is the worst case.
 - The sample point is still `SAMPLE_DLY` × 10 ns after the falling edge. That is well inside the window for both setup and hold.
 
-## Results (Verify Timing, multi-corner, 2026-10-22)
+## Results (Verify Timing, multi-corner, 2026-10-23, 4 mA drive on SCLK/IO)
 All checks are met. The OUT1 and `qspi_sclk` domains have no unconstrained paths. The remaining unconstrained items are older pins outside the QSPI domain: SWITCH1/2, LED1–4, DEBUG and the RPi SPI pins.
 
-| Check | Worst slack | Corner | Path |
-|---|---|---|---|
-| OUT1 register to register, setup / hold | 5.11 / 0.076 ns | slow_lv_ht / fast_hv_lt | inside `qspi_board` |
-| QSPI_IO input setup (`SAMPLE_DLY` = 2) | 2.15 ns | slow_lv_ht | QSPI_IO[3] → `io_i_r[3]` |
-| QSPI_IO input hold | 3.45 ns | fast_hv_lt | QSPI_IO[0] → `io_i_r[0]` |
-| QSPI_IO output setup / hold | 3.48 / 4.58 ns | slow_lv_ht / slow_lv_lt | `io_o_r`, `io_oe_r` → QSPI_IO |
-| QSPI_CS_N output setup / hold | 3.14 / 4.23 ns | slow_lv_ht | `cs_n_r` → QSPI_CS_N |
+| Check | 2026-10-23 (4 mA) | 2026-10-22 (8 mA) | Corner | Path |
+|---|---|---|---|---|
+| OUT1 register to register, setup / hold | 5.66 / 0.074 ns | 5.11 / 0.076 ns | slow_lv_ht / fast_hv_lt | inside `qspi_board`; hold: `CORERESET_1` |
+| QSPI_IO input setup (`SAMPLE_DLY` = 2) | **1.91 ns** | 2.15 ns | slow_lv_ht | QSPI_IO[3] → `io_i_r[3]` |
+| QSPI_IO input hold | 3.62 ns | 3.45 ns | fast_hv_lt | QSPI_IO[0] → `io_i_r[0]` |
+| QSPI_IO output setup / hold | 3.48 / 4.24 ns | 3.48 / 4.58 ns | slow_lv_ht / slow_lv_lt | `io_o_r`, `io_oe_r` → QSPI_IO |
+| QSPI_CS_N output setup / hold | 3.36 / 3.94 ns | 3.14 / 4.23 ns | slow_lv_ht / slow_lv_lt | `cs_n_r` → QSPI_CS_N |
 
 Notes:
 - SmartTime does propagate the generated clock through `sclk_r`. SCLK reaches the pin 9.9 / 11.3 ns (min / max, slow corner) and 6.7 ns (fast corner) after the CCC output edge. That is the clock tree, the IOREG and the output pad.
-- The input setup slack uses the AS308G208's tCO = 9 ns. With the W25Q128JV (tCLQV = 6 ns) it is about 3 ns larger, i.e. about 5.1 ns.
+- The input setup slack uses the AS308G208's tCO = 9 ns. With the W25Q128JV (tCLQV = 6 ns) it is about 3 ns larger, i.e. about 4.9 ns.
+- With 4 mA, SCLK reaches the pin later, which delays both the device's output data and the sampled SCLK edge relative to `io_i_r`: input setup drops by about 0.25 ns and CS# setup gains about 0.2 ns. The data outputs barely change.
+- On hardware the BIST at 50 MHz found exactly this window: `SAMPLE_DLY` {2} (`bringup.md`).
 - The I/O cell registers keep the input path at a fixed 0.55–1.2 ns (pad to `io_i_r`). The paths therefore don't change from one P&R run to the next.

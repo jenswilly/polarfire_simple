@@ -233,5 +233,5 @@ For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-hart
 - [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
 - [x] QSPI controller + BIST integrated into `TOP` (PLAN.md Step 11): synthesis, place and route and timing pass.
 - [x] QSPI timing constraints (Step 12).
-- [ ] QSPI hardware bring-up on the W25Q128JV breakout (Step 13): BIST passes at 12.5 and 25 MHz SCLK; 50 MHz to do (`documentation/bringup.md`).
+- [x] QSPI hardware bring-up on the W25Q128JV breakout (Step 13): BIST passes at 50 MHz SCLK, calibration window {2}, timing met (`documentation/bringup.md`).
 - [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).
