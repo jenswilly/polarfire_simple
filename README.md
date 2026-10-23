@@ -6,7 +6,7 @@ Outputs:
 
 | Output | Source | Pin |
 |--------|--------|-----|
-| LED1 | Push-button SWITCH1 (inverted), pure fabric | T18 |
+| LED1 | Tied low (off) | T18 |
 | LED2 | MSS register write via FIC0 AXI → bit 0 | V17 |
 | LED3 | MSS register write via FIC0 AXI → bit 1 | U20 |
 | LED4 | SWITCH2, debounced (on while pressed) | U21 |
@@ -49,7 +49,7 @@ Design decisions:
 - **Protocol.** SDR, SPI mode 0. Reads are EBh 1-4-4 on both devices (the W25Q has no QPI mode). Writes are only for tests and calibration: W25Q 20h sector erase + 32h page program with BUSY polling; AS D2h.
 - **Clocking.** `clk_ctrl` = 100 MHz (`PF_CCC_C0` OUT1, `CORERESET_1`). SCLK = `clk_ctrl` / (2 × `SCLK_DIV`) = 50 MHz. RX data is sampled `SAMPLE_DLY` `clk_ctrl` cycles after the SCLK falling edge; the BIST can calibrate it at run time. Only LED5/LED6 leave the domain; connecting the read stream to the 125 MHz fabric or the MSS needs a dual-clock FIFO.
 - **Interface.** Read requests `{len, addr}` in host bytes (both even; die address = host address / 2). A read starts only when the credit `rd_space` covers it, so SCLK never stalls. Data out is AXI4-Stream, 8 bit, `tlast` per request.
-- **Read time.** 8 × 880 host bytes take ≈ 145 µs at 50 MHz on both devices (7200 / 7248 SCLK cycles; `tb_qspi_read_ctrl`). 200 µs needs SCLK ≥ 36.3 MHz, so `SCLK_DIV` = 2 (25 MHz, ≈ 290 µs) is too slow; a lower SCLK would need a different OUT1 frequency (e.g. 80 MHz → 40 MHz SCLK, ≈ 181 µs).
+- **Read time.** 8 × 880 host bytes take ≈ 145 µs at 50 MHz on both devices (7200 / 7248 SCLK cycles; `tb_qspi_read_ctrl`) which is within the allowed 200 µs.
 
 Remaining work for the AS308G208 board (on hold until the target PCB exists):
 1. A dual-die variant of `qspi_board` with IO7:4, CS2#/SCLK2 and RESET# (`mem_reset_n` of `qspi_mram_ctrl`), `DEVICE_SEL` = 1 and `DIE2_PRESENT` = true. The current `qspi_board` is single die; with an AS308G208 die, RESET# must be tied high.
