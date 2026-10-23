@@ -1,4 +1,4 @@
-# QSPI bring-up: W25Q128JV breakout (PLAN.md Step 13)
+# QSPI bring-up: W25Q128JV breakout
 
 ## Setup
 - Adafruit QSPI DIP breakout (product 5634, W25Q128JVSSIQ). The board only routes the chip pins to two 1×4 headers: no pull-ups, no decoupling capacitor ([schematic](https://github.com/adafruit/Adafruit-QSPI-DIP-Breakout-PCB)).
@@ -33,7 +33,7 @@
    - Fix: `-OUT_DRIVE 4` (default 8 mA) on SCLK and IO0–3 in `constraints/io.pdc`. A 100 nF capacitor at the breakout and more GND wires are still recommended.
 
 ## Status
-Step 13 is done: the BIST passes at 50 MHz SCLK with calibration window {2}. Verify Timing for the 50 MHz build with 4 mA drive is met in all corners (input setup 1.91 ns is the tightest; `timing_budget.md`).
+Done: the BIST passes at 50 MHz SCLK with calibration window {2}. Verify Timing for the 50 MHz build with 4 mA drive is met in all corners (input setup 1.91 ns is the tightest; `timing_budget.md`).
 
-Open, optional: the 25 MHz window was not read. Next is Step 14 (AS308G208 dual die), which needs the target PCB.
+Open, optional: the 25 MHz window was not read. The AS308G208 dual-die board is on hold until the target PCB exists (README.md, QSPI controller and BIST).
 - `constraints/timing.sdc` assumes SCLK_DIV = 1 (`-divide_by 2`). The timing report is only meaningful for that build.

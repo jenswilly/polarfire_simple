@@ -2,7 +2,7 @@
 -- Self-checking testbench for qspi_write: write patterns, read them back with qspi_read_ctrl
 --   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
 --   qspi_write and qspi_read_ctrl share one qspi_xact; the testbench switches the command port
---   and the streams between them (owner), which qspi_mram_ctrl will do in Step 9. The models are
+--   and the streams between them (owner), as qspi_mram_ctrl does. The models are
 --   preloaded with a pattern. clk_ctrl 100 MHz, SCLK 50 MHz, sample delay 2, 3 ns board delay;
 --   short W25Q busy times (erase 5 us, page program 3 us).
 --     1. Requests before init_done and bad requests (odd address/length, length 0, past the end)

@@ -1,6 +1,6 @@
 # Device facts: W25Q128JV and AS308G208
 
-Extracted for PLAN.md Step 1. Every value has a source. `TBD` means the datasheet doesn't settle it; open questions are collected at the end.
+Extracted from the datasheets before the controller was designed. Every value has a source. `TBD` means the datasheet doesn't settle it; open questions are collected at the end.
 
 Sources:
 - **[W]** `W25Q128JV_QSPI_Flash.pdf`, Winbond W25Q128JV, Revision F (2018-03-27). Page numbers are the printed page numbers (PDF page − 1).
@@ -29,7 +29,7 @@ Conventions used below: `x-y-z` = number of IO lines for command-address-data. "
 | WP#/HOLD# on IO2/IO3 in 1-1-1 phases | Drive high | Drive high (WP# has no pull-up and must be driven) |
 | Min CS# high after read / write | 10 ns / 50 ns | 20 ns / 600 ns |
 
-With 8 × 880 host bytes at 50 MHz: W25Q128JV 7040 + 8 × 20 = 7200 clocks = 144 µs, AS308G208 7040 + 8 × 26 = 7248 clocks = 145 µs, plus CS# high time between requests. This agrees with the ~145 µs in PLAN.md Step 7.
+With 8 × 880 host bytes at 50 MHz: W25Q128JV 7040 + 8 × 20 = 7200 clocks = 144 µs, AS308G208 7040 + 8 × 26 = 7248 clocks = 145 µs, plus CS# high time between requests. `tb_qspi_read_ctrl` measures 144.5 µs (W25Q) and 145.5 µs (AS).
 
 ---
 
@@ -115,7 +115,7 @@ EBh details ([W] p.23 note 11, p.33):
 - The package contains two independent Quad-SPI devices: device 1 on CS1#/CLK1/IO[3:0], device 2 on CS2#/CLK2/IO[7:4]. Each has its own registers. [A] p.5, p.9
 - AS308G208 = 8 Gb = 8 × 1 Gb dies, i.e. **4 Gb (512 MB) per CS#**. [A] p.5 Table 2
 - **Addressing:** every command uses a 4-byte (32-bit) address ([A] p.40). Per CS the range is `0000_0000h–1FFF_FFFFh` (29 address bits, A[31:29] = 0). [A] p.21 Table 12, p.22 Fig. 12. The extended address register (A[28:24]) only applies to 3-byte commands (0Bh, 6Bh), which we don't use. [A] p.26–28
-- So the "8 Gb addressing" question from PLAN.md is answered: each CS has one linear 4 Gb space, and no die-select bits are needed. The "1 of 4 die" select in the interrupt configuration register is only for the ECC test mode. [A] p.33 Table 26
+- So the "8 Gb addressing" question is answered: each CS has one linear 4 Gb space, and no die-select bits are needed. The "1 of 4 die" select in the interrupt configuration register is only for the ECC test mode. [A] p.33 Table 26
 - Host addressing in the controller: die byte address = host_addr / 2 < 2^29, so host_addr < 2^30.
 - SPI mode 0 and mode 3 (mode 3 SDR only). SDR: inputs latched on the rising edge, outputs on the falling edge. [A] p.10, p.16 Table 7
 
@@ -147,7 +147,7 @@ EBh details ([W] p.23 note 11, p.33):
 - Table 31 (memory array read with XIP): 1-4-4 SDR 8–15 clocks at ≤ 54 MHz. 4-4-4 SDR 10–15 (changed from 8 in rev E.2, [A] p.63). [A] p.36
 - Table 33 (Read Any Register): 1-1-1 / 1-4-4 / 4-4-4 SDR 8–15 at ≤ 54 MHz. [A] p.36
 - CR2[3:0] MLATS sets the latency (0–15) for memory array read and Read Any Register. **Default 1000 = 8 clocks** ([A] p.32 Table 25; default confirmed in rev F.4, p.63).
-- **For 50 MHz and also 25 MHz: MLATS = 8**, which is the default. The table only gives a range, not a value per frequency, so 8 is the minimum allowed at any frequency up to 54 MHz. For 4-4-4 (optional Step 15) it would be 10.
+- **For 50 MHz and also 25 MHz: MLATS = 8**, which is the default. The table only gives a range, not a value per frequency, so 8 is the minimum allowed at any frequency up to 54 MHz. For 4-4-4 (optional QPI reads) it would be 10.
 
 ### 3.4 Registers ([A] p.22 Table 13 addresses for 65h/71h)
 
@@ -203,11 +203,13 @@ The 1 MHz minimum clock means that SCLK must not stop for long in the middle of 
 - Expected device ID per CS: `E6 21 2? 01`, where `?` is the density nibble (Q‑A1).
 
 ### 3.8 QPI recovery
-- We never send 38h, so the device can't be in QPI mode because of us. After RESET# it is in its default (SPI) state. The PLAN.md idea of a "reset in QPI form, then SPI form" isn't needed: RESET# covers it. (For Step 15, FFh in 4-0-0 form leaves QPI.)
+- We never send 38h, so the device can't be in QPI mode because of us. After RESET# it is in its default (SPI) state. A "reset in QPI form, then SPI form" isn't needed: RESET# covers it. (For optional QPI reads, FFh in 4-0-0 form leaves QPI.)
 
 ---
 
-## 4. Consequences for PLAN.md
+## 4. Consequences for the design
+
+Written before the HDL. Where the implementation differs (e.g. the AS308G208 registers are always written, CS# high times have one `clk_ctrl` cycle of margin and WREN gets the write time), the HDL header comments and `bringup.md` are authoritative.
 
 1. **AS308G208 needs a RESET# output.** `qspi_init` drives it low at start, releases it, then waits tPU (25 ms). For the W25Q128JV, `qspi_init` uses 66h + 99h + 30 µs instead. The RESET# port is unused with the W25Q128JV.
 2. **Per-transaction SCLK divider.** On the AS308G208, 05h and 9Fh are limited to 40 MHz. Either the PHY takes `sclk_div` per transaction (init uses 2 → 25 MHz for those commands, reads use 1 → 50 MHz), or init uses only 65h/71h (54 MHz). Recommendation: per-transaction divider, because it also helps bring-up and avoids depending on 65h's latency handling for the ID.
@@ -218,7 +220,7 @@ The 1 MHz minimum clock means that SCLK must not stop for long in the middle of 
 5. **Writes:** W25Q128JV: 20h sector erase + BUSY polling, then 32h (1-1-4) per page + BUSY polling. AS308G208: D2h (1-4-4) or 02h, then CS# high ≥ 600 ns.
 6. **Min CS# high:** 20 ns after reads (both), 600 ns after writes (AS) / 50 ns (W25Q). Use one generic `CS_HIGH_WR_NS = 600` for both, since writes only happen in tests.
 7. **IO2/IO3 (IO6/IO7) driven high in 1-1-1 phases.**
-8. **Sampling window (first estimate for Step 12):** data from the device is valid from tCO (AS 9 ns / W25Q 6 ns) + board delay after the falling edge until the next falling edge + tOH (1 ns / 1.5 ns). At 50 MHz (20 ns period), sampling 20 ns after the launch edge (SAMPLE_DLY = 2 at 100 MHz) works as long as tCO + round-trip delay + FPGA input setup ≤ 20 ns. For the AS308G208 that leaves about 11 ns, minus the FPGA input setup, for the round-trip delay (SCLK out + data back). Step 12 does this properly.
+8. **Sampling window (first estimate; see `timing_budget.md`):** data from the device is valid from tCO (AS 9 ns / W25Q 6 ns) + board delay after the falling edge until the next falling edge + tOH (1 ns / 1.5 ns). At 50 MHz (20 ns period), sampling 20 ns after the launch edge (SAMPLE_DLY = 2 at 100 MHz) works as long as tCO + round-trip delay + FPGA input setup ≤ 20 ns. For the AS308G208 that leaves about 11 ns, minus the FPGA input setup, for the round-trip delay (SCLK out + data back). `timing_budget.md` does this properly.
 
 ---
 

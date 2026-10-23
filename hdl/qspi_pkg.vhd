@@ -5,7 +5,7 @@
 --   Every value comes from documentation/device_facts.md, which has the datasheet references
 --   ([W] = W25Q128JV rev F, [A] = ASxxxx208 rev J.1). Change both together.
 --   Reads use EBh (1-4-4) on both devices: opcode on IO0, address/mode/latency/data on IO[3:0],
---   high nibble first. See PLAN.md.
+--   high nibble first. Design overview: README.md (QSPI controller and BIST).
 --   Generic helpers (clog2, ns_to_cycles) are in util_pkg.
 
 library ieee;
