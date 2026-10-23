@@ -7,6 +7,8 @@ Libero SoC on Linux uses a **FlexLM floating license**. Even on a single machine
 | `start_libero.sh` | Starts the license server if it isn't up yet, waits until `actlmgrd` reports UP, sets the license environment variables and then `exec`s Libero. Arguments are passed through to Libero. |
 | `stop_licenser_server.sh` | Stops the license server: first `lmutil lmdown`, then SIGTERM to `lmgrd` and the vendor daemons if they haven't exited after 10 s. Touches only your own processes. Close Libero first, because it loses its license otherwise. |
 
+`syn_check.sh` runs Synplify Pro in batch on hand-written HDL outside the Libero project (see the top-level README, "Synthesis check"). It also needs the license server.
+
 `99-pfsoc-discovery-uart.rules` is unrelated to licensing. It's the udev rule that makes all of the board's UARTs visible (see the top-level README, "Serial console").
 
 Paths used by the scripts:

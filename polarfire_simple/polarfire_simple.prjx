@@ -54,19 +54,31 @@ ENDLIST
 LIST FileManager
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 STATE="utd"
-TIME="1792420425"
-SIZE="1714"
+TIME="1792738504"
+SIZE="2973"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc,ndc"
+STATE="utd"
+TIME="1792660853"
+SIZE="1003"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
+STATE="utd"
+TIME="1792662802"
+SIZE="3836"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd,hdl"
 STATE="utd"
-TIME="1792406649"
-SIZE="13706"
+TIME="1792578611"
+SIZE="13214"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd,hdl"
 STATE="utd"
-TIME="1792500192"
-SIZE="9953"
+TIME="1792578611"
+SIZE="9461"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd,hdl"
 STATE="utd"
@@ -75,17 +87,17 @@ SIZE="4055"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd,hdl"
 STATE="utd"
-TIME="1792492529"
+TIME="1792567886"
 SIZE="4075"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd,hdl"
 STATE="utd"
-TIME="1792410511"
+TIME="1792567886"
 SIZE="2643"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd,hdl"
 STATE="utd"
-TIME="1792411131"
+TIME="1792567886"
 SIZE="2526"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd,hdl"
@@ -95,22 +107,72 @@ SIZE="2527"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd,hdl"
 STATE="utd"
-TIME="1792478168"
+TIME="1792567886"
 SIZE="1583"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd,hdl"
+STATE="utd"
+TIME="1792682054"
+SIZE="15067"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd,hdl"
+STATE="utd"
+TIME="1792682077"
+SIZE="5807"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd,hdl"
+STATE="utd"
+TIME="1792589089"
+SIZE="17158"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd,hdl"
+STATE="utd"
+TIME="1792588768"
+SIZE="12525"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd,hdl"
+STATE="utd"
+TIME="1792660861"
+SIZE="15387"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd,hdl"
+STATE="utd"
+TIME="1792582926"
+SIZE="8717"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd,hdl"
+STATE="utd"
+TIME="1792584342"
+SIZE="6741"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd,hdl"
+STATE="utd"
+TIME="1792677750"
+SIZE="12939"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd,hdl"
+STATE="utd"
+TIME="1792678830"
+SIZE="22180"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd,hdl"
 STATE="utd"
-TIME="1792500282"
+TIME="1792567886"
 SIZE="4112"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd,hdl"
 STATE="utd"
-TIME="1792492543"
+TIME="1792567886"
 SIZE="2289"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd,hdl"
+STATE="utd"
+TIME="1792578598"
+SIZE="1622"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axis_spi_master.vhd,tb_hdl"
 STATE="utd"
-TIME="1792402356"
+TIME="1792567886"
 SIZE="16429"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
@@ -125,7 +187,7 @@ SIZE="5511"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_pulse_stretch.vhd,tb_hdl"
 STATE="utd"
-TIME="1792410773"
+TIME="1792567886"
 SIZE="4737"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/COREAXI4INTERCONNECT.cxf,actgen_cxf"
@@ -838,13 +900,13 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="1298"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.cxf"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/clock_driver.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="697"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -852,7 +914,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/fifo_driver.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="13955"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -860,7 +922,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/fifo_monitor.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="22096"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -868,7 +930,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/g4_dp_ext_mem.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3801"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -876,7 +938,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WeqR.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="2194"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -884,7 +946,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WgtR.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="2287"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -892,7 +954,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WltR.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="1981"
 PARENT="<project>/component/Actel/DirectCore/COREFIFO/4.0.139/COREFIFO.cxf"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
@@ -900,13 +962,14 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/Actel/DirectCore/CORERESET_PF/2.3.100/CORERESET_PF.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364191"
+TIME="1792657490"
 SIZE="485"
 PARENT="<project>/component/work/CORERESET/CORERESET.cxf"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1.cxf"
 ENDFILE
 VALUE "<project>/component/Actel/SgCore/PF_CCC/2.2.222/PF_CCC.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364011"
+TIME="1792657337"
 SIZE="279"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf"
 ENDFILE
@@ -930,25 +993,25 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="4590"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="5795"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="6249"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE.cxf"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/coreparameters.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="1006"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
@@ -956,175 +1019,175 @@ IS_INCLUDED="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/mti/scripts/runall.do,do"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="23"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/mti/scripts/wave.do,do"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3286"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO_ram_wrapper.v,hdl"
 STATE="utd"
-TIME="1792410256"
+TIME="1792567886"
 SIZE="5085"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/COREFIFO.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="85390"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_async.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="56373"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_fwft.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="35603"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_grayToBinConv.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3282"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_NstagesSync.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="5214"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="24609"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="6488"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_lsram_hs.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3663"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_lsram_lp.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3714"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_reg.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3657"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_usram_hs.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3657"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_dncnv_usram_lp.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3681"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="6475"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_lsram_hs.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3864"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_lsram_lp.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3893"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_reg.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3860"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_usram_hs.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3869"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_raminfer_eccdis_upcnv_usram_lp.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="3887"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_ram_wrapper.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="14929"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_sync.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="37012"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_sync_scntr.v,hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="24068"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/test/user/testbench.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="19410"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 MODULE_UNDER_TEST="testbench"
@@ -1133,7 +1196,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/test/user/top_define.v,tb_hdl"
 STATE="utd"
-TIME="1792410257"
+TIME="1792567886"
 SIZE="372"
 PARENT="<project>/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.cxf"
 IS_READONLY="TRUE"
@@ -1169,6 +1232,40 @@ STATE="utd"
 TIME="1791364191"
 SIZE="7506"
 PARENT="<project>/component/work/CORERESET/CORERESET_0/CORERESET_CORERESET_0_CORERESET_PF.cxf"
+MODULE_UNDER_TEST="corereset_pf_tb"
+SIMULATION_TIME="10000ns"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1.cxf,actgen_cxf"
+STATE="utd"
+TIME="1792657490"
+SIZE="3347"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1.vhd,hdl"
+STATE="utd"
+TIME="1792657490"
+SIZE="4410"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1.cxf"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd,hdl"
+STATE="utd"
+TIME="1792657490"
+SIZE="3559"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1_0/CORERESET_1_CORERESET_1_0_CORERESET_PF.cxf"
+IS_READONLY="TRUE"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/CORERESET_1_CORERESET_1_0_CORERESET_PF.cxf,actgen_cxf"
+STATE="utd"
+TIME="1792657490"
+SIZE="864"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1.cxf"
+ENDFILE
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd,tb_hdl"
+STATE="utd"
+TIME="1792657490"
+SIZE="7514"
+PARENT="<project>/component/work/CORERESET_1/CORERESET_1_0/CORERESET_1_CORERESET_1_0_CORERESET_PF.cxf"
 MODULE_UNDER_TEST="corereset_pf_tb"
 SIMULATION_TIME="10000ns"
 IS_READONLY="TRUE"
@@ -1231,45 +1328,45 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364012"
-SIZE="18355"
+TIME="1792657340"
+SIZE="18515"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0.v,hdl"
 STATE="utd"
-TIME="1791364011"
-SIZE="9982"
+TIME="1792657337"
+SIZE="10230"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791364011"
+TIME="1792657337"
 SIZE="457"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0.cxf"
 ENDFILE
 VALUE "<project>/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.v,hdl"
 STATE="utd"
-TIME="1791364011"
-SIZE="3823"
+TIME="1792657337"
+SIZE="3983"
 PARENT="<project>/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1792500340"
-SIZE="11614"
+TIME="1792740601"
+SIZE="12269"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1792500340"
-SIZE="42093"
+TIME="1792740601"
+SIZE="44644"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 STATE="utd"
-TIME="1791367251"
-SIZE="920"
+TIME="1792662016"
+SIZE="1298"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_FIC0_compile_bfm.tcl,sim"
 STATE="utd"
@@ -1326,23 +1423,23 @@ SIZE="16598"
 ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
-TIME="1792420311"
+TIME="1792682140"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
-STATE="ood"
-TIME="1792420310"
-SIZE="2791815"
+STATE="utd"
+TIME="1792682139"
+SIZE="3267361"
 ENDFILE
 VALUE "<project>/synthesis/TOP_syn.prj,prj"
 STATE="utd"
-TIME="1792420312"
-SIZE="25513"
+TIME="1792682140"
+SIZE="26722"
 ENDFILE
 VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
 STATE="utd"
-TIME="1792420311"
-SIZE="1152"
+TIME="1792682139"
+SIZE="1361"
 ENDFILE
 ENDLIST
 LIST UsedFile
@@ -1376,6 +1473,12 @@ VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlo
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/testbench.v,tb_hdl"
 ENDLIST
 ENDLIST
+LIST "CORERESET_1_CORERESET_1_0_corereset_pf::work"
+FILE "<project>/component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd,hdl"
+LIST Other_Association
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd,tb_hdl"
+ENDLIST
+ENDLIST
 LIST "CORERESET_CORERESET_0_corereset_pf::work"
 FILE "<project>/component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd,hdl"
 LIST Other_Association
@@ -1397,7 +1500,7 @@ VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_PROCESSOR_user.bfm,sim"
 ENDLIST
 ENDLIST
 LIST "TOP::work"
-FILE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
+FILE "<project>/component/work/TOP/TOP.vhd,hdl"
 LIST AssociatedStimulus
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_led_reg.vhd,tb_hdl"
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_button_debounce.vhd,tb_hdl"
@@ -1406,17 +1509,21 @@ VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_pulse_stretch.vhd,tb_hdl"
 ENDLIST
 LIST SynthesisConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc,ndc"
 ENDLIST
 LIST TimingConstraints
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
 ENDLIST
 LIST PNRConstraints
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
 ENDLIST
 LIST ProjectState5.1
 LIST Impl1
 ideSTIMULUS=StateSuccess
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1444,6 +1551,9 @@ VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlo
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/AXI4Models/AxiInitiator.v,tb_hdl"
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/AXI4Models/DualPort_Ram_SyncWr_ASyncRd_Sim.v,tb_hdl"
 VALUE "<project>/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/testbench.v,tb_hdl"
+ENDLIST
+LIST CORERESET_1_CORERESET_1_0_corereset_pf
+VALUE "<project>/component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd,tb_hdl"
 ENDLIST
 LIST CORERESET_CORERESET_0_corereset_pf
 VALUE "<project>/component/work/CORERESET/CORERESET_0/test/corereset_pf_tb.vhd,tb_hdl"
@@ -1575,6 +1685,7 @@ LIST ProjectState5.1
 LIST "TOP::work"
 LIST Impl1
 ideSTIMULUS=StateSuccess
+ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1599,9 +1710,10 @@ LIST OpenedFileList
 ORIENTATION;HORIZONTAL
 Reports;Reports;0
 ReportsCurrentItem;Run Programming Action:TOP_PROGRAM.log
-HDL;/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd;0
+Timing Report Explorer;Timing Report Explorer;0
+StartPage;StartPage;0
 SmartDesign;TOP;0
-ACTIVEVIEW;TOP
+ACTIVEVIEW;Reports
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
@@ -1907,6 +2019,11 @@ ENDLIST
 LIST "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
 SUBBLOCK "CORERESET_CORERESET_0_corereset_pf::work","component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd","FALSE","FALSE"
 ENDLIST
+LIST "CORERESET_1::work","component/work/CORERESET_1/CORERESET_1.vhd","TRUE","FALSE"
+SUBBLOCK "CORERESET_1_CORERESET_1_0_corereset_pf::work","component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd","FALSE","FALSE"
+ENDLIST
+LIST "CORERESET_1_CORERESET_1_0_corereset_pf::work","component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd","FALSE","FALSE"
+ENDLIST
 LIST "CORERESET_CORERESET_0_corereset_pf::work","component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd","FALSE","FALSE"
 ENDLIST
 LIST "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd","FALSE","FALSE"
@@ -2126,6 +2243,10 @@ LIST "caxi4interconnect_WriteDataMux::work","component/Actel/DirectCore/COREAXI4
 ENDLIST
 LIST "MSS::work","component/work/MSS_simple/MSS_NOBYP_BYP_BYP_BYP_BYP_syn_comps.v","FALSE","FALSE"
 ENDLIST
+LIST "qspi_bist::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_phy::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd","FALSE","FALSE"
+ENDLIST
 LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_AddressController::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/AddressController.v","FALSE","FALSE"
@@ -2236,24 +2357,49 @@ LIST "PF_CCC_C0_PF_CCC_C0_0_PF_CCC::work","component/work/PF_CCC_C0/PF_CCC_C0_0/
 ENDLIST
 LIST "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
 ENDLIST
+LIST "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_bist::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_mram_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_init::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_mram_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_mram_ctrl.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_init::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_read_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_write::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_xact::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_pkg::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_read_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_read_ctrl.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_write::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_write.vhd","FALSE","FALSE"
+ENDLIST
+LIST "qspi_xact::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_phy::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd","FALSE","FALSE"
+ENDLIST
 LIST "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
 SUBBLOCK "block_fifo::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd","FALSE","FALSE"
 SUBBLOCK "block_serializer::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd","FALSE","FALSE"
 SUBBLOCK "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd","FALSE","FALSE"
 ENDLIST
-LIST "TOP::work","component/work/TOP/TOP.cxf","TRUE","FALSE"
+LIST "TOP::work","component/work/TOP/TOP.vhd","TRUE","FALSE"
 SUBBLOCK "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
-SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
+SUBBLOCK "CORERESET_1::work","component/work/CORERESET_1/CORERESET_1.vhd","TRUE","FALSE"
 SUBBLOCK "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
 SUBBLOCK "INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR.v","TRUE","FALSE"
 SUBBLOCK "MSS_simple::work","component/work/MSS_simple/MSS_simple.v","TRUE","FALSE"
 SUBBLOCK "PF_CCC_C0::work","component/work/PF_CCC_C0/PF_CCC_C0.v","TRUE","FALSE"
-SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
 SUBBLOCK "axi_led_reg::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd","FALSE","FALSE"
 SUBBLOCK "block_arbiter::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd","FALSE","FALSE"
+SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
+SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
-SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
-SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+SUBBLOCK "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
+SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
+ENDLIST
+LIST "util_pkg::work","/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_IntrProtocolConverter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/IntrProtocolConverter.v","FALSE","FALSE"
 ENDLIST
@@ -2282,6 +2428,9 @@ LIST "clock_driver::work","component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/
 ENDLIST
 LIST "corereset_pf_tb::work","component/work/CORERESET/CORERESET_0/test/corereset_pf_tb.vhd","FALSE","TRUE"
 SUBBLOCK "CORERESET_CORERESET_0_corereset_pf::work","component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd","FALSE","FALSE"
+ENDLIST
+LIST "corereset_pf_tb::work","component/work/CORERESET_1/CORERESET_1_0/test/corereset_pf_tb.vhd","FALSE","TRUE"
+SUBBLOCK "CORERESET_1_CORERESET_1_0_corereset_pf::work","component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd","FALSE","FALSE"
 ENDLIST
 LIST "AHBL_Initiator::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/test/user/AHBModel/AHBL_Initiator.v","FALSE","TRUE"
 ENDLIST
@@ -3334,6 +3483,8 @@ ENDLIST
 LIST TimingTabList
 VALUE "constraint/TOP_derived_constraints.sdc"
 VALUE "component/work/MSS_simple/MSS_simple.sdc"
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc"
 ENDLIST
 LIST FDCTabList
+VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc"
 ENDLIST

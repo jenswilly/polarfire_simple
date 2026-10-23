@@ -36,6 +36,7 @@ kk56c81a5ef0f7
 *.sav
 *~
 polarfire_simple/constraint/*_errors.log
+polarfire_simple/constraint/run_*_sdc_check.tcl
 
 # QuestaSim output from sim/run_tb.sh (work library, transcript, waveforms)
 sim/out/

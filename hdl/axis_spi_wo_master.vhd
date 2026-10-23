@@ -25,6 +25,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use work.util_pkg.all;
 
 entity axis_spi_wo_master is
     generic (
@@ -59,26 +60,6 @@ entity axis_spi_wo_master is
 end entity axis_spi_wo_master;
 
 architecture rtl of axis_spi_wo_master is
-
-    function clog2(n : natural) return natural is
-        variable r : natural := 0;
-        variable v : natural := 1;
-    begin
-        while v < n loop
-            v := v * 2;
-            r := r + 1;
-        end loop;
-        return r;
-    end function;
-
-    function reverse(v : std_logic_vector(7 downto 0)) return std_logic_vector is
-        variable r : std_logic_vector(7 downto 0);
-    begin
-        for i in 0 to 7 loop
-            r(i) := v(7 - i);
-        end loop;
-        return r;
-    end function;
 
     -- Counter widths (maximum() is predefined in VHDL-2008)
     constant DIV_W  : positive := maximum(1, clog2(CLK_DIV));
