@@ -8,7 +8,7 @@ set_io -port_name REF_CLK_50MHz -pin_name R18 -fixed true -io_std LVCMOS18 -DIRE
 #-------------------------
 # Push-button (active low)
 
-set_io -port_name SWITCH1 -pin_name T19 -fixed true -DIRECTION INPUT
+# set_io -port_name SWITCH1 -pin_name T19 -fixed true -DIRECTION INPUT
 set_io -port_name SWITCH2 -pin_name U18 -fixed true -DIRECTION INPUT
 
 # ------------------
