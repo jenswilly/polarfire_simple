@@ -77,7 +77,7 @@
         <mxCell id="arbiter" value="&lt;b&gt;block_arbiter&lt;/b&gt;&lt;br&gt;round-robin,&lt;br&gt;2 ports" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="700" y="535" width="160" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="txpath" value="&lt;b&gt;spi_tx_path&lt;/b&gt;&lt;br&gt;FIFO 512 blocks, mode 0,&lt;br&gt;8.93 MHz, MSB first&lt;br&gt;(see spi_tx_path.drawio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="txpath" value="&lt;b&gt;spi_tx_path&lt;/b&gt;&lt;br&gt;FIFO 512 blocks, mode 0,&lt;br&gt;20.83 MHz, MSB first&lt;br&gt;(see spi_tx_path.drawio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="930" y="555" width="180" height="80" as="geometry" />
         </mxCell>
         <mxCell id="p_spi" value="SCLK B19, pin 35&lt;br&gt;MOSI B15, pin 36&lt;br&gt;CS_N B17, pin 37" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
