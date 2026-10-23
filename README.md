@@ -6,7 +6,7 @@ Outputs:
 
 | Output | Source | Pin |
 |--------|--------|-----|
-| LED1 | Push-button SWITCH1 (inverted), pure fabric | T18 |
+| LED1 | Tied low (off) | T18 |
 | LED2 | MSS register write via FIC0 AXI → bit 0 | V17 |
 | LED3 | MSS register write via FIC0 AXI → bit 1 | U20 |
 | LED4 | SWITCH2, debounced (on while pressed) | U21 |
@@ -35,7 +35,7 @@ The RPi header pins are in Bank1 (3.3 V). The QSPI breakout (W25Q128JV) gets 3.3
 Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock (OUT0) with `FABRIC_RESET_N` from `CORERESET_0`, except `qspi_board`, which runs on OUT1 (100 MHz, `clk_ctrl`) with `CORERESET_1`. The two clocks are asynchronous; only LED5/LED6 leave the QSPI domain. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
 
 ### SPI TX path
-`spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 7` so SCLK = 125 MHz / 14 ≈ 8.93 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
+`spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 3` so SCLK = 125 MHz / 6 ≈ 20.83 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
 
 Several producers share `spi_tx_path` through `block_arbiter` (in TOP, in front of `spi_tx_path`). It is round-robin and moves one whole block per handshake, so blocks from different producers never interleave. Only the selected producer sees `s_ready`; the others hold their block. The mux is combinational (no extra latency), and once a block is offered the selection is held until it is taken. SmartDesign has no array ports, so the inputs are flattened: producer *i* is `s_data((i+1)*80-1 downto i*80)`, `s_valid(i)`, `s_ready(i)`.
 
@@ -49,7 +49,7 @@ Design decisions:
 - **Protocol.** SDR, SPI mode 0. Reads are EBh 1-4-4 on both devices (the W25Q has no QPI mode). Writes are only for tests and calibration: W25Q 20h sector erase + 32h page program with BUSY polling; AS D2h.
 - **Clocking.** `clk_ctrl` = 100 MHz (`PF_CCC_C0` OUT1, `CORERESET_1`). SCLK = `clk_ctrl` / (2 × `SCLK_DIV`) = 50 MHz. RX data is sampled `SAMPLE_DLY` `clk_ctrl` cycles after the SCLK falling edge; the BIST can calibrate it at run time. Only LED5/LED6 leave the domain; connecting the read stream to the 125 MHz fabric or the MSS needs a dual-clock FIFO.
 - **Interface.** Read requests `{len, addr}` in host bytes (both even; die address = host address / 2). A read starts only when the credit `rd_space` covers it, so SCLK never stalls. Data out is AXI4-Stream, 8 bit, `tlast` per request.
-- **Read time.** 8 × 880 host bytes take ≈ 145 µs at 50 MHz on both devices (7200 / 7248 SCLK cycles; `tb_qspi_read_ctrl`). 200 µs needs SCLK ≥ 36.3 MHz, so `SCLK_DIV` = 2 (25 MHz, ≈ 290 µs) is too slow; a lower SCLK would need a different OUT1 frequency (e.g. 80 MHz → 40 MHz SCLK, ≈ 181 µs).
+- **Read time.** 8 × 880 host bytes take ≈ 145 µs at 50 MHz on both devices (7200 / 7248 SCLK cycles; `tb_qspi_read_ctrl`) which is within the allowed 200 µs.
 
 Remaining work for the AS308G208 board (on hold until the target PCB exists):
 1. A dual-die variant of `qspi_board` with IO7:4, CS2#/SCLK2 and RESET# (`mem_reset_n` of `qspi_mram_ctrl`), `DEVICE_SEL` = 1 and `DIE2_PRESENT` = true. The current `qspi_board` is single die; with an AS308G208 die, RESET# must be tied high.
