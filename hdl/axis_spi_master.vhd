@@ -4,8 +4,7 @@
 --
 --   Every frame is exactly FRAME_BYTES bytes. spi_cs_n goes low before the first byte and
 --   high after the last one. Each byte taken from s_axis gives one byte on m_axis (full
---   duplex), and m_axis_tlast marks the last byte of a frame. With RX_ENABLE = false the
---   RX path is removed and m_axis_tvalid stays low.
+--   duplex), and m_axis_tlast marks the last byte of a frame.
 --
 -- Flow control:
 --   - If s_axis runs dry mid-frame, sclk pauses at its idle level with spi_cs_n held low
@@ -45,8 +44,7 @@ entity axis_spi_master is
         CS_SETUP    : natural   := 1;      -- Extra half-periods cs_n low before the first edge
         CS_HOLD     : natural   := 1;      -- Half-periods after the last edge before cs_n high
         CS_IDLE     : natural   := 2;      -- Min. half-periods cs_n high between frames
-        MISO_SYNC   : natural   := 2;      -- MISO synchronizer stages
-        RX_ENABLE   : boolean   := true
+        MISO_SYNC   : natural   := 2       -- MISO synchronizer stages
     );
     port (
         clk           : in  std_logic;
@@ -113,7 +111,7 @@ begin
 
     -- Elaboration-time check: the MISO round trip must fit in a half-period.
     -- This only covers the internal latency; pad and slave delays come on top.
-    assert (not RX_ENABLE) or (CLK_DIV > MISO_SYNC + 1)
+    assert (CLK_DIV > MISO_SYNC + 1)
         report "axis_spi_master: CLK_DIV too small for MISO_SYNC; RX data will be sampled late"
         severity warning;
 
@@ -143,7 +141,7 @@ begin
 
     -- Accept a TX byte only in S_LOAD and only when the RX holding register is free,
     -- so the byte about to be received always has somewhere to go.
-    s_ready <= '1' when state = S_LOAD and (rx_valid = '0' or not RX_ENABLE) else '0';
+    s_ready <= '1' when state = S_LOAD and (rx_valid = '0') else '0';
 
     fsm_proc : process (clk)
         variable rx_next : std_logic_vector(7 downto 0);
@@ -253,15 +251,14 @@ begin
                                 else
                                     rx_next := rx_shift;
                                 end if;
-                                if RX_ENABLE then
-                                    if MSB_FIRST then
-                                        rx_data <= rx_next;
-                                    else
-                                        rx_data <= reverse(rx_next);
-                                    end if;
-                                    rx_valid <= '1';
-                                    rx_last  <= last_byte;
+
+                                if MSB_FIRST then
+                                    rx_data <= rx_next;
+                                else
+                                    rx_data <= reverse(rx_next);
                                 end if;
+                                rx_valid <= '1';
+                                rx_last  <= last_byte;
 
                                 if last_byte = '1' then
                                     wait_cnt <= to_unsigned(CS_HOLD, WAIT_W);

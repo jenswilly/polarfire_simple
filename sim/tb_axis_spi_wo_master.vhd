@@ -3,7 +3,6 @@
 --   every cs_n assertion carries exactly FRAME_BYTES * 8 bits with sclk idle at both cs_n edges.
 --   A timing monitor checks the sclk half-periods and the cs_n setup/hold/idle times.
 --   Random stalls are applied to s_axis_tvalid.
---   The last frame has a wrong s_axis_tlast and must give frame_err_out pulses.
 --   Finally reset_n is pulsed mid-frame and the DUT must return to idle.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 --
@@ -23,7 +22,7 @@ entity tb_axis_spi_wo_master is
         MSB_I       : integer  := 1;
         FRAME_BYTES : positive := 10;
         CLK_DIV     : positive := 7;
-        NFRAMES     : positive := 20;   -- Good frames; one frame with a bad tlast follows
+        NFRAMES     : positive := 20;
         STALLS      : integer  := 1     -- 1: random tvalid stalls
     );
 end entity tb_axis_spi_wo_master;
@@ -42,7 +41,7 @@ architecture sim of tb_axis_spi_wo_master is
     constant CPOL       : std_logic := to_sl(CPOL_I /= 0);
     constant CPHA       : std_logic := to_sl(CPHA_I /= 0);
     constant MSBF       : boolean   := MSB_I /= 0;
-    constant NBYTES     : natural   := (NFRAMES + 1) * FRAME_BYTES;
+    constant NBYTES     : natural   := NFRAMES * FRAME_BYTES;
     constant CLK_PERIOD : time      := 8 ns;    -- 125 MHz, same as the fabric clock
 
     constant CS_SETUP   : natural   := 1;
@@ -52,16 +51,6 @@ architecture sim of tb_axis_spi_wo_master is
     constant SETUP_T    : time      := ((CS_SETUP + 1) * CLK_DIV + 2) * CLK_PERIOD;
     constant HOLD_T     : time      := (CS_HOLD * CLK_DIV + 1) * CLK_PERIOD;
     constant IDLE_T     : time      := (CS_IDLE * CLK_DIV + 1) * CLK_PERIOD;
-
-    -- Bad tlast in the last frame: tlast on byte 0 and not on the last byte
-    function exp_ferr return natural is
-    begin
-        if FRAME_BYTES = 1 then
-            return 1;
-        else
-            return 2;
-        end if;
-    end function;
 
     -- Data sequence
     function tx_byte(i : natural) return std_logic_vector is
@@ -75,15 +64,13 @@ architecture sim of tb_axis_spi_wo_master is
     signal s_tdata  : std_logic_vector(7 downto 0) := (others => '0');
     signal s_tvalid : std_logic := '0';
     signal s_tready : std_logic;
-    signal s_tlast  : std_logic := '0';
 
     signal sclk, mosi, cs_n : std_logic;
-    signal busy, frame_err  : std_logic;
+    signal busy             : std_logic;
 
     signal tx_done, slv_done : boolean := false;
     signal reset_phase       : boolean := false;   -- Set by p_ctrl for the reset test
     signal done              : boolean := false;
-    signal ferr_count        : natural := 0;
 
     -- Per-process error counts, summed at the end
     signal err_slv, err_tim : natural := 0;
@@ -105,16 +92,14 @@ begin
         port map (
             clk => clk, reset_n => rstn,
             s_axis_tdata => s_tdata, s_axis_tvalid => s_tvalid,
-            s_axis_tready => s_tready, s_axis_tlast => s_tlast,
+            s_axis_tready => s_tready,
             spi_sclk => sclk, spi_mosi => mosi, spi_cs_n => cs_n,
-            busy_out => busy, frame_err_out => frame_err);
+            busy_out => busy);
 
     -- TX driver: NBYTES bytes, then keeps a byte offered until the reset test is over
     p_tx : process
         variable seed1, seed2 : positive := 11;
         variable r            : real;
-        variable bad_frame    : boolean;
-        variable first, last  : boolean;
     begin
         wait until rising_edge(clk) and rstn = '1';
         for i in 0 to NBYTES - 1 loop
@@ -128,20 +113,11 @@ begin
                     end loop;
                 end if;
             end if;
-            bad_frame := i >= NFRAMES * FRAME_BYTES;
-            first     := (i mod FRAME_BYTES) = 0;
-            last      := (i mod FRAME_BYTES) = FRAME_BYTES - 1;
-            s_tdata   <= tx_byte(i);
-            if bad_frame then
-                s_tlast <= to_sl(first and not last);
-            else
-                s_tlast <= to_sl(last);
-            end if;
+            s_tdata  <= tx_byte(i);
             s_tvalid <= '1';
             wait until rising_edge(clk) and s_tready = '1';
         end loop;
         s_tvalid <= '0';
-        s_tlast  <= '0';
         tx_done  <= true;
 
         -- Reset test: start a new frame and keep feeding bytes until p_ctrl resets the DUT
@@ -270,15 +246,6 @@ begin
         wait;
     end process;
 
-    p_ferr : process (clk)
-    begin
-        if rising_edge(clk) then
-            if frame_err = '1' then
-                ferr_count <= ferr_count + 1;
-            end if;
-        end if;
-    end process;
-
     -- Control, reset test and summary
     p_ctrl : process
         variable errors : natural := 0;
@@ -305,8 +272,6 @@ begin
         check(tx_done and slv_done, "timeout");
         clocks(20 * CLK_DIV);
         check(busy = '0' and cs_n = '1' and sclk = CPOL, "DUT not idle after the data phase");
-        check(ferr_count = exp_ferr, "bad tlast frame: expected " & integer'image(exp_ferr)
-              & " frame_err_out pulse(s), got " & integer'image(ferr_count));
 
         -- Reset in the middle of a byte
         reset_phase <= true;

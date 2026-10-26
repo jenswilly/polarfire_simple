@@ -11,10 +11,6 @@
 --   until the next byte arrives (SPI allows this, but check the slave). To avoid such
 --   pauses, only start a frame once the upstream FIFO holds FRAME_BYTES bytes.
 --
--- s_axis_tlast is optional. If the producer drives it, frame_err_out pulses for one clock
--- whenever tlast does not match the last byte of a frame. It does not affect framing.
--- If tlast is not driven (default '0'), frame_err_out pulses on every frame: leave it open.
---
 -- Timing (in clk cycles):
 --   Sclk half-period        = CLK_DIV                 (f_sclk = f_clk / (2*CLK_DIV))
 --   Gap between bytes       = CLK_DIV + 1 at the idle level
@@ -46,7 +42,6 @@ entity axis_spi_wo_master is
         s_axis_tdata  : in  std_logic_vector(7 downto 0);
         s_axis_tvalid : in  std_logic;
         s_axis_tready : out std_logic;
-        s_axis_tlast  : in  std_logic := '0';
 
         -- SPI
         spi_sclk      : out std_logic;
@@ -54,8 +49,7 @@ entity axis_spi_wo_master is
         spi_cs_n      : out std_logic;
 
         -- Status
-        busy_out      : out std_logic;           -- High from frame start until the cs_n idle time is over
-        frame_err_out : out std_logic            -- One-cycle pulse on tlast mismatch
+        busy_out      : out std_logic            -- High from frame start until the cs_n idle time is over
     );
 end entity axis_spi_wo_master;
 
@@ -82,7 +76,6 @@ architecture rtl of axis_spi_wo_master is
     signal tx_shift  : std_logic_vector(7 downto 0) := (others => '0');
 
     signal s_ready   : std_logic;
-    signal ferr_r    : std_logic := '0';
 
     signal last_byte : std_logic;
 
@@ -98,8 +91,6 @@ begin
         variable tx_v : std_logic_vector(7 downto 0);
     begin
         if rising_edge(clk) then
-            ferr_r <= '0';
-
             -- The divider runs in the timed states and is held at 0 otherwise,
             -- so every timed phase starts with a full half-period.
             if state = S_SETUP or state = S_XFER or state = S_HOLD or state = S_GAP then
@@ -128,12 +119,14 @@ begin
                         sclk_r   <= CPOL;
                         byte_cnt <= (others => '0');
                         if s_axis_tvalid = '1' then
+                            -- We have valid data (in IDLE mode): assert nCS and start the setup phase
                             cs_n_r   <= '0';
                             wait_cnt <= to_unsigned(CS_SETUP, WAIT_W);
                             state    <= S_SETUP;
                         end if;
 
                     when S_SETUP =>
+                        -- Wait CS_SETUP half-periods with nCS low and then move to the load state
                         if wait_cnt = 0 then
                             state <= S_LOAD;
                         elsif tick = '1' then
@@ -141,17 +134,14 @@ begin
                         end if;
 
                     when S_LOAD =>
-                        if s_ready = '1' and s_axis_tvalid = '1' then
-                            -- Tlast check (informational only)
-                            if s_axis_tlast /= last_byte then
-                                ferr_r <= '1';
-                            end if;
+                        if s_axis_tvalid = '1' then
                             -- Normalize to MSB first; the shifter always shifts out bit 7
                             if MSB_FIRST then
                                 tx_v := s_axis_tdata;
                             else
                                 tx_v := reverse(s_axis_tdata);
                             end if;
+
                             if CPHA = '0' then
                                 -- CPHA = 0: the first bit must be on MOSI before the leading edge
                                 mosi_r   <= tx_v(7);
@@ -159,6 +149,7 @@ begin
                             else
                                 tx_shift <= tx_v;
                             end if;
+
                             edge_cnt <= (others => '0');
                             state    <= S_XFER;
                         end if;
@@ -223,6 +214,5 @@ begin
     spi_cs_n      <= cs_n_r;
 
     busy_out      <= '0' when state = S_IDLE else '1';
-    frame_err_out <= ferr_r;
 
 end architecture rtl;

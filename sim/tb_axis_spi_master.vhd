@@ -23,7 +23,6 @@ entity tb_axis_spi_master is
         CPOL_I      : integer  := 0;
         CPHA_I      : integer  := 0;
         MSB_I       : integer  := 1;
-        RX_I        : integer  := 1;    -- RX_ENABLE
         FRAME_BYTES : positive := 10;
         CLK_DIV     : positive := 7;
         NFRAMES     : positive := 20;   -- Good frames; one frame with a bad tlast follows
@@ -46,7 +45,6 @@ architecture sim of tb_axis_spi_master is
     constant CPOL       : std_logic := to_sl(CPOL_I /= 0);
     constant CPHA       : std_logic := to_sl(CPHA_I /= 0);
     constant MSBF       : boolean   := MSB_I /= 0;
-    constant RX_ENABLE  : boolean   := RX_I /= 0;
     constant NBYTES     : natural   := (NFRAMES + 1) * FRAME_BYTES;
     constant CLK_PERIOD : time      := 8 ns;    -- 125 MHz, same as the fabric clock
 
@@ -118,8 +116,7 @@ begin
             CS_SETUP    => CS_SETUP,
             CS_HOLD     => CS_HOLD,
             CS_IDLE     => CS_IDLE,
-            MISO_SYNC   => MISO_SYNC_I,
-            RX_ENABLE   => RX_ENABLE)
+            MISO_SYNC   => MISO_SYNC_I)
         port map (
             clk => clk, reset_n => rstn,
             s_axis_tdata => s_tdata, s_axis_tvalid => s_tvalid,
@@ -185,50 +182,39 @@ begin
     begin
         m_tready <= '0';
         wait until rstn = '1';
-        if not RX_ENABLE then
-            -- No RX path: m_axis_tvalid must stay low
-            m_tready <= '1';
-            while not slv_done loop
-                wait until rising_edge(clk);
-                if m_tvalid /= '0' then
-                    report "m_axis_tvalid high with RX_ENABLE = false" severity error;
+        
+        while i < NBYTES loop
+            wait until rising_edge(clk);
+            if m_tvalid = '1' and m_tready = '1' then
+                if m_tdata /= rx_byte(i) then
+                    report "RX data mismatch at byte " & integer'image(i) severity error;
                     errs := errs + 1;
-                    exit;
                 end if;
-            end loop;
-        else
-            while i < NBYTES loop
-                wait until rising_edge(clk);
-                if m_tvalid = '1' and m_tready = '1' then
-                    if m_tdata /= rx_byte(i) then
-                        report "RX data mismatch at byte " & integer'image(i) severity error;
-                        errs := errs + 1;
-                    end if;
-                    exp_last := to_sl((i mod FRAME_BYTES) = FRAME_BYTES - 1);
-                    if m_tlast /= exp_last then
-                        report "RX tlast mismatch at byte " & integer'image(i) severity error;
-                        errs := errs + 1;
-                    end if;
-                    i := i + 1;
+                exp_last := to_sl((i mod FRAME_BYTES) = FRAME_BYTES - 1);
+                if m_tlast /= exp_last then
+                    report "RX tlast mismatch at byte " & integer'image(i) severity error;
+                    errs := errs + 1;
                 end if;
-                if STALLS /= 0 then
-                    -- Every 7th byte: hold tready low for about 3 byte times (overrun check)
-                    if i mod 7 = 3 and stalled_at /= i then
-                        stalled_at := i;
-                        stall_left := 3 * 16 * CLK_DIV;
-                    end if;
-                    if stall_left > 0 then
-                        stall_left := stall_left - 1;
-                        m_tready   <= '0';
-                    else
-                        uniform(seed1, seed2, r);
-                        m_tready <= to_sl(r < 0.6);
-                    end if;
+                i := i + 1;
+            end if;
+            if STALLS /= 0 then
+                -- Every 7th byte: hold tready low for about 3 byte times (overrun check)
+                if i mod 7 = 3 and stalled_at /= i then
+                    stalled_at := i;
+                    stall_left := 3 * 16 * CLK_DIV;
+                end if;
+                if stall_left > 0 then
+                    stall_left := stall_left - 1;
+                    m_tready   <= '0';
                 else
-                    m_tready <= '1';
+                    uniform(seed1, seed2, r);
+                    m_tready <= to_sl(r < 0.6);
                 end if;
-            end loop;
-        end if;
+            else
+                m_tready <= '1';
+            end if;
+        end loop;
+
         m_tready <= '1';
         err_rx   <= errs;
         rx_done  <= true;

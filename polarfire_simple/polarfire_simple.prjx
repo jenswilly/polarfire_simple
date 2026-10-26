@@ -72,17 +72,17 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd,hdl"
 STATE="utd"
-TIME="1792742678"
-SIZE="13214"
+TIME="1793022706"
+SIZE="13021"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd,hdl"
 STATE="utd"
-TIME="1792742678"
-SIZE="9461"
+TIME="1793021155"
+SIZE="8934"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/axi_sys_ctrl.vhd,hdl"
 STATE="utd"
-TIME="1793006573"
+TIME="1793008273"
 SIZE="4256"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd,hdl"
@@ -97,7 +97,7 @@ SIZE="2643"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd,hdl"
 STATE="utd"
-TIME="1792567886"
+TIME="1793021657"
 SIZE="2526"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd,hdl"
@@ -157,8 +157,8 @@ SIZE="22180"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd,hdl"
 STATE="utd"
-TIME="1792567886"
-SIZE="4112"
+TIME="1793021681"
+SIZE="3875"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd,hdl"
 STATE="utd"
@@ -177,7 +177,7 @@ SIZE="16429"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_sys_ctrl.vhd,tb_hdl"
 STATE="utd"
-TIME="1793006561"
+TIME="1793008273"
 SIZE="6195"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/sim/tb_button_debounce.vhd,tb_hdl"
@@ -1353,13 +1353,13 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1793007017"
+TIME="1793021228"
 SIZE="12272"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1793007017"
-SIZE="44651"
+TIME="1793021228"
+SIZE="44491"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
@@ -1421,11 +1421,6 @@ STATE="utd"
 TIME="1792406823"
 SIZE="16598"
 ENDFILE
-VALUE "<project>/simulation/tb_axi_sys_ctrl_presynth_simulation.log,log"
-STATE="utd"
-TIME="1793007707"
-SIZE="48631"
-ENDFILE
 VALUE "<project>/simulation/tb_pulse_stretch_presynth_simulation.log,log"
 STATE="utd"
 TIME="1793007772"
@@ -1437,7 +1432,7 @@ TIME="1792742731"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
-STATE="utd"
+STATE="ood"
 TIME="1792742730"
 SIZE="3278955"
 ENDFILE
@@ -1689,7 +1684,6 @@ ENDLIST
 LIST ProjectState5.1
 LIST Impl1
 ideSTIMULUS=StateSuccess
-ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE
@@ -1851,7 +1845,6 @@ LIST ProjectState5.1
 LIST "TOP::work"
 LIST Impl1
 ideSTIMULUS=StateSuccess
-ideSYNTHESIS(<project>/synthesis/TOP.vm,syn_vm)=StateSuccess
 LIST FlowOptions
 UsePhySynth=FALSE
 UseSynth=TRUE

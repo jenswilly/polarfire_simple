@@ -7,8 +7,8 @@
 --        empty and each block starts from an idle path.
 --     2. NBURST blocks back to back, more than the FIFO holds: s_ready must go low
 --        (backpressure) and every block must still arrive.
---   frame_err_out must never pulse. At the end the path must be idle. Then a reset with
---   blocks in the FIFO and a frame in progress must leave the path idle with cs_n high.
+--   At the end the path must be idle. Then a reset with blocks in the FIFO and a frame in
+--   progress must leave the path idle with cs_n high.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 --
 -- Other SPI modes, e.g.: sim/run_tb.sh tb_spi_tx_path -gCPOL_I=1 -gCPHA_I=1 -gCLK_DIV=2
@@ -65,13 +65,12 @@ architecture sim of tb_spi_tx_path is
     signal s_ready   : std_logic;
 
     signal sclk, mosi, cs_n : std_logic;
-    signal busy, frame_err  : std_logic;
+    signal busy             : std_logic;
 
     signal tx_done, slv_done : boolean := false;
     signal reset_phase       : boolean := false;   -- Set by p_ctrl for the reset test
     signal done              : boolean := false;
     signal bp_seen           : boolean := false;   -- s_ready low while s_valid high
-    signal ferr_count        : natural := 0;
     signal err_slv           : natural := 0;
 
 begin
@@ -84,7 +83,7 @@ begin
             clk => clk, reset_n => rstn,
             s_data => s_data, s_valid => s_valid, s_ready => s_ready,
             spi_sclk => sclk, spi_mosi => mosi, spi_cs_n => cs_n,
-            busy_out => busy, frame_err_out => frame_err);
+            busy_out => busy);
 
     -- Producer
     p_tx : process
@@ -124,9 +123,6 @@ begin
         if rising_edge(clk) then
             if s_valid = '1' and s_ready = '0' then
                 bp_seen <= true;
-            end if;
-            if frame_err = '1' then
-                ferr_count <= ferr_count + 1;
             end if;
         end if;
     end process;
@@ -196,7 +192,6 @@ begin
         check(busy = '0' and cs_n = '1' and sclk = CPOL, "path not idle after the data phase");
         check(s_ready = '1', "s_ready low with an empty FIFO");
         check(NBURST <= DEPTH or bp_seen, "burst: no backpressure (s_ready never went low)");
-        check(ferr_count = 0, "frame_err_out pulsed " & integer'image(ferr_count) & " time(s)");
 
         -- Reset with blocks in the FIFO and a frame in progress
         reset_phase <= true;

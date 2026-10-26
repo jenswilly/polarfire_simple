@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Mon Oct 26 10:30:17 2026
+-- Created by SmartDesign Mon Oct 26 14:27:08 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -345,17 +345,16 @@ component spi_tx_path
     -- Port list
     port(
         -- Inputs
-        clk           : in  std_logic;
-        reset_n       : in  std_logic;
-        s_data        : in  std_logic_vector(79 downto 0);
-        s_valid       : in  std_logic;
+        clk      : in  std_logic;
+        reset_n  : in  std_logic;
+        s_data   : in  std_logic_vector(79 downto 0);
+        s_valid  : in  std_logic;
         -- Outputs
-        busy_out      : out std_logic;
-        frame_err_out : out std_logic;
-        s_ready       : out std_logic;
-        spi_cs_n      : out std_logic;
-        spi_mosi      : out std_logic;
-        spi_sclk      : out std_logic
+        busy_out : out std_logic;
+        s_ready  : out std_logic;
+        spi_cs_n : out std_logic;
+        spi_mosi : out std_logic;
+        spi_sclk : out std_logic
         );
 end component;
 -- test_block_producer
@@ -926,17 +925,16 @@ qspi_board_0 : entity work.qspi_board
 spi_tx_path_0 : spi_tx_path
     port map( 
         -- Inputs
-        clk           => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n       => CORERESET_0_FABRIC_RESET_N,
-        s_valid       => block_arbiter_0_m_valid,
-        s_data        => block_arbiter_0_m_data,
+        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n  => CORERESET_0_FABRIC_RESET_N,
+        s_data   => block_arbiter_0_m_data,
+        s_valid  => block_arbiter_0_m_valid,
         -- Outputs
-        s_ready       => spi_tx_path_0_s_ready,
-        spi_sclk      => RPi_GPIO19_net_0,
-        spi_mosi      => RPi_GPIO16_net_0,
-        spi_cs_n      => RPi_GPIO26_net_0,
-        busy_out      => OPEN,
-        frame_err_out => OPEN 
+        s_ready  => spi_tx_path_0_s_ready,
+        spi_sclk => RPi_GPIO19_net_0,
+        spi_mosi => RPi_GPIO16_net_0,
+        spi_cs_n => RPi_GPIO26_net_0,
+        busy_out => OPEN 
         );
 -- test_block_producer_0
 test_block_producer_0 : entity work.test_block_producer

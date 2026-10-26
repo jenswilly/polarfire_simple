@@ -35,8 +35,7 @@ entity spi_tx_path is
         spi_cs_n      : out std_logic;
 
         -- Status
-        busy_out      : out std_logic;           -- SPI master busy (frame in progress or cs_n idle time)
-        frame_err_out : out std_logic            -- One-cycle pulse on a tlast mismatch (should never happen)
+        busy_out      : out std_logic            -- SPI master busy (frame in progress or cs_n idle time)
     );
 end entity spi_tx_path;
 
@@ -51,7 +50,6 @@ architecture rtl of spi_tx_path is
     signal axis_tdata  : std_logic_vector(7 downto 0);
     signal axis_tvalid : std_logic;
     signal axis_tready : std_logic;
-    signal axis_tlast  : std_logic;
 
 begin
 
@@ -79,7 +77,7 @@ begin
             m_axis_tdata  => axis_tdata,
             m_axis_tvalid => axis_tvalid,
             m_axis_tready => axis_tready,
-            m_axis_tlast  => axis_tlast
+            m_axis_tlast  => open
         );
 
     u_spi : entity work.axis_spi_wo_master
@@ -99,12 +97,10 @@ begin
             s_axis_tdata  => axis_tdata,
             s_axis_tvalid => axis_tvalid,
             s_axis_tready => axis_tready,
-            s_axis_tlast  => axis_tlast,
             spi_sclk      => spi_sclk,
             spi_mosi      => spi_mosi,
             spi_cs_n      => spi_cs_n,
-            busy_out      => busy_out,
-            frame_err_out => frame_err_out
+            busy_out      => busy_out
         );
 
 end architecture rtl;
