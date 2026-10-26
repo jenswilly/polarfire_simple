@@ -1,4 +1,4 @@
--- Self-checking testbench for axi_led_reg
+-- Self-checking testbench for axi_sys_ctrl
 --   Drives AXI4-Lite reads/writes and checks LED bits, the ID register and DEBUG_PULSE.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
@@ -6,10 +6,10 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity tb_axi_led_reg is
-end entity tb_axi_led_reg;
+entity tb_axi_sys_ctrl is
+end entity tb_axi_sys_ctrl;
 
-architecture sim of tb_axi_led_reg is
+architecture sim of tb_axi_sys_ctrl is
     constant CLK_PERIOD : time := 8 ns;   -- 125 MHz, same as the fabric clock
 
     signal clk     : std_logic := '0';
@@ -40,7 +40,7 @@ architecture sim of tb_axi_led_reg is
 begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
-    dut : entity work.axi_led_reg
+    dut : entity work.axi_sys_ctrl
         port map (
             ACLK    => clk,     ARESETN => rstn,
             AWADDR  => awaddr,  AWPROT  => "000", AWVALID => awvalid, AWREADY => awready,

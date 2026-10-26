@@ -1,6 +1,6 @@
 #!/bin/bash
 # Compile hdl/*.vhd plus one testbench and run it in Libero's QuestaSim (command line).
-#   Usage: sim/run_tb.sh <testbench> [vsim args]   e.g. sim/run_tb.sh tb_axi_led_reg
+#   Usage: sim/run_tb.sh <testbench> [vsim args]   e.g. sim/run_tb.sh tb_axi_sys_ctrl
 #   Extra arguments go to vsim, e.g. generic overrides: sim/run_tb.sh tb_axis_spi_master -gCPHA_I=1
 #   Exit code 0 if the testbench printed "TB PASSED", 1 otherwise.
 # A testbench that needs Libero-generated cores names them in a header line, e.g.
@@ -22,7 +22,7 @@ PORT=1702
 export LM_LICENSE_FILE="$PORT@localhost"
 export SALT_LICENSE_SERVER="$PORT@localhost"
 
-TB="${1:?usage: $0 <testbench, e.g. tb_axi_led_reg> [vsim args]}"
+TB="${1:?usage: $0 <testbench, e.g. tb_axi_sys_ctrl> [vsim args]}"
 shift
 SIM_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO_DIR="$(dirname "$SIM_DIR")"

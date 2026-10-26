@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Fri Oct 23 09:30:01 2026
+-- Created by SmartDesign Mon Oct 26 10:30:17 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -151,8 +151,8 @@ component AXI_IC
         TARGET0_WVALID      : out std_logic
         );
 end component;
--- axi_led_reg
--- using entity instantiation for component axi_led_reg
+-- axi_sys_ctrl
+-- using entity instantiation for component axi_sys_ctrl
 -- block_arbiter
 -- using entity instantiation for component block_arbiter
 -- button_debounce
@@ -385,7 +385,7 @@ signal AXI_IC_0_AXI4Lmtarget0_WDATA              : std_logic_vector(31 downto 0)
 signal AXI_IC_0_AXI4Lmtarget0_WREADY             : std_logic;
 signal AXI_IC_0_AXI4Lmtarget0_WSTRB              : std_logic_vector(3 downto 0);
 signal AXI_IC_0_AXI4Lmtarget0_WVALID             : std_logic;
-signal axi_led_reg_0_DEBUG_PULSE                 : std_logic;
+signal axi_sys_ctrl_0_DEBUG_PULSE                : std_logic;
 signal BA_net_0                                  : std_logic_vector(1 downto 0);
 signal BG0_net_0                                 : std_logic;
 signal block_arbiter_0_m_data                    : std_logic_vector(79 downto 0);
@@ -670,8 +670,8 @@ AXI_IC_0 : AXI_IC
         TARGET0_ARADDR       => AXI_IC_0_AXI4Lmtarget0_ARADDR,
         TARGET0_ARPROT       => AXI_IC_0_AXI4Lmtarget0_ARPROT 
         );
--- axi_led_reg_0
-axi_led_reg_0 : entity work.axi_led_reg
+-- axi_sys_ctrl_0
+axi_sys_ctrl_0 : entity work.axi_sys_ctrl
     generic map( 
         ADDR_WIDTH => ( 38 )
         )
@@ -679,29 +679,29 @@ axi_led_reg_0 : entity work.axi_led_reg
         -- Inputs
         ACLK        => PF_CCC_C0_0_OUT0_FABCLK_0,
         ARESETN     => CORERESET_0_FABRIC_RESET_N,
-        AWVALID     => AXI_IC_0_AXI4Lmtarget0_AWVALID,
-        WVALID      => AXI_IC_0_AXI4Lmtarget0_WVALID,
-        BREADY      => AXI_IC_0_AXI4Lmtarget0_BREADY,
-        ARVALID     => AXI_IC_0_AXI4Lmtarget0_ARVALID,
-        RREADY      => AXI_IC_0_AXI4Lmtarget0_RREADY,
         AWADDR      => AXI_IC_0_AXI4Lmtarget0_AWADDR,
         AWPROT      => AXI_IC_0_AXI4Lmtarget0_AWPROT,
+        AWVALID     => AXI_IC_0_AXI4Lmtarget0_AWVALID,
         WDATA       => AXI_IC_0_AXI4Lmtarget0_WDATA,
         WSTRB       => AXI_IC_0_AXI4Lmtarget0_WSTRB,
+        WVALID      => AXI_IC_0_AXI4Lmtarget0_WVALID,
+        BREADY      => AXI_IC_0_AXI4Lmtarget0_BREADY,
         ARADDR      => AXI_IC_0_AXI4Lmtarget0_ARADDR,
         ARPROT      => AXI_IC_0_AXI4Lmtarget0_ARPROT,
+        ARVALID     => AXI_IC_0_AXI4Lmtarget0_ARVALID,
+        RREADY      => AXI_IC_0_AXI4Lmtarget0_RREADY,
         -- Outputs
         AWREADY     => AXI_IC_0_AXI4Lmtarget0_AWREADY,
         WREADY      => AXI_IC_0_AXI4Lmtarget0_WREADY,
+        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
         BVALID      => AXI_IC_0_AXI4Lmtarget0_BVALID,
         ARREADY     => AXI_IC_0_AXI4Lmtarget0_ARREADY,
+        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
+        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP,
         RVALID      => AXI_IC_0_AXI4Lmtarget0_RVALID,
         LED2        => LED2_net_0,
         LED3        => LED3_net_0,
-        DEBUG_PULSE => axi_led_reg_0_DEBUG_PULSE,
-        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
-        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
-        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP 
+        DEBUG_PULSE => axi_sys_ctrl_0_DEBUG_PULSE 
         );
 -- block_arbiter_0
 block_arbiter_0 : entity work.block_arbiter
@@ -871,7 +871,7 @@ OR2_1 : OR2
     port map( 
         -- Inputs
         A => button_debounce_0_pulse_out,
-        B => axi_led_reg_0_DEBUG_PULSE,
+        B => axi_sys_ctrl_0_DEBUG_PULSE,
         -- Outputs
         Y => OR2_1_Y 
         );

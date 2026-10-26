@@ -1,7 +1,7 @@
-# axi_led_reg
+# axi_sys_ctrl
 
-AXI4-Lite slave with two LED bits, a read-only ID register and a write-triggered debug pulse.
-Source: `hdl/axi_led_reg.vhd`. In TOP it sits behind CoreAXI4Interconnect at `0x6000_0000`.
+System control registers (AXI4-Lite slave): two LED bits, a read-only ID register and a write-triggered debug pulse.
+Source: `hdl/axi_sys_ctrl.vhd`. In TOP it sits behind CoreAXI4Interconnect at `0x6000_0000`.
 
 ## Generics
 
@@ -54,7 +54,7 @@ Source: `hdl/axi_led_reg.vhd`. In TOP it sits behind CoreAXI4Interconnect at `0x
 
 ## Testbench
 
-`sim/tb_axi_led_reg.vhd` — `sim/run_tb.sh tb_axi_led_reg`. Also linked in Libero as the TOP stimulus.
+`sim/tb_axi_sys_ctrl.vhd` — `sim/run_tb.sh tb_axi_sys_ctrl`. Also linked in Libero as the TOP stimulus.
 
 | Test | Checks |
 |---|---|

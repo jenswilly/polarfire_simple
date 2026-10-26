@@ -1,4 +1,4 @@
--- Minimal AXI4-Lite slave: two LED bits, read-only ID register and a debug pulse
+-- System control registers (AXI4-Lite slave): two LED bits, read-only ID register and a debug pulse
 --   offset 0x0: LED control  (R/W)  bit0 = LED2, bit1 = LED3
 --   offset 0x4: ID           (RO)   0x1ED50001
 --   offset 0x8: DEBUG        (WO)   write bit0 = 1 -> DEBUG_PULSE high for one ACLK cycle (reads 0)
@@ -6,7 +6,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-entity axi_led_reg is
+entity axi_sys_ctrl is
     generic (
         ADDR_WIDTH : integer := 38
     );
@@ -45,9 +45,9 @@ entity axi_led_reg is
         -- Debug pulse (one ACLK cycle per write to 0x8)
         DEBUG_PULSE : out std_logic
     );
-end entity axi_led_reg;
+end entity axi_sys_ctrl;
 
-architecture rtl of axi_led_reg is
+architecture rtl of axi_sys_ctrl is
     constant ID_VALUE : std_logic_vector(31 downto 0) := x"1ED50001";
 
     signal led_reg  : std_logic_vector(1 downto 0);
@@ -81,7 +81,7 @@ begin
                 led_reg  <= (others => '0');
                 bvalid_i <= '0';
             elsif wr_ready = '1' then
-                bvalid_i <= '1';
+                bvalid_i <= '1'; -- This will make the write response valid for one cycle
                 if AWADDR(3 downto 2) = "00" and WSTRB(0) = '1' then
                     led_reg <= WDATA(1 downto 0);
                 end if;
@@ -101,7 +101,7 @@ begin
                 rvalid_i <= '0';
                 rdata_i  <= (others => '0');
             elsif rd_ready = '1' then
-                rvalid_i <= '1';
+                rvalid_i <= '1'; -- This will make the read data valid for one cycle
                 rdata_i  <= (others => '0');
                 case ARADDR(3 downto 2) is
                     when "00"   => rdata_i(1 downto 0) <= led_reg;
@@ -109,7 +109,7 @@ begin
                     when others => null;
                 end case;
             elsif RREADY = '1' then
-                rvalid_i <= '0';
+                rvalid_i <= '0'; -- Clear the read valid signal after the master acknowledges the read
             end if;
         end if;
     end process;

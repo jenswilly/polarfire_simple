@@ -37,7 +37,7 @@ void e51(void) {
   /* MMUART0 is routed through the fabric to the FTDI (pins Y21/W21) */
   (void)mss_config_clk_rst(MSS_PERIPH_MMUART0, (uint8_t)MPFS_HAL_FIRST_HART,
                            PERIPHERAL_ON);
-  /* FIC0: MSS -> fabric AXI path to axi_led_reg */
+  /* FIC0: MSS -> fabric AXI path to axi_sys_ctrl */
   (void)mss_config_clk_rst(MSS_PERIPH_FIC0, (uint8_t)MPFS_HAL_FIRST_HART,
                            PERIPHERAL_ON);
 

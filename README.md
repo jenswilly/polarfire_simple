@@ -32,7 +32,7 @@ The RPi header pins are in Bank1 (3.3 V). The QSPI breakout (W25Q128JV) gets 3.3
 
 ## Design overview
 
-Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock (OUT0) with `FABRIC_RESET_N` from `CORERESET_0`, except `qspi_board`, which runs on OUT1 (100 MHz, `clk_ctrl`) with `CORERESET_1`. The two clocks are asynchronous; only LED5/LED6 leave the QSPI domain. The MSS FIC_0 AXI4 initiator reaches `axi_led_reg` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_led_reg`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
+Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric runs on the 125 MHz `PF_CCC_C0` clock (OUT0) with `FABRIC_RESET_N` from `CORERESET_0`, except `qspi_board`, which runs on OUT1 (100 MHz, `clk_ctrl`) with `CORERESET_1`. The two clocks are asynchronous; only LED5/LED6 leave the QSPI domain. The MSS FIC_0 AXI4 initiator reaches `axi_sys_ctrl` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_sys_ctrl`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
 
 ### SPI TX path
 `spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 3` so SCLK = 125 MHz / 6 ≈ 20.83 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
@@ -58,7 +58,7 @@ Remaining work for the AS308G208 board (on hold until the target PCB exists):
 4. Vendor questions Q‑A1…Q‑A6 in `device_facts.md` §5 (currently accepted assumptions). The 8 Gb addressing question is answered there (§3.1: each CS# is one linear 4 Gb space).
 5. Optional: QPI 4-4-4 reads (38h, 0Bh, latency 10–15, FFh in 4-0-0 form to leave QPI) if the 1-4-4 overhead (≈ 1 µs per 8 reads) ever matters.
 
-### Register map (`axi_led_reg`, base `0x6000_0000`)
+### Register map (`axi_sys_ctrl`, base `0x6000_0000`)
 
 | Offset | Name | Access | Description |
 |--------|------|--------|-------------|
@@ -79,7 +79,7 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 ```
 mss/                MSS Configurator source (.cfg) and generated .cxz/.xml
 hdl/                Hand-written VHDL, linked into Libero:
-                      axi_led_reg.vhd      AXI4-Lite LED register + debug pulse
+                      axi_sys_ctrl.vhd     AXI4-Lite system control registers: LEDs, ID, debug pulse
                       button_debounce.vhd  Push-button debouncer with single-clock press pulse
                       pulse_stretch.vhd    Stretches a short pulse (1 ms in TOP, for the DEBUG pin)
                       axis_spi_master.vhd  AXI4-Stream SPI master, full duplex, fixed 10-byte frames (not used; kept for later)
@@ -131,18 +131,18 @@ The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...
 Testbenches live in `sim/` and are self-checking. Run one from the command line with Libero's QuestaSim:
 
 ```bash
-sim/run_tb.sh tb_axi_led_reg
+sim/run_tb.sh tb_axi_sys_ctrl
 ```
 
 The script rebuilds the work library in `sim/out/` (git-ignored) and compiles (VHDL-2008) `hdl/*_pkg.vhd` first, then the other `hdl/*.vhd` files, any models named in a `-- run_tb models: <name>` header line (from `sim/models/<name>.vhd`) and the testbench. Files are compiled in dependency order: a file that fails because a unit it uses isn't compiled yet is retried after the others. The testbench prints `TB PASSED` or `TB FAILED: <n> error(s)`, and the script exits with 0 or 1 accordingly. Any further arguments go to `vsim`, so generics can be overridden, e.g. `sim/run_tb.sh tb_axis_spi_master -gCPOL_I=1 -gCPHA_I=1`. QuestaSim needs the license server, which `tools/start_libero.sh` starts. To look at the waveforms afterwards:
 
 ```bash
-/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_led_reg.wlf
+/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/QuestaSim_Pro/linux_x86_64/vsim -view sim/out/tb_axi_sys_ctrl.wlf
 ```
 
-`tb_axi_led_reg` also runs from Libero. The testbenches `tb_axi_led_reg`, `tb_axis_spi_master`, `tb_button_debounce` and `tb_pulse_stretch` are linked into the project as stimulus files; the others run from the command line only. To link a testbench, use Files → stimulus → **Link Files**. A linked file does *not* show up under Files → stimulus, but it is listed in the Stimulus Hierarchy under Work and under User HDL Stimulus Files. `tb_axi_led_reg` is the one associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_led_reg` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_led_reg_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_led_reg` into `TOP`, so this testbench can't run there.
+`tb_axi_sys_ctrl` also runs from Libero. The testbenches `tb_axi_sys_ctrl`, `tb_axis_spi_master`, `tb_button_debounce` and `tb_pulse_stretch` are linked into the project as stimulus files; the others run from the command line only. To link a testbench, use Files → stimulus → **Link Files**. A linked file does *not* show up under Files → stimulus, but it is listed in the Stimulus Hierarchy under Work and under User HDL Stimulus Files. `tb_axi_sys_ctrl` is the one associated with `TOP` (Design Flow → **Create Design → Verify Pre-Synthesized Design → Simulate**, right-click → **Organize Input Files → Organize Stimulus Files**). Project Settings → Simulation Options has testbench module `tb_axi_sys_ctrl` and top-level instance `dut`. Right-click that Simulate → **Open Interactively** to get the QuestaSim GUI with waveforms. The log is `polarfire_simple/simulation/tb_axi_sys_ctrl_presynth_simulation.log`. Use only the pre-synthesis Simulate: the post-synthesis and post-layout netlists flatten `axi_sys_ctrl` into `TOP`, so this testbench can't run there.
 
-`tb_axi_led_reg` checks the ID register, the LED register (write and readback) and `DEBUG_PULSE`: exactly one cycle per write of 1, even with a slow `BREADY`, no pulse when writing 0 or writing to the LED register, and DEBUG reads as 0.
+`tb_axi_sys_ctrl` checks the ID register, the LED register (write and readback) and `DEBUG_PULSE`: exactly one cycle per write of 1, even with a slow `BREADY`, no pulse when writing 0 or writing to the LED register, and DEBUG reads as 0.
 
 `tb_button_debounce` uses `DEBOUNCE_CYCLES = 20` and asynchronous button edges. It checks: short glitches are ignored, both when released and when pressed; a bouncy press gives exactly one single-cycle pulse, exactly `DEBOUNCE_CYCLES + 2` clock edges after the last bounce; holding and releasing give no pulse; and holding the button through a reset gives one pulse after the reset.
 

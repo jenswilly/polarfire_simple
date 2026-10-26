@@ -2,13 +2,13 @@
 
 One page per hand-written VHDL entity in `hdl/`: generics, ports, usage notes, sub-components and testbenches. Implementation details are in the source headers; the system view is in the top-level `README.md`.
 
-All components use `clk` with a synchronous, active-low `reset_n` (except `axi_led_reg`, which uses the AXI names `ACLK` / `ARESETN`). Testbenches run with `sim/run_tb.sh tb_<name>` and print `TB PASSED` / `TB FAILED`.
+All components use `clk` with a synchronous, active-low `reset_n` (except `axi_sys_ctrl`, which uses the AXI names `ACLK` / `ARESETN`). Testbenches run with `sim/run_tb.sh tb_<name>` and print `TB PASSED` / `TB FAILED`.
 
 ## General
 
 | Component | Purpose |
 |---|---|
-| [axi_led_reg](axi_led_reg.md) | AXI4-Lite register block: LED bits, ID register, debug pulse. |
+| [axi_sys_ctrl](axi_sys_ctrl.md) | AXI4-Lite system control registers: LED bits, ID register, debug pulse. |
 | [button_debounce](button_debounce.md) | Push-button debouncer with level output and press pulse. |
 | [pulse_stretch](pulse_stretch.md) | Stretches a short pulse to a fixed length. |
 
