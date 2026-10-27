@@ -16,7 +16,7 @@ The ground rules in CLAUDE.md apply (VHDL subset Synplify supports, `hdl/` conve
 After the BIST has passed, two clients can read and write the QSPI memory through `qspi_board`, **never at the same time**:
 
 - **CPU** (E51 over FIC0): an AXI4-Lite register block. The CPU writes the memory to update lookup data and reads it back to verify. Throughput is not critical.
-- **Fabric**: AXI4-Stream request, write data, read data and response streams, for the high-throughput readers of the lookup data (e.g. 8 × 880 bytes within 200 µs).
+- **Fabric**: AXI4-Stream request, read data and response streams, for the high-throughput readers of the lookup data (e.g. 8 × 880 bytes within 200 µs). Fabric will never _write_ data to the QSPI memory.
 
 Who may access the memory follows from a **high-level system state** that the CPU controls:
 - `operational`: the fabric owns the QSPI.
@@ -33,42 +33,42 @@ Until the BIST has passed, all client requests are held (`tready` low). After a 
 - **Late write data pauses SCLK** (CS# stays low, `qspi_xact`). Functionally harmless, but a client that never delivers its data would keep the controller busy forever, and an ownership change would then never happen.
 - `qspi_bist` stops in `B_DONE` / `B_FAIL` (with `LOOP_ROUNDS = false`) and keeps driving `sample_dly_ovr_valid = '1'` with the calibrated delay until reset.
 - The BIST writes 8 blocks of 880 host bytes at stride `0x4000` from `BASE_ADDR = 0`, i.e. within host addresses `0x0000_0000 – 0x0001_FFFF`. On the W25Q128JV it erases the sectors it touches. It does this **at every power-up**.
-- `qspi_board` runs on `clk_ctrl` (100 MHz, `CORERESET_1`). FIC0 and the rest of the fabric run on 125 MHz. The two clocks are asynchronous (`constraints/timing.sdc`).
+- Everything in the fabric, including `qspi_board` (`clk_ctrl`) and FIC0, runs on the one 200 MHz clock (`PF_CCC_C0` OUT0, `CORERESET_0_FABRIC_RESET_N`). There is no clock domain crossing anywhere in this plan. At 200 MHz the QSPI controller is close to the timing limit, so check `syn_check.sh` after every change to the QSPI path.
 
 ## Architecture
 
 ```
- 125 MHz                                                      | 100 MHz (clk_ctrl)
-                                                              |
- FIC0 -+-> axi_sys_ctrl (LED, ID, DEBUG, STATE)                |
-       |      | operational                                   |
-       |      v                                               |
-       +-> qspi_axil_regs --(port 0)--+                       |
-                                      +--> qspi_client_mux --> qspi_port_cdc --> qspi_board
- fabric client(s) -------(port 1)----+     (owner = fabric    |   (CoreFIFOs)     qspi_host_mux
-   (reset while not operational)           when operational)  |                   + qspi_bist
-                                                              |                   + qspi_mram_ctrl
+ all blocks: one 200 MHz clock (PF_CCC_C0 OUT0)
+
+ FIC0 -+-> axi_sys_ctrl (LED, ID, DEBUG, STATE)
+       |      | operational
+       |      v
+       +-> qspi_axil_regs --(port 0)--+
+                                      +--> qspi_client_mux --> qspi_port_fifo --> qspi_board
+ fabric client(s) -------(port 1)----+     (owner = fabric      (CoreFIFOs)       qspi_host_mux
+   (reset while not operational)           when operational)                      + qspi_bist
+                                                                                  + qspi_mram_ctrl
 ```
 
 ## Design decisions
 
 | Item | Decision |
 |---|---|
-| Structure | `qspi_board` stays **single-clock** (`clk_ctrl`) with **one** client port. There is **one CDC block** (`qspi_port_cdc`) outside `qspi_board`. CPU and fabric meet in `qspi_client_mux` on the 125 MHz side. No arbitration, no per-client credit or read routing, because only one client owns the port at a time. |
+| Structure | Everything runs on the one 200 MHz clock. `qspi_board` has **one** client port. **One FIFO block** (`qspi_port_fifo`) outside `qspi_board` buffers it. CPU and fabric meet in `qspi_client_mux`. No arbitration, no per-client credit or read routing, because only one client owns the port at a time. |
 | Handover from the BIST | `qspi_host_mux` inside `qspi_board` connects `qspi_bist` to the controller until the BIST has passed **and** `busy = '0'`. Then it switches to the client port once (registered `ready`, cleared only by reset). `sample_dly_ovr*` stay driven by the BIST. `init_restart` is held at `'0'` after the switch. `LOOP_ROUNDS` must be false (`qspi_board` already uses the default false). |
 | Client request format | One request stream, 49 bit: `{wr, len[15:0], addr[31:0]}`. `qspi_host_mux` splits it into the controller's read and write request streams. |
-| Read flow control | `rd_space` of the controller comes from the CDC read data FIFO's write-side count (`clk_ctrl` domain, conservative). A read longer than that FIFO (`RD_DEPTH` generic) could never start, so it is rejected. |
-| Write flow control | **Store and forward.** `qspi_host_mux` forwards a write only when the CDC write data FIFO holds all `len` bytes (`wr_avail`, from its read-side count). The controller then never waits for data while CS# is low. A half-written request (e.g. the CPU program stops) therefore can't leave the controller busy and block the next ownership change. A write longer than `WR_DEPTH` is rejected. |
+| Read flow control | `rd_space` of the controller comes from the read data FIFO's count in `qspi_port_fifo` (conservative: it must never overstate the free space, including the count's latency). A read longer than that FIFO (`RD_DEPTH` generic) could never start, so it is rejected. |
+| Write flow control | **Store and forward.** `qspi_host_mux` forwards a write only when the write data FIFO in `qspi_port_fifo` holds all `len` bytes (`wr_avail`, from its count). The controller then never waits for data while CS# is low. A half-written request (e.g. the CPU program stops) therefore can't leave the controller busy and block the next ownership change. A write longer than `WR_DEPTH` is rejected. |
 | Responses | **Every request gets exactly one response** on a response stream, `{wr, err}`. Read OK: after its `tlast` has been forwarded. Write OK: `wr_done`. Error: the controller's `req_err` (one cycle after the accept), or `qspi_host_mux`'s own checks. `qspi_client_mux` counts requests without a response, to know when the port is idle. |
 | BIST area protection | `qspi_host_mux` rejects **writes** that overlap the BIST area (`BASE_ADDR … BASE_ADDR + (NBLK − 1) · BLK_STRIDE + BLK_LEN`). Reads there are allowed. The area is documented in README as reserved. Open question Q1. |
-| Ownership | `qspi_client_mux` (125 MHz) has two client ports with the same signals as the CDC client side: port 0 = CPU (`qspi_axil_regs`), port 1 = fabric. Its input is `operational`. Owner = fabric when `operational = '1'`, else CPU. The non-owner's `tready` signals are low and it sees no read data or responses. |
-| Ownership change | The owner changes only when the port is idle: no outstanding requests, and the CDC request and write data FIFOs are empty. Until then the old owner stays connected and the new one is held. **Leaving `operational`:** the fabric readers may be put into reset immediately, so from then on `qspi_client_mux` takes over the fabric's side. It drops further fabric requests, accepts and discards the remaining read data and responses of its outstanding requests, and only then hands the port to the CPU. `owner` (0 = CPU, 1 = fabric) is an output, readable by the CPU and visible to the fabric. |
-| System state | The high-level state register is `STATE` in **`axi_sys_ctrl`**, the renamed and extended `axi_led_reg` (register map below). It already has the general registers (LEDs, ID, debug pulse) and runs on the same 125 MHz FIC0 clock. Its output `operational` (125 MHz, no CDC needed) drives `qspi_client_mux` and, in TOP, the reset of the fabric blocks that produce data (`reset_n = FABRIC_RESET_N and operational`). `qspi_axil_regs` contains only QSPI registers. Open question Q3. |
-| Status | `qspi_board` outputs `ready` and `bist_fail` (quasi-static; `qspi_port_cdc` synchronises them with 2 flip-flops). `bist_pass` / `bist_fail` keep driving LED5 / LED6. |
-| CDC block | `qspi_port_cdc`, dual-clock CoreFIFOs: request (client → QSPI), write data (client → QSPI), read data + `tlast` (QSPI → client), response (QSPI → client), plus the `ready` / `bist_fail` synchronisers. It also gives `rd_space` and `wr_avail` to `qspi_board`, in the `clk_ctrl` domain. |
-| CoreFIFO configs | Two new configurations: `QSPI_CTL_FIFO` (dual clock, 49 bit × 16, for requests and responses; responses use the low bits) and `QSPI_DATA_FIFO` (dual clock, 9 bit × 2048 = one LSRAM, with write-side and read-side counts, for read data `{tlast, byte}` and write data). FWFT, active-high WE/RE, sync reset per side, like `BLOCK_FIFO_CORE`. Verify the exact count port names and latency in the configurator before writing the wrapper. |
-| CPU port | `qspi_axil_regs` on the 125 MHz FIC0 clock is a second target of CoreAXI4Interconnect, at `0x6000_1000 – 0x6000_1FFF`. Data moves 4 bytes per 32-bit register access. |
-| Fabric port | Port 1 of `qspi_client_mux`, exposed in TOP on the 125 MHz clock. First user: a small test client (Step 8). Open question Q2. |
+| Ownership | `qspi_client_mux` has two client ports with the same signals as the `qspi_port_fifo` client side: port 0 = CPU (`qspi_axil_regs`), port 1 = fabric. Its input is `operational`. Owner = fabric when `operational = '1'`, else CPU. The non-owner's `tready` signals are low and it sees no read data or responses. |
+| Ownership change | The owner changes only when the port is idle: no outstanding requests, and the request and write data FIFOs in `qspi_port_fifo` are empty. Until then the old owner stays connected and the new one is held. **Leaving `operational`:** the fabric readers may be put into reset immediately, so from then on `qspi_client_mux` takes over the fabric's side. It drops further fabric requests, accepts and discards the remaining read data and responses of its outstanding requests, and only then hands the port to the CPU. `owner` (0 = CPU, 1 = fabric) is an output, readable by the CPU and visible to the fabric. |
+| System state | The high-level state register is `STATE` in **`axi_sys_ctrl`**, the renamed and extended `axi_led_reg` (register map below). It already has the general registers (LEDs, ID, debug pulse) and runs on the same 200 MHz clock. Its output `operational` drives `qspi_client_mux` and, in TOP, the reset of the fabric blocks that produce data (`reset_n = FABRIC_RESET_N and operational`). `qspi_axil_regs` contains only QSPI registers. Open question Q3. |
+| Status | `qspi_board` outputs `ready` and `bist_fail` (same clock, no synchronisers needed). `bist_pass` / `bist_fail` keep driving LED5 / LED6. |
+| FIFO block | `qspi_port_fifo`, single-clock CoreFIFOs: request (client → QSPI), write data (client → QSPI), read data + `tlast` (QSPI → client), response (QSPI → client). It gives `rd_space` and `wr_avail` to `qspi_board`. No clock crossing: the FIFOs are there for the read credit (`rd_space`) and store and forward (`wr_avail`), and to decouple the client side from the controller. |
+| CoreFIFO configs | Two new configurations: `QSPI_CTL_FIFO` (single clock, 49 bit × 16, for requests and responses; responses use the low bits) and `QSPI_DATA_FIFO` (single clock, 9 bit × 2048 = one LSRAM, with a count output, for read data `{tlast, byte}` and write data). FWFT, active-high WE/RE, sync reset, like `BLOCK_FIFO_CORE`. Verify the exact count port names and latency in the configurator before writing the wrapper. |
+| CPU port | `qspi_axil_regs` on the FIC0 (200 MHz) clock is a second target of CoreAXI4Interconnect, at `0x6000_1000 – 0x6000_1FFF`. Data moves 4 bytes per 32-bit register access. |
+| Fabric port | Port 1 of `qspi_client_mux`, exposed in TOP on the 200 MHz clock. First user: a small test client (Step 8). Open question Q2. |
 
 ### System register map (`axi_sys_ctrl`, base `0x6000_0000`, proposal)
 
@@ -106,7 +106,7 @@ Software sequences:
 ## Open questions (answer before the step that needs them)
 
 - **Q1 (Step 1):** Keep the BIST area at host `0x0000_0000 – 0x0001_FFFF`, or move it, e.g. to the end of the memory (the `BASE_ADDR` generic, exposed on `qspi_board`)? On the MRAM, lookup data in that area would be overwritten at every power-up.
-- **Q2 (Step 8):** What is the real fabric client? Its clock domain and how it consumes the data decide the TOP wiring after the test client. If it runs on `clk_ctrl`, it would need its own path; this plan assumes 125 MHz.
+- **Q2 (Step 8):** What is the real fabric client? How it consumes the data decides the TOP wiring after the test client. This plan assumes it runs on the common 200 MHz clock; a client on another clock would need its own CDC.
 - **Q3 (Step 6):** Which system states are there besides `operational`, and what is their encoding in STATE? If this isn't decided by Step 6, use 0 = idle (reset value) and 1 = operational, and leave the rest reserved.
 
 ## Steps
@@ -140,21 +140,21 @@ Software sequences:
 - The user updates the HDL+ core and the instance in SmartDesign (new ports tied off for now) and does Generate Component.
 - **Done when:** tests pass, the generated `TOP.vhd` shows the new ports, and synthesis, place and route and timing still pass in Libero.
 
-### Step 4 — `qspi_port_cdc` with CoreFIFOs
+### Step 4 — `qspi_port_fifo` with CoreFIFOs
 - The user creates `QSPI_CTL_FIFO` and `QSPI_DATA_FIFO` in the CoreFIFO configurator (instructions from Claude). Claude checks the `.cxf` values and the `_manifest.txt`.
-- `hdl/qspi_port_cdc.vhd`: four FIFOs, `rd_space` / `wr_avail` from the counts, 2-FF synchronisers for `ready` / `bist_fail`, and a client-side `idle` output (request and write data FIFOs empty) for `qspi_client_mux`.
-- `sim/tb_qspi_port_cdc.vhd` (`-- run_tb cores: QSPI_CTL_FIFO QSPI_DATA_FIFO`), with 100 MHz and 125 MHz clocks:
+- `hdl/qspi_port_fifo.vhd`: four FIFOs, `rd_space` / `wr_avail` from the counts, `ready` / `bist_fail` passed through, and an `idle` output (request and write data FIFOs empty) for `qspi_client_mux`.
+- `sim/tb_qspi_port_fifo.vhd` (`-- run_tb cores: QSPI_CTL_FIFO QSPI_DATA_FIFO`), 200 MHz clock:
   - streams pass through intact in both directions
   - `rd_space` never overstates the real free space
   - `wr_avail` never overstates the bytes present
-  - resets on both sides
+  - reset with data in the FIFOs
 - CLAUDE.md: add the two CoreFIFO configs (like the `BLOCK_FIFO_CORE` note).
 - **Done when:** the testbench passes and `syn_check` is clean (with the core sources).
 
-### Step 5 — `qspi_client_mux` (125 MHz, pure RTL)
-- Two client ports (CPU, fabric), one port to `qspi_port_cdc`, inputs `operational` and `idle`, output `owner`.
+### Step 5 — `qspi_client_mux` (pure RTL)
+- Two client ports (CPU, fabric), one port to `qspi_port_fifo`, inputs `operational` and `idle`, output `owner`.
 - Ownership as in Design decisions: change only when the port is idle, the non-owner is held, and on leaving `operational` the remaining fabric data and responses are drained.
-- `sim/tb_qspi_client_mux.vhd` with a behavioural stand-in for the CDC + `qspi_board` (responds to requests with data and responses after a delay):
+- `sim/tb_qspi_client_mux.vhd` with a behavioural stand-in for `qspi_port_fifo` + `qspi_board` (responds to requests with data and responses after a delay):
   - each client only gets through while it is the owner
   - `operational` toggled with requests outstanding: `owner` changes only after the last response
   - fabric put in reset mid-read: its remaining data is drained, and the CPU's first read afterwards gets only its own data
@@ -177,15 +177,15 @@ The rename `axi_led_reg` → `axi_sys_ctrl` (HDL, testbench, docs, `e51.c` comme
 ### Step 7 — CPU port: `qspi_axil_regs` and TOP
 - `hdl/qspi_axil_regs.vhd` (structure like `axi_sys_ctrl`), register map as above.
 - `sim/tb_qspi_axil_regs.vhd`:
-  - AXI-Lite master BFM through `qspi_client_mux` → `qspi_port_cdc` → `qspi_board` → model
+  - AXI-Lite master BFM through `qspi_client_mux` → `qspi_port_fifo` → `qspi_board` → model
   - write/read of a block via the registers, lengths of 4n and 4n + 2
   - RSP and LEVELS behaviour, ID, STATUS before and after `ready`
   - `owner` following an `operational` input driven by the testbench
   - slow `BREADY` / `RREADY`
 - TOP (user, with instructions):
   - a second interconnect target at `0x6000_1000`
-  - `qspi_axil_regs` + `qspi_client_mux` + `qspi_port_cdc` wiring, `axi_sys_ctrl` `operational` → `qspi_client_mux`, fabric port tied off
-  - Derive Constraints if needed, then check that the existing asynchronous clock groups cover the FIFO crossings
+  - `qspi_axil_regs` + `qspi_client_mux` + `qspi_port_fifo` wiring, `axi_sys_ctrl` `operational` → `qspi_client_mux`, fabric port tied off
+  - Derive Constraints if needed
 - **Done when:** the tests pass, Libero passes synthesis, place and route and timing, and the user has programmed the board.
 
 ### Step 8 — Fabric port in TOP and a test client
@@ -217,7 +217,7 @@ The rename `axi_led_reg` → `axi_sys_ctrl` (HDL, testbench, docs, `e51.c` comme
 | 1 — BIST area and `qspi_board` generics | open |
 | 2 — `qspi_host_mux` | open |
 | 3 — `qspi_board` with the client port | open |
-| 4 — `qspi_port_cdc` with CoreFIFOs | open |
+| 4 — `qspi_port_fifo` with CoreFIFOs | open |
 | 5 — `qspi_client_mux` | open |
 | 6 — `axi_sys_ctrl`: add STATE | open (rename done) |
 | 7 — CPU port: `qspi_axil_regs` and TOP | open |
