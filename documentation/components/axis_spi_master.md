@@ -8,7 +8,7 @@ Source: `hdl/axis_spi_master.vhd`. Not used in TOP (kept for later); the write-o
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `FRAME_BYTES` | positive | 10 | Bytes per CS_N assertion. |
-| `CLK_DIV` | positive | 7 | `clk` cycles per SCLK half-period (f_sclk = f_clk / (2·CLK_DIV); 8.93 MHz at 125 MHz). |
+| `CLK_DIV` | positive | 7 | `clk` cycles per SCLK half-period (f_sclk = f_clk / (2·CLK_DIV); 14.29 MHz at 200 MHz). |
 | `CPOL` | std_logic | '0' | SCLK idle level. |
 | `CPHA` | std_logic | '0' | 0: sample on leading edge, 1: on trailing edge. |
 | `MSB_FIRST` | boolean | true | Bit order on MOSI/MISO. |
@@ -16,7 +16,6 @@ Source: `hdl/axis_spi_master.vhd`. Not used in TOP (kept for later); the write-o
 | `CS_HOLD` | natural | 1 | Half-periods after the last edge before CS_N goes high. |
 | `CS_IDLE` | natural | 2 | Minimum half-periods CS_N high between frames. |
 | `MISO_SYNC` | natural | 2 | MISO synchronizer stages (0 only if MISO is already synchronous to `clk`). |
-| `RX_ENABLE` | boolean | true | false removes the RX path (`m_axis_tvalid` stays low). |
 
 ## Ports
 
@@ -29,7 +28,7 @@ Source: `hdl/axis_spi_master.vhd`. Not used in TOP (kept for later); the write-o
 | `s_axis_tready` | out | 1 | TX byte accepted. |
 | `s_axis_tlast` | in | 1 | Optional; only used for the `frame_err_out` check (default '0'). |
 | `m_axis_tdata` | out | 8 | RX byte (AXI4-Stream initiator). |
-| `m_axis_tvalid` | out | 1 | RX byte valid (stays low with `RX_ENABLE` = false). |
+| `m_axis_tvalid` | out | 1 | RX byte valid. |
 | `m_axis_tready` | in | 1 | Consumer ready; defaults to '1'. |
 | `m_axis_tlast` | out | 1 | Last byte of a frame. |
 | `spi_sclk` | out | 1 | SPI clock. |

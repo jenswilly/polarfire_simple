@@ -24,7 +24,7 @@ entity tb_qspi_init is
 end entity tb_qspi_init;
 
 architecture sim of tb_qspi_init is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
 
     type result_t is (R_DONE, R_ERR_ID, R_ERR_CFG);
     type cfg_t is record
@@ -88,8 +88,8 @@ begin
         signal reset_pulses : natural := 0;
     begin
         init : entity work.qspi_init
-            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_HZ => 100_000_000,
-                         SCLK_DIV => 1, T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
+            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_HZ => 200_000_000,
+                         SCLK_DIV => 2, T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
             port map (
                 clk => clk, reset_n => rstn, init_restart => init_restart,
                 init_done => init_done, init_err => init_err, err_code => err_code, step => open,
@@ -104,7 +104,7 @@ begin
                 rx_tlast => rx_tlast);
 
         xact : entity work.qspi_xact
-            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_HZ => 100_000_000)
+            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => cmd_valid, cmd_ready => cmd_ready, cmd_op => cmd_op,
@@ -115,7 +115,7 @@ begin
                 s_axis_tdata => tx_tdata, s_axis_tvalid => tx_tvalid, s_axis_tready => tx_tready,
                 m_axis_tdata => rx_tdata, m_axis_tvalid => rx_tvalid, m_axis_tready => rx_tready,
                 m_axis_tlast => rx_tlast, rx_overflow => open,
-                sample_dly => 2, busy => xact_busy,
+                sample_dly => 4, busy => xact_busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
         pads : for i in 0 to 7 generate

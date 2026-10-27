@@ -28,7 +28,7 @@ architecture sim of tb_block_arbiter is
 
     constant BLOCK_BYTES : positive := 10;
     constant W           : positive := BLOCK_BYTES * 8;
-    constant CLK_PERIOD  : time     := 8 ns;    -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD  : time     := 5 ns;    -- 200 MHz, same as the fabric clock
 
     -- Block = port (8 b), sequence number (16 b), filler that depends on both
     function blk(p, seq : natural) return std_logic_vector is

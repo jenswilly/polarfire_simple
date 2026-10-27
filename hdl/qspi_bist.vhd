@@ -3,13 +3,13 @@
 --   qspi_bist --(init_restart, rd_req, wr_req/data, sample_dly_ovr)--> qspi_mram_ctrl
 --             <--(init_done/err, read data, wr_done, req errors)------
 --
---   1. Wait for init. With CALIBRATE, a failed init is retried with sample delays 1..4 (init
---      itself reads ID and registers, so a wrong delay can make it fail).
+--   1. Wait for init. With CALIBRATE, a failed init is retried with sample delays
+--      1..SAMPLE_DLY_MAX (init itself reads ID and registers, so a wrong delay can make it fail).
 --   2. Write the pattern once: NBLK blocks of BLK_LEN host bytes at BASE_ADDR + k * BLK_STRIDE;
 --      host byte i of block k = (k * 7 + i) mod 256. On the W25Q128JV each block's sectors are
 --      erased first, so the pattern is written once per reset only (flash endurance).
---   3. With CALIBRATE: read all blocks once with each sample delay 1..4, record which delays
---      return the pattern (cal_window(d)) and use the middle of the first passing run
+--   3. With CALIBRATE: read all blocks once with each sample delay 1..SAMPLE_DLY_MAX, record
+--      which delays return the pattern (cal_window(d)) and use the middle of the first passing run
 --      (lower middle for an even width) from then on (cal_dly).
 --   4. Read all blocks and compare. With LOOP_ROUNDS, again and again until reset (reads don't wear the
 --      flash); without, once, then stop (B_DONE, no more QSPI traffic).
@@ -114,6 +114,10 @@ architecture rtl of qspi_bist is
     signal count     : unsigned(15 downto 0) := (others => '0');
     signal calibrating : std_logic := '0';                     -- Current round is a calibration round
     signal wait_cnt  : natural range 0 to 3 := 0;              -- Cycles until init status is valid
+    -- ctrl_busy, registered: it is combinational over several levels in qspi_mram_ctrl and failed
+    -- setup at 200 MHz into this state machine. One cycle late is safe: only the BIST makes the
+    -- controller busy, and it issues nothing in the states that wait for busy_r = '0'.
+    signal busy_r    : std_logic := '1';
 begin
     init_restart         <= restart;
     rd_space             <= (others => '1');
@@ -139,6 +143,7 @@ begin
     begin
         if rising_edge(clk) then
             restart <= '0';
+            busy_r  <= ctrl_busy;
 
             -- Read data check (runs in B_ROUND)
             if rd_tvalid = '1' then
@@ -175,10 +180,8 @@ begin
                             state <= B_WREQ;
                         elsif init_err = '1' then
                             if CALIBRATE and tries < SAMPLE_DLY_MAX then
-                                ovr_v    <= '1';
-                                ovr_d    <= try_dly;
-                                tries    <= tries + 1;
-                                state    <= B_INIT_RETRY;
+                                tries <= tries + 1;
+                                state <= B_INIT_RETRY;
                             else
                                 fail_r <= '1';
                                 state  <= B_FAIL;
@@ -186,8 +189,11 @@ begin
                         end if;
 
                     when B_INIT_RETRY =>
-                        -- Restart init with the new delay once the controller is idle
-                        if ctrl_busy = '0' then
+                        -- Set the next delay and restart init once the controller is idle (the
+                        -- failed init's last transaction may still be finishing)
+                        if busy_r = '0' then
+                            ovr_v    <= '1';
+                            ovr_d    <= try_dly;
                             restart  <= '1';
                             wait_cnt <= 3;
                             if try_dly < SAMPLE_DLY_MAX then
@@ -231,7 +237,7 @@ begin
                     ---------------------------------------------------------------- Calibration
                     when B_CAL_SET =>
                         -- Change the sample delay only while the controller is idle
-                        if ctrl_busy = '0' then
+                        if busy_r = '0' then
                             ovr_v       <= '1';
                             ovr_d       <= try_dly;
                             blk         <= 0;
@@ -268,7 +274,7 @@ begin
                         if lo = 0 then
                             fail_r <= '1';
                             state  <= B_FAIL;
-                        elsif ctrl_busy = '0' then
+                        elsif busy_r = '0' then
                             ovr_v       <= '1';
                             ovr_d       <= (lo + hi) / 2;
                             calibrating <= '0';
@@ -328,6 +334,7 @@ begin
                 round_bad <= '0';
                 calibrating <= '0';
                 wait_cnt  <= 0;
+                busy_r    <= '1';
             end if;
         end if;
     end process;

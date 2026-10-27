@@ -11,7 +11,9 @@
 --   on the board.
 --   Use as an HDL+ core so the generics can be set per instance. They are integers because the
 --   HDL+ configurator only handles integer generics.
---   clk is clk_ctrl (2 x the SCLK frequency for SCLK_DIV = 1); reset_n must be synchronous to it.
+--   clk is clk_ctrl (the fabric clock, 200 MHz in TOP: SCLK 50 MHz with SCLK_DIV = 2 and
+--   SAMPLE_DLY = 4, timing_budget.md); reset_n must be synchronous to it. The ranges 1 to 8 must
+--   match SCLK_DIV_MAX / SAMPLE_DLY_MAX in qspi_pkg.
 --   The pad registers are inside qspi_phy; constraints/qspi_ioreg.ndc combines them into the I/O
 --   cells.
 
@@ -23,9 +25,9 @@ use work.qspi_pkg.all;
 entity qspi_board is
     generic (
         DEVICE_SEL : natural range 0 to 1 := 0;        -- 0: W25Q128JV, 1: AS308G208 (one die)
-        CLK_HZ     : positive := 100_000_000;          -- Input clock frequency
-        SCLK_DIV   : positive range 1 to 4 := 1;       -- SCLK = CLK_HZ / (2 * SCLK_DIV)
-        SAMPLE_DLY : positive range 1 to 4 := 2;       -- RX sample delay before calibration
+        CLK_HZ     : positive := 200_000_000;          -- Input clock frequency
+        SCLK_DIV   : positive range 1 to 8 := 2;       -- SCLK = CLK_HZ / (2 * SCLK_DIV)
+        SAMPLE_DLY : positive range 1 to 8 := 4;       -- RX sample delay before calibration
         CALIBRATE  : natural range 0 to 1 := 1;        -- 1: BIST calibrates the sample delay
         NBLK       : positive := 8;                    -- BIST blocks
         BLK_LEN    : positive := 880                   -- BIST host bytes per block (even)

@@ -15,7 +15,7 @@ entity tb_qspi_board is
 end entity tb_qspi_board;
 
 architecture sim of tb_qspi_board is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz, as in TOP
 
     signal clk       : std_logic := '0';
     signal rstn      : std_logic := '0';
@@ -30,7 +30,7 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     dut : entity work.qspi_board
-        generic map (DEVICE_SEL => 0, CLK_HZ => 100_000_000, SCLK_DIV => 1, SAMPLE_DLY => 2,
+        generic map (DEVICE_SEL => 0, CLK_HZ => 200_000_000, SCLK_DIV => 2, SAMPLE_DLY => 4,
                      CALIBRATE => 1, NBLK => 2, BLK_LEN => 64)
         port map (clk => clk, reset_n => rstn, qspi_sclk => qspi_sclk, qspi_cs_n => qspi_cs_n,
                   qspi_io => qspi_io, bist_pass => pass, bist_fail => fail);

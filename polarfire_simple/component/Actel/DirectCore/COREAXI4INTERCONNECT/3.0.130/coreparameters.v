@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------
-// Created by Microsemi SmartDesign Wed Oct  7 11:50:08 2026
+// Created by Microsemi SmartDesign Tue Oct 27 11:02:51 2026
 // Parameters for COREAXI4INTERCONNECT
 //--------------------------------------------------------------------
 
@@ -1358,7 +1358,7 @@ parameter TARGET0_CDC_FIFO_DEPTH = 16;
 parameter TARGET0_CDC_PLACEMENT = 1;
 parameter TARGET0_CHAN_RS = 1;
 parameter TARGET0_CLOCK_DOMAIN_CROSSING = 0;
-parameter TARGET0_DATA_WIDTH = 32;
+parameter TARGET0_DATA_WIDTH = 64;
 parameter TARGET0_DWC_CHAN_RS = 0;
 parameter TARGET0_DWC_DATA_FIFO_DEPTH = 16;
 parameter TARGET0_END_ADDR = 'h60000fff;

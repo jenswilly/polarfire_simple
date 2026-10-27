@@ -21,7 +21,7 @@ end entity tb_test_block_producer;
 
 architecture sim of tb_test_block_producer is
 
-    constant CLK_PERIOD : time := 8 ns;    -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD : time := 5 ns;    -- 200 MHz, same as the fabric clock
 
     function blk(seq : natural) return std_logic_vector is
     begin

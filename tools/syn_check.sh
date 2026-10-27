@@ -4,10 +4,12 @@
 #   e.g.   tools/syn_check.sh qspi_mram_ctrl as2 DEVICE=DEV_AS308G208 DIE2_PRESENT=true
 #   Default sources: hdl/util_pkg.vhd, hdl/qspi_pkg.vhd and hdl/qspi_*.vhd (VHDL-2008);
 #   after "--" give hdl file names (without .vhd) instead.
-#   Target: PolarFire SoC MPFS095T FCSG325 -1, 100 MHz, no I/O insertion (module check only;
-#   IO=1 tools/syn_check.sh ... inserts I/O buffers, e.g. for a board-level wrapper).
+#   Target: PolarFire SoC MPFS095T FCSG325 -1, 200 MHz (the fabric clock; FREQ=<MHz> to change),
+#   no I/O insertion (module check only; IO=1 tools/syn_check.sh ... inserts I/O buffers, e.g. for
+#   a board-level wrapper).
 #   Output in sim/out/syn/<config>/ (git-ignored). Prints errors, latches, multiple drivers and
-#   combinational loops, then the resource summary; exit code 1 if any of those were found.
+#   combinational loops, then the resource summary and Synplify's estimated clock frequency (a
+#   pre-P&R estimate, only a hint); exit code 1 if any of those were found.
 # Needs the license server (tools/start_libero.sh starts it).
 
 LIBERO_INSTALL_DIR="/usr/local/microchip/Libero_SoC_2026.1"
@@ -53,7 +55,7 @@ TCL="$OUT_DIR/run.tcl"
     echo "set_option -speed_grade -1"
     echo "set_option -vhdl2008 1"
     echo "set_option -top_module \"work.$TOP\""
-    echo "set_option -frequency 100.000"
+    echo "set_option -frequency ${FREQ:-200}"
     echo "set_option -disable_io_insertion $((1 - ${IO:-0}))"
     echo "set_option -resolve_multiple_driver 0"
     for p in "${PARAMS[@]}"; do echo "set_option -hdl_param -set ${p%%=*} ${p#*=}"; done
@@ -75,4 +77,5 @@ else
     echo "No errors, latches, multiple drivers or combinational loops."
 fi
 grep -A25 -E '^Resource Usage Report' "$SRR" | grep -E 'SLE|Total LUTs|Total ARI1|RAM'
+grep -A12 -E '^Performance Summary' "$SRR" | grep -E 'MHz' | grep -v -E '^\s*Starting'
 [ -z "$PROBLEMS" ]

@@ -9,8 +9,8 @@ Source: `hdl/qspi_init.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md). Se
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | Memory type. |
 | `DIE2_PRESENT` | boolean | false | Check both dies. |
-| `CLK_HZ` | positive | 100 000 000 | `clk` frequency (for wait times and the slow SCLK). |
-| `SCLK_DIV` | positive | 1 | Normal SCLK divider. |
+| `CLK_HZ` | positive | 200 000 000 | `clk` frequency (for wait times and the slow SCLK). |
+| `SCLK_DIV` | positive | 2 | Normal SCLK divider. |
 | `T_POWERUP_NS` | natural | 0 | W25Q tPUW / AS tPU; 0 = datasheet value. |
 | `T_RESET_NS` | natural | 0 | W25Q tRST / AS RESET# low time; 0 = datasheet value. |
 

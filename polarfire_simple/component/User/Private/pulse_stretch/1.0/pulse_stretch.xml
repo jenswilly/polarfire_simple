@@ -29,7 +29,7 @@
       </spirit:signal>
     </spirit:signals>
     <spirit:hwParameters>
-      <spirit:hwParameter spirit:id="STRETCH_CYCLES" spirit:name="STRETCH_CYCLES" spirit:prompt="STRETCH_CYCLES:" spirit:dataType="int" spirit:resolve="user">125000</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="STRETCH_CYCLES" spirit:name="STRETCH_CYCLES" spirit:prompt="STRETCH_CYCLES:" spirit:dataType="int" spirit:resolve="user">200000</spirit:hwParameter>
     </spirit:hwParameters>
     <spirit:deletedhwParameters>
     </spirit:deletedhwParameters>

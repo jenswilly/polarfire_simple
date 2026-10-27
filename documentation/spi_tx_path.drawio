@@ -6,7 +6,7 @@
         <mxCell id="1" parent="0" />
 
         <!-- Title and notes -->
-        <mxCell id="title" value="&lt;b&gt;SPI TX path&lt;/b&gt; (all blocks on the 125 MHz fabric clock)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
+        <mxCell id="title" value="&lt;b&gt;SPI TX path&lt;/b&gt; (all blocks on the 200 MHz fabric clock)" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;" vertex="1" parent="1">
           <mxGeometry x="40" y="20" width="600" height="30" as="geometry" />
         </mxCell>
 

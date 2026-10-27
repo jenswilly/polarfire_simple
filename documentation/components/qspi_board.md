@@ -8,9 +8,9 @@ Source: `hdl/qspi_board.vhd`. Used as an HDL+ core in TOP; the generics are inte
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `DEVICE_SEL` | natural 0–1 | 0 | 0: W25Q128JV, 1: AS308G208 (one die). |
-| `CLK_HZ` | positive | 100 000 000 | `clk` frequency. |
-| `SCLK_DIV` | positive 1–4 | 1 | SCLK = `CLK_HZ` / (2·`SCLK_DIV`). |
-| `SAMPLE_DLY` | positive 1–4 | 2 | RX sample delay (clocks) before calibration. |
+| `CLK_HZ` | positive | 200 000 000 | `clk` frequency. |
+| `SCLK_DIV` | positive 1–8 | 2 | SCLK = `CLK_HZ` / (2·`SCLK_DIV`). |
+| `SAMPLE_DLY` | positive 1–8 | 4 | RX sample delay (clocks) before calibration. |
 | `CALIBRATE` | natural 0–1 | 1 | 1: BIST calibrates the sample delay. |
 | `NBLK` | positive | 8 | BIST blocks. |
 | `BLK_LEN` | positive | 880 | BIST host bytes per block (even). |
@@ -19,7 +19,7 @@ Source: `hdl/qspi_board.vhd`. Used as an HDL+ core in TOP; the generics are inte
 
 | Port | Dir | Width | Description |
 |---|---|---|---|
-| `clk` | in | 1 | `clk_ctrl` (2 × SCLK for `SCLK_DIV` = 1). |
+| `clk` | in | 1 | `clk_ctrl`, the 200 MHz fabric clock (4 × SCLK for `SCLK_DIV` = 2). |
 | `reset_n` | in | 1 | Synchronous to `clk`, active low. |
 | `qspi_sclk` | out | 1 | SCLK pin. |
 | `qspi_cs_n` | out | 1 | CS# pin. |

@@ -36,4 +36,6 @@
 Done: the BIST passes at 50 MHz SCLK with calibration window {2}. Verify Timing for the 50 MHz build with 4 mA drive is met in all corners (input setup 1.91 ns is the tightest; `timing_budget.md`).
 
 Open, optional: the 25 MHz window was not read. The AS308G208 dual-die board is on hold until the target PCB exists (README.md, QSPI controller and BIST).
-- `constraints/timing.sdc` assumes SCLK_DIV = 1 (`-divide_by 2`). The timing report is only meaningful for that build.
+- All results above are from the old 100 MHz `clk_ctrl` build (OUT1, `SCLK_DIV` = 1, sample points 10 ns apart).
+- **200 MHz** (single fabric clock since 2026-10-27, `SCLK_DIV` = 2, `SAMPLE_DLY` = 4): the BIST passes on the breakout (LED5, 2026-10-27). SmartDebug Active Probe: `bist/window` = `0x1C`, i.e. sample delays {3, 4, 5} (15, 20 and 25 ns after the falling edge) pass with the W25Q128JV; the BIST picks the middle, 4 (`bist/ovr_d` = 4, `ctrl/smp_dly` = 4). That is one step wider than the worst-case prediction in `timing_budget.md` ({4}, or {3, 4} / {4, 5}), as expected for typical device and wiring delays; worst case still guarantees only 4. Probe `window` and `smp_dly`/`ovr_d`, not `try_dly` (the sweep counter ends at 8). SmartDebug splits `smp_dly` into `smp_dly_Z[3:1]` and bit 0, so read all four bits.
+- `constraints/timing.sdc` assumes `SCLK_DIV` = 2 (`-divide_by 4`). The timing report is only meaningful for that build.

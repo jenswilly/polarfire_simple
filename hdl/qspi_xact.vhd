@@ -42,7 +42,7 @@ entity qspi_xact is
     generic (
         DEVICE       : device_t := DEV_W25Q128JV;
         DIE2_PRESENT : boolean  := false;
-        CLK_HZ       : positive := 100_000_000    -- clk (clk_ctrl) frequency
+        CLK_HZ       : positive := 200_000_000    -- clk (clk_ctrl) frequency
     );
     port (
         clk            : in  std_logic;
@@ -154,6 +154,10 @@ architecture rtl of qspi_xact is
     signal state     : state_t := X_IDLE;
     signal cur_ph    : ph_sel_t := PH_DONE;
     signal data_left : unsigned(15 downto 0) := (others => '0');   -- TX units still to issue
+    -- data_left = col_target (the chunk being collected is the last), one cycle behind: both
+    -- change only on a handshake or a command latch, and the next TX data handshake is at least
+    -- two cycles later. Registered for timing at 200 MHz.
+    signal last_chunk : std_logic := '0';
 
     -- TX chunk collector (4-line: units = host bytes, max 8; 1-line: units = bytes per die, max 4)
     signal col_active : std_logic := '0';
@@ -183,11 +187,13 @@ architecture rtl of qspi_xact is
     -- RX: 1-line bit accumulation and the output FIFO ({last, data})
     signal acc1, acc2 : std_logic_vector(7 downto 0) := (others => '0');
     signal acc_n      : natural range 0 to 7 := 0;
-    type fifo_t is array (0 to 3) of std_logic_vector(8 downto 0);
+    -- RX FIFO: capacity 4, but 8 slots, so incoming words can be written before the overflow
+    -- check without touching unread entries (keeps pop / f_cnt out of the write enables)
+    type fifo_t is array (0 to 7) of std_logic_vector(8 downto 0);
     signal fifo       : fifo_t := (others => (others => '0'));
     attribute syn_ramstyle : string;
-    attribute syn_ramstyle of fifo : signal is "registers";      -- 4 entries: flip-flops, not RAM
-    signal f_rd, f_wr : unsigned(1 downto 0) := (others => '0');
+    attribute syn_ramstyle of fifo : signal is "registers";      -- 8 entries: flip-flops, not RAM
+    signal f_rd, f_wr : unsigned(2 downto 0) := (others => '0');
     signal f_cnt      : natural range 0 to 4 := 0;
     signal ovf        : std_logic := '0';
     signal rx_done    : std_logic := '0';                          -- Last RX byte queued
@@ -269,6 +275,11 @@ begin
     begin
         if rising_edge(clk) then
             hs := ph_valid = '1' and ph_ready = '1';
+            if data_left = col_target then
+                last_chunk <= '1';
+            else
+                last_chunk <= '0';
+            end if;
 
             ---------------------------------------------------------------- TX chunk collector
             if s_ready_i = '1' and s_axis_tvalid = '1' then
@@ -352,7 +363,7 @@ begin
                             col_die    <= '0';
                             chunk_tx1  <= (others => '0');
                             chunk_tx2  <= (others => '0');
-                            if left /= 0 then
+                            if last_chunk = '0' then
                                 nph := PH_DATA;
                                 col_target <= chunk_units(left, c_lanes /= L111);
                             else
@@ -378,7 +389,7 @@ begin
                         if cur_ph = PH_DATA and c_dir = DIR_TX then
                             if chunk_full = '1' then
                                 present(PH_DATA);
-                                if data_left = col_target then
+                                if last_chunk = '1' then
                                     ph_last <= '1';
                                 end if;
                             end if;
@@ -413,7 +424,6 @@ begin
         variable n_push : natural range 0 to 2;
         variable d0, d1 : std_logic_vector(8 downto 0);
         variable pop    : boolean;
-        variable wr     : unsigned(1 downto 0);
         variable cnt    : natural range 0 to 6;
         variable b1, b2 : std_logic_vector(7 downto 0);
     begin
@@ -449,22 +459,21 @@ begin
                 end if;
             end if;
 
+            -- Unread entries are f_rd .. f_rd + 3 at most, so f_wr and f_wr + 1 are always free.
+            -- Only the words that fit advance f_wr; the others are dropped (rx_overflow).
+            if n_push >= 1 then
+                fifo(to_integer(f_wr)) <= d0;
+            end if;
+            if n_push = 2 then
+                fifo(to_integer(f_wr + 1)) <= d1;
+            end if;
             pop := f_cnt /= 0 and m_axis_tready = '1';
             cnt := f_cnt - boolean'pos(pop);
             if cnt + n_push > 4 then
                 ovf    <= '1';
                 n_push := 4 - cnt;
             end if;
-            wr := f_wr;
-            if n_push >= 1 then
-                fifo(to_integer(wr)) <= d0;
-                wr := wr + 1;
-            end if;
-            if n_push = 2 then
-                fifo(to_integer(wr)) <= d1;
-                wr := wr + 1;
-            end if;
-            f_wr  <= wr;
+            f_wr  <= f_wr + n_push;
             f_cnt <= cnt + n_push;
             if pop then
                 f_rd <= f_rd + 1;

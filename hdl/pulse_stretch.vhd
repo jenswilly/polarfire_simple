@@ -1,6 +1,6 @@
 -- Pulse stretcher
 --   A high pulse_in (any length, synchronous to clk) makes pulse_out high for STRETCH_CYCLES
---   clk cycles, starting on the next clock edge (default 125_000 = 1 ms at 125 MHz).
+--   clk cycles, starting on the next clock edge (default 200_000 = 1 ms at 200 MHz).
 --   A new pulse_in while pulse_out is high restarts the count, so close pulses merge.
 --   pulse_out comes straight from a flip-flop, so it is glitch-free on a pin.
 
@@ -9,7 +9,7 @@ use ieee.std_logic_1164.all;
 
 entity pulse_stretch is
     generic (
-        STRETCH_CYCLES : positive := 125_000   -- Output length in clk cycles. Align with clock freq.
+        STRETCH_CYCLES : positive := 200_000   -- Output length in clk cycles. Align with clock freq.
     );
     port (
         clk       : in  std_logic;

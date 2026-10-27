@@ -1,7 +1,7 @@
 -- Push-button debouncer with a single-clock press pulse
 --   btn_in is asynchronous; it goes through a 2-FF synchronizer first.
 --   The debounced state changes only after the synchronized input has differed from it
---   for DEBOUNCE_CYCLES consecutive clocks (default 1_250_000 = 10 ms at 125 MHz).
+--   for DEBOUNCE_CYCLES consecutive clocks (default 2_000_000 = 10 ms at 200 MHz).
 --   pulse_out is high for exactly one clk cycle when a press is accepted. Releases give no pulse.
 --   pressed_out is the debounced level ('1' = pressed, regardless of ACTIVE_LOW).
 --   Latency: pulse_out goes high on the (DEBOUNCE_CYCLES + 2)th clock edge after the last bounce
@@ -12,7 +12,7 @@ use ieee.std_logic_1164.all;
 
 entity button_debounce is
     generic (
-        DEBOUNCE_CYCLES : positive := 1_250_000; -- Number of clock cycles to debounce. Align with clock freq.
+        DEBOUNCE_CYCLES : positive := 2_000_000; -- Number of clock cycles to debounce. Align with clock freq.
         ACTIVE_LOW      : boolean  := true       -- True: btn_in = '0' means pressed
     );
     port (

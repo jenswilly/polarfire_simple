@@ -17,13 +17,13 @@
         <mxCell id="clkint" value="&lt;b&gt;CLKINT&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="200" y="90" width="100" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ccc" value="&lt;b&gt;PF_CCC_C0&lt;/b&gt;&lt;br&gt;VCO 4000 MHz (was 5000)&lt;br&gt;OUT0 ÷8 → 125 MHz&lt;br&gt;OUT1 ÷10 → 100 MHz (new)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+        <mxCell id="ccc" value="&lt;b&gt;PF_CCC_C0&lt;/b&gt;&lt;br&gt;OUT0 200 MHz&lt;br&gt;(single fabric clock;&lt;br&gt;OUT1 removed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
           <mxGeometry x="340" y="70" width="200" height="90" as="geometry" />
         </mxCell>
-        <mxCell id="fabric" value="&lt;b&gt;Existing fabric logic&lt;/b&gt;&lt;br&gt;FIC0 ACLK, spi_tx_path, … (125 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+        <mxCell id="fabric" value="&lt;b&gt;Existing fabric logic&lt;/b&gt;&lt;br&gt;FIC0 ACLK, spi_tx_path, … (200 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="640" y="50" width="240" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="rst1" value="&lt;b&gt;CORERESET_1&lt;/b&gt; (CORERESET_PF)&lt;br&gt;CLK = clk_ctrl&lt;br&gt;PLL_LOCK, INIT_DONE as CORERESET_0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+        <mxCell id="rst1" value="&lt;b&gt;CORERESET_0&lt;/b&gt; (CORERESET_PF)&lt;br&gt;CLK = OUT0 = clk_ctrl&lt;br&gt;shared with the fabric" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
           <mxGeometry x="640" y="130" width="240" height="60" as="geometry" />
         </mxCell>
 
@@ -33,10 +33,10 @@
         <mxCell id="e_int_ccc" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.556;entryDx=0;entryDy=0;" edge="1" parent="1" source="clkint" target="ccc">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_ccc_fab" value="OUT0 125 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.111;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="ccc" target="fabric">
+        <mxCell id="e_ccc_fab" value="OUT0 200 MHz" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.111;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="ccc" target="fabric">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_ccc_rst" value="OUT1 100 MHz&lt;br&gt;PLL_LOCK" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.889;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="ccc" target="rst1">
+        <mxCell id="e_ccc_rst" value="OUT0 200 MHz&lt;br&gt;PLL_LOCK" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.889;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="ccc" target="rst1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
@@ -44,7 +44,7 @@
         <mxCell id="board" value="&lt;b&gt;qspi_board&lt;/b&gt; (HDL+ core in TOP, all on clk_ctrl)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacingLeft=8;fontColor=#3c5d8f;" vertex="1" parent="1">
           <mxGeometry x="40" y="240" width="1260" height="600" as="geometry" />
         </mxCell>
-        <mxCell id="e_clk_board" value="clk_ctrl (OUT1, 100 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=0.5;exitY=1;entryX=0.317;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ccc" target="board">
+        <mxCell id="e_clk_board" value="clk_ctrl (OUT0, 200 MHz)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=0.5;exitY=1;entryX=0.317;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ccc" target="board">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e_rst_board" value="reset_n" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=0.5;exitY=1;entryX=0.571;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="rst1" target="board">
@@ -57,7 +57,7 @@
         </mxCell>
 
         <!-- BIST -->
-        <mxCell id="bist" value="&lt;b&gt;qspi_bist&lt;/b&gt;&lt;br&gt;&lt;br&gt;after init_done:&lt;br&gt;write counter pattern once,&lt;br&gt;then read back and&lt;br&gt;compare once&lt;br&gt;(LOOP_ROUNDS: until reset)&lt;br&gt;&lt;br&gt;CALIBRATE: retry init and&lt;br&gt;sweep SAMPLE_DLY 1–4,&lt;br&gt;pick the window centre" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+        <mxCell id="bist" value="&lt;b&gt;qspi_bist&lt;/b&gt;&lt;br&gt;&lt;br&gt;after init_done:&lt;br&gt;write counter pattern once,&lt;br&gt;then read back and&lt;br&gt;compare once&lt;br&gt;(LOOP_ROUNDS: until reset)&lt;br&gt;&lt;br&gt;CALIBRATE: retry init and&lt;br&gt;sweep SAMPLE_DLY 1–8,&lt;br&gt;pick the window centre" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
           <mxGeometry x="70" y="300" width="200" height="320" as="geometry" />
         </mxCell>
 
@@ -178,7 +178,7 @@
         <mxCell id="leg_ext" value="external" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;dashed=1;fontSize=10;" vertex="1" parent="1">
           <mxGeometry x="610" y="890" width="90" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="note" value="Single clock domain: every qspi block runs on clk_ctrl (100 MHz) with reset_n from CORERESET_1. Only LED5/LED6 leave the domain, so there is no CDC logic. qspi_board generics (integers for HDL+): DEVICE_SEL, CLK_HZ, SCLK_DIV, SAMPLE_DLY, CALIBRATE, NBLK, BLK_LEN; single die only. I/O registers (constraints/qspi_ioreg.ndc): SCLK/CS# output and IO3:0 input registers sit in the I/O cells. RESET# (AS308G208) is not a qspi_board port: tie it high on the board until the dual-die wrapper exists (README.md). init, read and write share qspi_xact through an arbiter (init first, then read/write take turns; the owner only changes while qspi_xact is idle)." style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="note" value="Single clock domain: every qspi block runs on clk_ctrl, the 200 MHz fabric clock (OUT0), with reset_n from CORERESET_0, the same as the rest of the fabric and FIC_0, so the read stream needs no CDC logic. SCLK_DIV = 2 (50 MHz), SAMPLE_DLY = 4 (20 ns). qspi_board generics (integers for HDL+): DEVICE_SEL, CLK_HZ, SCLK_DIV, SAMPLE_DLY, CALIBRATE, NBLK, BLK_LEN; single die only. I/O registers (constraints/qspi_ioreg.ndc): SCLK/CS# output and IO3:0 input registers sit in the I/O cells. RESET# (AS308G208) is not a qspi_board port: tie it high on the board until the dual-die wrapper exists (README.md). init, read and write share qspi_xact through an arbiter (init first, then read/write take turns; the owner only changes while qspi_xact is idle)." style="text;html=1;align=left;verticalAlign=top;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="730" y="870" width="810" height="60" as="geometry" />
         </mxCell>
       </root>

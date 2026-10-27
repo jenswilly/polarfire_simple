@@ -4,7 +4,7 @@
 --     0: W25Q128JV, one die          (DIE2_PRESENT = false)
 --     1: AS308G208, one die          (DIE2_PRESENT = false)
 --     2: AS308G208, two dies         (DIE2_PRESENT = true; die 2 has another seed and ID)
---   clk_ctrl 100 MHz, SCLK 50 MHz (25 MHz for the AS 9Fh), sample delay 2, 3 ns board delay.
+--   clk_ctrl 200 MHz, SCLK 50 MHz (33 MHz for the AS 9Fh), sample delay 4, 3 ns board delay.
 --   W25Q: reset, JEDEC ID, status registers, EBh read, sector erase + BUSY polling, quad page
 --     program (1-1-4) wrapping in the page with junk upper nibbles, 1-1-1 program, read back.
 --   AS: device ID per die, RDAR, EBh reads with latency 8 and 10 (CR2 written with WRAR) and
@@ -24,7 +24,7 @@ entity tb_qspi_xact is
 end entity tb_qspi_xact;
 
 architecture sim of tb_qspi_xact is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
     constant NCFG       : positive := 3;
 
     subtype byte8 is std_logic_vector(7 downto 0);
@@ -57,7 +57,7 @@ begin
         signal cmd_lat     : natural range 0 to 15 := 0;
         signal cmd_dir     : dir_t := DIR_NONE;
         signal cmd_len     : unsigned(15 downto 0) := (others => '0');
-        signal cmd_div     : natural range 1 to SCLK_DIV_MAX := 1;
+        signal cmd_div     : natural range 1 to SCLK_DIV_MAX := 2;
         signal cmd_write   : std_logic := '0';
         signal s_tdata     : std_logic_vector(7 downto 0) := (others => '0');
         signal s_tvalid    : std_logic := '0';
@@ -80,7 +80,7 @@ begin
         signal rx_n      : natural := 0;
     begin
         dut : entity work.qspi_xact
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 100_000_000)
+            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => cmd_valid, cmd_ready => cmd_ready, cmd_op => cmd_op,
@@ -91,7 +91,7 @@ begin
                 s_axis_tdata => s_tdata, s_axis_tvalid => s_tvalid, s_axis_tready => s_tready,
                 m_axis_tdata => m_tdata, m_axis_tvalid => m_tvalid, m_axis_tready => '1',
                 m_axis_tlast => m_tlast, rx_overflow => rx_ovf,
-                sample_dly => 2, busy => busy,
+                sample_dly => 4, busy => busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
         -- Board: tristate pads
@@ -141,7 +141,7 @@ begin
 
             procedure issue(op : byte8; lanes : cmd_lanes_t; addr : natural; ab : natural;
                             mode_en : std_logic; lat : natural; dir : dir_t; len : natural;
-                            div : positive := 1; wr : std_logic := '0') is
+                            div : positive := 2; wr : std_logic := '0') is
             begin
                 cmd_op      <= op;
                 cmd_lanes   <= lanes;
@@ -297,7 +297,7 @@ begin
                 issue(x"EB", L144, 16#001010#, 3, '1', 4, DIR_RX, 12);
                 expect(host_bytes(S1, S1), "1-1-1 program");
             else
-                issue(x"9F", L111, 0, 0, '0', 0, DIR_RX, 4, div => 2);
+                issue(x"9F", L111, 0, 0, '0', 0, DIR_RX, 4, div => 3);
                 expect(line1_bytes((x"E6", x"21", x"2C", x"01"), (x"E6", x"21", x"2A", x"01")),
                        "device ID");
                 issue(x"65", L111, 16#03#, 4, '0', 8, DIR_RX, 1);

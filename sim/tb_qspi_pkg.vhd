@@ -1,6 +1,7 @@
 -- Self-checking testbench for qspi_pkg
 --   Checks the device parameters through the util_pkg helpers (the device timings converted with
---   ns_to_cycles at 100 MHz, address widths with clog2), read_overhead_clocks and id_ok.
+--   ns_to_cycles at the 200 MHz clk_ctrl, and that they fit the counters of qspi_xact / qspi_init),
+--   address widths with clog2, read_overhead_clocks and id_ok.
 --   The helpers themselves are tested in tb_util_pkg.
 --   No clock or DUT: everything is a function call.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
@@ -26,18 +27,21 @@ begin
             end if;
         end procedure;
 
-        constant HZ_100M : positive := 100_000_000;
+        constant HZ_200M : positive := 200_000_000;
         constant W25 : dev_params_t := dev_params(DEV_W25Q128JV);
         constant AS  : dev_params_t := dev_params(DEV_AS308G208);
     begin
-        -- 1. The device timings the controller converts, at 100 MHz
-        check(ns_to_cycles(W25.t_cs_rd_ns,   HZ_100M) = 1,         "W25Q tSHSL1 at 100 MHz");
-        check(ns_to_cycles(W25.t_cs_wr_ns,   HZ_100M) = 5,         "W25Q tSHSL2 at 100 MHz");
-        check(ns_to_cycles(W25.t_reset_ns,   HZ_100M) = 3_000,     "W25Q tRST at 100 MHz");
-        check(ns_to_cycles(W25.t_powerup_ns, HZ_100M) = 500_000,   "W25Q tPUW at 100 MHz");
-        check(ns_to_cycles(AS.t_cs_rd_ns,    HZ_100M) = 2,         "AS tCS1 at 100 MHz");
-        check(ns_to_cycles(AS.t_cs_wr_ns,    HZ_100M) = 60,        "AS tCS3 at 100 MHz");
-        check(ns_to_cycles(AS.t_powerup_ns,  HZ_100M) = 2_500_000, "AS tPU at 100 MHz");
+        -- 1. The device timings the controller converts, at 200 MHz
+        check(ns_to_cycles(W25.t_cs_rd_ns,   HZ_200M) = 2,         "W25Q tSHSL1 at 200 MHz");
+        check(ns_to_cycles(W25.t_cs_wr_ns,   HZ_200M) = 10,        "W25Q tSHSL2 at 200 MHz");
+        check(ns_to_cycles(W25.t_reset_ns,   HZ_200M) = 6_000,     "W25Q tRST at 200 MHz");
+        check(ns_to_cycles(W25.t_powerup_ns, HZ_200M) = 1_000_000, "W25Q tPUW at 200 MHz");
+        check(ns_to_cycles(AS.t_cs_rd_ns,    HZ_200M) = 4,         "AS tCS1 at 200 MHz");
+        check(ns_to_cycles(AS.t_cs_wr_ns,    HZ_200M) = 120,       "AS tCS3 at 200 MHz");
+        check(ns_to_cycles(AS.t_powerup_ns,  HZ_200M) = 5_000_000, "AS tPU at 200 MHz");
+        -- They must fit qspi_xact's 8-bit CS# high count (+ 1 cycle) and qspi_init's 26-bit counter
+        check(ns_to_cycles(AS.t_cs_wr_ns, HZ_200M) + 1 < 2 ** 8, "AS tCS3 + 1 must fit 8 bits");
+        check(ns_to_cycles(AS.t_powerup_ns, HZ_200M) < 2 ** 26, "AS tPU must fit 26 bits");
 
         -- 2. Address widths from the device sizes
         check(clog2(W25.size_bytes) = 24, "W25Q size should need 24 address bits");

@@ -8,7 +8,7 @@ Source: `hdl/axis_spi_wo_master.vhd`. Used inside [spi_tx_path](spi_tx_path.md).
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `FRAME_BYTES` | positive | 10 | Bytes per CS_N assertion. |
-| `CLK_DIV` | positive | 3 | `clk` cycles per SCLK half-period (f_sclk = f_clk / (2·CLK_DIV); 20.83 MHz at 125 MHz). |
+| `CLK_DIV` | positive | 5 | `clk` cycles per SCLK half-period (f_sclk = f_clk / (2·CLK_DIV); 20 MHz at 200 MHz). |
 | `CPOL` | std_logic | '0' | SCLK idle level. |
 | `CPHA` | std_logic | '0' | 0: slave samples on leading edge, 1: on trailing edge. |
 | `MSB_FIRST` | boolean | true | Bit order on MOSI. |

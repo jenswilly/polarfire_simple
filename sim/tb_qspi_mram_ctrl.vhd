@@ -1,10 +1,10 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Full-system testbench for qspi_mram_ctrl: init -> write -> 8 x 880 read
 --   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
---   clk_ctrl 100 MHz, SCLK 50 MHz, 3 ns board delay, preloaded models with short power-up,
+--   clk_ctrl 200 MHz, SCLK 50 MHz, 3 ns board delay, preloaded models with short power-up,
 --   reset, erase and program times (and the same short times in the DUT).
---   The SAMPLE_DLY generic is 3, which does not fit the board delay: everything runs with
---   sample_dly_ovr = 2, and one read without the override must return wrong data.
+--   The SAMPLE_DLY generic is 6 (30 ns), which does not fit the board delay: everything runs with
+--   sample_dly_ovr = 4 (20 ns), and one read without the override must return wrong data.
 --     1. Init after reset must end with init_done (models: no protocol errors, e.g. 9Fh speed).
 --     2. Write 8 blocks of 880 host bytes (W25Q: one block per sector). While the first write is
 --        running, a read of an unwritten area is requested: the arbiter must let it wait until
@@ -12,7 +12,7 @@
 --        Then a write is requested while a read is still delivering data: the read must
 --        arrive complete (the owner may only change once qspi_xact is idle).
 --     3. Read the 8 blocks back to back and report the time (8 x 880 host bytes, ~145 us).
---     4. One read with the override off (SAMPLE_DLY = 3): must return wrong data.
+--     4. One read with the override off (SAMPLE_DLY = 6): must return wrong data.
 --     5. init_restart: requests during init give rd_req_err / wr_req_err; after init_done a read
 --        works again.
 --   All read data and tlast are checked against the written data / erased flash / preload.
@@ -28,7 +28,7 @@ entity tb_qspi_mram_ctrl is
 end entity tb_qspi_mram_ctrl;
 
 architecture sim of tb_qspi_mram_ctrl is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
     constant NCFG       : positive := 3;
     constant SEED1      : positive := 5;
     constant SEED2      : positive := 9;
@@ -79,8 +79,8 @@ begin
         signal t_rx     : time := 0 ns;          -- Time of the last received byte
     begin
         dut : entity work.qspi_mram_ctrl
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_CTRL_HZ => 100_000_000,
-                         SCLK_DIV => 1, SAMPLE_DLY => 3, SPACE_W => 16,
+            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_CTRL_HZ => 200_000_000,
+                         SCLK_DIV => 2, SAMPLE_DLY => 6, SPACE_W => 16,
                          T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
             port map (
                 clk => clk, reset_n => rstn,
@@ -94,7 +94,7 @@ begin
                 wr_req_tdata => wr_req_tdata, wr_req_tvalid => wr_req_tvalid,
                 wr_req_tready => wr_req_tready, wr_req_err => wr_req_err, wr_done => wr_done,
                 s_axis_wr_tdata => wd_tdata, s_axis_wr_tvalid => wd_tvalid, s_axis_wr_tready => wd_tready,
-                sample_dly_ovr_valid => ovr_valid, sample_dly_ovr => 2,
+                sample_dly_ovr_valid => ovr_valid, sample_dly_ovr => 4,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io,
                 mem_reset_n => mem_reset_n);
 
@@ -294,13 +294,13 @@ begin
             read_req(blk_addr(1) - 32, 64);                    -- Across the start of block 1
             verify(base, blk_addr(1) - 32, 64, "block 1 start", bad);
 
-            -- 4. Without the sample delay override (SAMPLE_DLY = 3): wrong data
+            -- 4. Without the sample delay override (SAMPLE_DLY = 6): wrong data
             wait until rising_edge(clk) and busy = '0';
             ovr_valid <= '0';
             base := rx_n;
             read_req(blk_addr(2), 64);
-            verify(base, blk_addr(2), 64, "SAMPLE_DLY 3", bad, false);
-            check(bad > 0, "SAMPLE_DLY 3 should give wrong data with this board delay");
+            verify(base, blk_addr(2), 64, "SAMPLE_DLY 6", bad, false);
+            check(bad > 0, "SAMPLE_DLY 6 should give wrong data with this board delay");
             wait until rising_edge(clk) and busy = '0';
             ovr_valid <= '1';
 

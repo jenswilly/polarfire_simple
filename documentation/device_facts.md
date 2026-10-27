@@ -220,7 +220,7 @@ Written before the HDL. Where the implementation differs (e.g. the AS308G208 reg
 5. **Writes:** W25Q128JV: 20h sector erase + BUSY polling, then 32h (1-1-4) per page + BUSY polling. AS308G208: D2h (1-4-4) or 02h, then CS# high ≥ 600 ns.
 6. **Min CS# high:** 20 ns after reads (both), 600 ns after writes (AS) / 50 ns (W25Q). Use one generic `CS_HIGH_WR_NS = 600` for both, since writes only happen in tests.
 7. **IO2/IO3 (IO6/IO7) driven high in 1-1-1 phases.**
-8. **Sampling window (first estimate; see `timing_budget.md`):** data from the device is valid from tCO (AS 9 ns / W25Q 6 ns) + board delay after the falling edge until the next falling edge + tOH (1 ns / 1.5 ns). At 50 MHz (20 ns period), sampling 20 ns after the launch edge (SAMPLE_DLY = 2 at 100 MHz) works as long as tCO + round-trip delay + FPGA input setup ≤ 20 ns. For the AS308G208 that leaves about 11 ns, minus the FPGA input setup, for the round-trip delay (SCLK out + data back). `timing_budget.md` does this properly.
+8. **Sampling window (first estimate; see `timing_budget.md`):** data from the device is valid from tCO (AS 9 ns / W25Q 6 ns) + board delay after the falling edge until the next falling edge + tOH (1 ns / 1.5 ns). At 50 MHz (20 ns period), sampling 20 ns after the launch edge (SAMPLE_DLY = 2 at 100 MHz, 4 at 200 MHz) works as long as tCO + round-trip delay + FPGA input setup ≤ 20 ns. For the AS308G208 that leaves about 11 ns, minus the FPGA input setup, for the round-trip delay (SCLK out + data back). `timing_budget.md` does this properly.
 
 ---
 

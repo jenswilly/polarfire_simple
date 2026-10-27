@@ -1,6 +1,6 @@
 -- Self-checking testbench for qspi_phy
 --   A driver feeds a fixed table of transactions (phase descriptors) to the PHY, once per run.
---   Each run has its own SCLK divider (1, 2), sample delay (1-4) and device round-trip delay.
+--   Each run has its own SCLK divider (1-8), sample delay (1-8) and device round-trip delay.
 --   A pin-level device stub follows the same table and checks, at every SCLK edge:
 --     - CS#/SCLK: first rising edge sclk_div clk cycles after CS# low, exact high/low times,
 --       exactly the expected number of SCLK cycles per CS# assertion, CS# high only after the
@@ -9,7 +9,7 @@
 --     - TX bit order: SPI1 on IO0/IO4 MSB first, QUAD4 on IO3:0/IO7:4 high nibble first
 --     - OE: SPI1 = IO0/IO2/IO3 driven (IO2/IO3 high), QUAD4 TX all driven, QUAD4 RX/NONE released
 --   and drives RX data (IO1/IO5 in SPI1, IO3:0/IO7:4 in QUAD4) a delay T after each falling
---   edge that launches an RX cycle, and 'X' otherwise. With T = 10 ns * sample_dly - 5 ns the
+--   edge that launches an RX cycle, and 'X' otherwise. With T = 5 ns * sample_dly - 2.5 ns the
 --   PHY must return exactly that data; a run with a mismatched T must give wrong data.
 --   One run inserts gaps between descriptors (SCLK pauses, PHY state S_WAIT).
 --   A monitor checks on every pin event: SCLK toggles only while CS# is low, CS# and OE change
@@ -32,7 +32,7 @@ end entity tb_qspi_phy;
 
 architecture sim of tb_qspi_phy is
     constant DIE2       : boolean := DIE2_I /= 0;
-    constant CLK_PERIOD : time    := 10 ns;          -- clk_ctrl 100 MHz
+    constant CLK_PERIOD : time    := 5 ns;           -- clk_ctrl 200 MHz
 
     -- Transaction table: phases, ph_last ends a transaction
     type phase_t is record
@@ -80,16 +80,21 @@ architecture sim of tb_qspi_phy is
     end record;
     type run_arr_t is array (natural range <>) of run_t;
     constant RUNS : run_arr_t := (
-        (1, 1,  5 ns, true,  false),
-        (1, 2, 15 ns, true,  false),
-        (1, 3, 25 ns, true,  false),
-        (1, 4, 35 ns, true,  false),
-        (2, 1,  5 ns, true,  false),
-        (2, 2, 15 ns, true,  false),
-        (2, 3, 25 ns, true,  false),
-        (2, 4, 35 ns, true,  false),
-        (1, 2, 15 ns, true,  true),    -- Gaps between descriptors
-        (1, 1, 25 ns, false, false)    -- Sample before the data arrives: must fail
+        (1, 1,  2.5 ns, true,  false),
+        (1, 4, 17.5 ns, true,  false),
+        (1, 8, 37.5 ns, true,  false),    -- Sample later than the next launch
+        (2, 1,  2.5 ns, true,  false),
+        (2, 2,  7.5 ns, true,  false),
+        (2, 3, 12.5 ns, true,  false),
+        (2, 4, 17.5 ns, true,  false),    -- Design point: SCLK 50 MHz, sample at 20 ns
+        (2, 5, 22.5 ns, true,  false),
+        (2, 8, 37.5 ns, true,  false),
+        (3, 2,  7.5 ns, true,  false),
+        (4, 6, 27.5 ns, true,  false),
+        (8, 1,  2.5 ns, true,  false),
+        (8, 8, 37.5 ns, true,  false),
+        (2, 4, 17.5 ns, true,  true),     -- Gaps between descriptors
+        (2, 1, 12.5 ns, false, false)     -- Sample before the data arrives: must fail
     );
 
     signal clk         : std_logic := '0';
@@ -218,6 +223,7 @@ begin
         variable t_rise      : time;
         variable t_fall      : time;
         variable t_launch    : time;
+        variable t_exp       : time;
         variable had_rx      : boolean;
         variable first_rise  : boolean;
         variable first_in_run: boolean;
@@ -381,11 +387,14 @@ begin
                     check(false, "extra SCLK cycle");
                     wait until cs_n(0) = '1';
                 end if;
-                check(now - t_fall >= CLK_PERIOD, "CS# high too soon after the last SCLK fall");
-                if had_rx then
-                    check(now >= t_launch + RUNS(r).dly * CLK_PERIOD,
-                          "CS# high before the last RX sample");
+                -- CS# rises on the first clk edge after the last falling edge at which no launched
+                -- RX cycle is waiting for its sample (sample taken dly clk cycles after launch)
+                t_exp := t_fall + CLK_PERIOD;
+                if had_rx and t_launch + (RUNS(r).dly + 1) * CLK_PERIOD > t_exp then
+                    t_exp := t_launch + (RUNS(r).dly + 1) * CLK_PERIOD;
                 end if;
+                check(now = t_exp, "CS# high at " & time'image(now) & ", expected "
+                      & time'image(t_exp));
                 t_cs_rise := now;
                 prev_cs_high := TABLE(p).cs_high;
                 ti := p + 1;

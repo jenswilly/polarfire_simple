@@ -32,8 +32,8 @@ entity qspi_init is
     generic (
         DEVICE         : device_t := DEV_W25Q128JV;
         DIE2_PRESENT   : boolean  := false;
-        CLK_HZ         : positive := 100_000_000; -- Input clock frequency
-        SCLK_DIV       : positive := 1;           -- Normal SCLK divider
+        CLK_HZ         : positive := 200_000_000; -- Input clock frequency
+        SCLK_DIV       : positive := 2;           -- Normal SCLK divider
         T_POWERUP_NS   : natural  := 0;           -- W25Q tPUW / AS tPU
         T_RESET_NS     : natural  := 0            -- W25Q tRST / AS RESET# low time
     );
@@ -111,7 +111,7 @@ architecture rtl of qspi_init is
         S_QREAD, S_DONE, S_ERROR);
 
     -- Within a step: wait, issue the command, send TX bytes, receive RX bytes, check
-    type sub_t is (U_WAIT, U_CMD, U_TX, U_RX, U_CHECK);
+    type sub_t is (U_WAIT, U_CMD, U_TX, U_NEXT, U_RX, U_CHECK);
 
     function first_step return step_t is
     begin
@@ -364,10 +364,15 @@ begin
                             if tx_tready = '1' then
                                 if n_tx = 1 then
                                     tx_val_r <= '0';
-                                    enter(next_step(cur));
+                                    sub      <= U_NEXT;
                                 end if;
                                 n_tx <= n_tx - 1;
                             end if;
+
+                        when U_NEXT =>
+                            -- One cycle after the last TX byte: keeps tx_tready (muxed by the
+                            -- qspi_mram_ctrl arbiter) out of the count / step logic (200 MHz)
+                            enter(next_step(cur));
 
                         when U_RX =>
                             if rx_tvalid = '1' then
