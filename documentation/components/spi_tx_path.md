@@ -8,7 +8,7 @@ Source: `hdl/spi_tx_path.vhd`. Diagram: `documentation/spi_tx_path.drawio`.
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `BLOCK_BYTES` | positive | 10 | Must match the CoreFIFO width / 8 (checked in `block_fifo`). |
-| `CLK_DIV` | positive | 3 | `clk` cycles per SCLK half-period (20.83 MHz at 125 MHz). |
+| `CLK_DIV` | positive | 5 | `clk` cycles per SCLK half-period (20 MHz at 200 MHz). |
 | `CPOL` | std_logic | '0' | SCLK idle level. |
 | `CPHA` | std_logic | '0' | 0: slave samples on leading edge, 1: on trailing edge. |
 | `CS_SETUP` | natural | 1 | Extra half-periods CS_N low before the first edge. |

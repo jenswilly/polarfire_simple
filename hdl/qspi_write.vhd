@@ -25,7 +25,7 @@ entity qspi_write is
     generic (
         DEVICE       : device_t := DEV_W25Q128JV;
         DIE2_PRESENT : boolean  := false;
-        SCLK_DIV     : positive := 1                -- SCLK = input clock / (2 * SCLK_DIV)
+        SCLK_DIV     : positive := 2                -- SCLK = input clock / (2 * SCLK_DIV)
     );
     port (
         clk                : in  std_logic;

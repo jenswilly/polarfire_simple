@@ -2,6 +2,9 @@
 --   offset 0x0: LED control  (R/W)  bit0 = LED2, bit1 = LED3
 --   offset 0x4: ID           (RO)   0x1ED50001
 --   offset 0x8: DEBUG        (WO)   write bit0 = 1 -> DEBUG_PULSE high for one ACLK cycle (reads 0)
+-- 64-bit data bus, the width of the interconnect crossbar and FIC_0, so CoreAXI4Interconnect needs no
+-- width converter (its 64->32 DownConverter failed timing at 200 MHz). The registers stay 32 bits:
+-- address bit 2 selects the 32-bit lane of WDATA/WSTRB, and reads return the register on both lanes.
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -19,8 +22,8 @@ entity axi_sys_ctrl is
         AWVALID : in  std_logic;
         AWREADY : out std_logic;
         -- write data channel
-        WDATA   : in  std_logic_vector(31 downto 0);
-        WSTRB   : in  std_logic_vector(3 downto 0);
+        WDATA   : in  std_logic_vector(63 downto 0);
+        WSTRB   : in  std_logic_vector(7 downto 0);
         WVALID  : in  std_logic;
         WREADY  : out std_logic;
         -- write response channel
@@ -33,7 +36,7 @@ entity axi_sys_ctrl is
         ARVALID : in  std_logic;
         ARREADY : out std_logic;
         -- read data channel
-        RDATA   : out std_logic_vector(31 downto 0);
+        RDATA   : out std_logic_vector(63 downto 0);
         RRESP   : out std_logic_vector(1 downto 0);
         RVALID  : out std_logic;
         RREADY  : in  std_logic;
@@ -57,7 +60,12 @@ architecture rtl of axi_sys_ctrl is
     signal rd_ready : std_logic;
     signal rvalid_i : std_logic;
     signal rdata_i  : std_logic_vector(31 downto 0);
+    signal wdata_l  : std_logic_vector(31 downto 0);  -- 32-bit lane of WDATA addressed by AWADDR(2)
+    signal wstrb_l  : std_logic;                      -- strobe of that lane's byte 0
 begin
+    wdata_l <= WDATA(63 downto 32) when AWADDR(2) = '1' else WDATA(31 downto 0);
+    wstrb_l <= WSTRB(4)            when AWADDR(2) = '1' else WSTRB(0);
+
     -- Accept a write when address and data are both present and no response is pending
     wr_ready <= AWVALID and WVALID and not bvalid_i;
     AWREADY  <= wr_ready;
@@ -69,7 +77,7 @@ begin
     rd_ready <= ARVALID and not rvalid_i;
     ARREADY  <= rd_ready;
     RVALID   <= rvalid_i;
-    RDATA    <= rdata_i;
+    RDATA    <= rdata_i & rdata_i;
     RRESP    <= "00";
 
     write_proc : process (ACLK)
@@ -82,11 +90,11 @@ begin
                 bvalid_i <= '0';
             elsif wr_ready = '1' then
                 bvalid_i <= '1'; -- This will make the write response valid for one cycle
-                if AWADDR(3 downto 2) = "00" and WSTRB(0) = '1' then
-                    led_reg <= WDATA(1 downto 0);
+                if AWADDR(3 downto 2) = "00" and wstrb_l = '1' then
+                    led_reg <= wdata_l(1 downto 0);
                 end if;
-                if AWADDR(3 downto 2) = "10" and WSTRB(0) = '1' then
-                    pulse_i <= WDATA(0);
+                if AWADDR(3 downto 2) = "10" and wstrb_l = '1' then
+                    pulse_i <= wdata_l(0);
                 end if;
             elsif BREADY = '1' then
                 bvalid_i <= '0';

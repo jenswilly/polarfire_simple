@@ -3,7 +3,7 @@
 --   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
 --   qspi_write and qspi_read_ctrl share one qspi_xact; the testbench switches the command port
 --   and the streams between them (owner), as qspi_mram_ctrl does. The models are
---   preloaded with a pattern. clk_ctrl 100 MHz, SCLK 50 MHz, sample delay 2, 3 ns board delay;
+--   preloaded with a pattern. clk_ctrl 200 MHz, SCLK 50 MHz, sample delay 4, 3 ns board delay;
 --   short W25Q busy times (erase 5 us, page program 3 us).
 --     1. Requests before init_done and bad requests (odd address/length, length 0, past the end)
 --        give req_err and write nothing.
@@ -25,7 +25,7 @@ entity tb_qspi_write is
 end entity tb_qspi_write;
 
 architecture sim of tb_qspi_write is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
     constant NCFG       : positive := 3;
     constant SEED1      : positive := 5;
     constant SEED2      : positive := 9;
@@ -98,7 +98,7 @@ begin
         signal rx_n      : natural := 0;
     begin
         wr : entity work.qspi_write
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, SCLK_DIV => 1)
+            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, SCLK_DIV => 2)
             port map (
                 clk => clk, reset_n => rstn, init_done => init_done,
                 s_axis_req_tdata => wreq_tdata, s_axis_req_tvalid => wreq_tvalid,
@@ -116,7 +116,7 @@ begin
                 rx_tlast => x_rx_tlast);
 
         rd : entity work.qspi_read_ctrl
-            generic map (DEVICE => DEV, SCLK_DIV => 1, SPACE_W => 16)
+            generic map (DEVICE => DEV, SCLK_DIV => 2, SPACE_W => 16)
             port map (
                 clk => clk, reset_n => rstn, init_done => init_done,
                 s_axis_req_tdata => rreq_tdata, s_axis_req_tvalid => rreq_tvalid,
@@ -151,7 +151,7 @@ begin
         x_rx_tready   <= w_rx_tready   when owner_wr else r_rx_tready;
 
         xact : entity work.qspi_xact
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 100_000_000)
+            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => x_cmd_valid, cmd_ready => x_cmd_ready, cmd_op => x_cmd_op,
@@ -162,7 +162,7 @@ begin
                 s_axis_tdata => x_tx_tdata, s_axis_tvalid => x_tx_tvalid, s_axis_tready => x_tx_tready,
                 m_axis_tdata => x_rx_tdata, m_axis_tvalid => x_rx_tvalid, m_axis_tready => x_rx_tready,
                 m_axis_tlast => x_rx_tlast, rx_overflow => open,
-                sample_dly => 2, busy => xact_busy,
+                sample_dly => 4, busy => xact_busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
         pads : for i in 0 to 7 generate

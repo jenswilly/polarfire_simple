@@ -16,7 +16,8 @@
 --   read and write, the one that did not go last wins.
 --
 -- Sample delay: SAMPLE_DLY, or sample_dly_ovr while sample_dly_ovr_valid = '1' (calibration).
--- Change it only while busy = '0'.
+-- Change it only while busy = '0'. It is registered (timing at 200 MHz), so a change takes effect
+-- one clock later; a command issued in the same cycle reaches the PHY only after that.
 --
 -- Pins: no tristates inside. With DIE2_PRESENT = false, io_oe(7:4) stays low and io_i(7:4) is
 -- ignored; sclk(1)/cs_n(1) still toggle (leave them unconnected). mem_reset_n is the
@@ -31,9 +32,9 @@ entity qspi_mram_ctrl is
     generic (
         DEVICE       : device_t := DEV_W25Q128JV;
         DIE2_PRESENT : boolean  := false;
-        CLK_CTRL_HZ  : positive := 100_000_000;     -- Input clock frequency
-        SCLK_DIV     : positive := 1;               -- SCLK = CLK_CTRL_HZ / (2 * SCLK_DIV)
-        SAMPLE_DLY   : positive := 2;               -- Default RX sample delay (clk cycles)
+        CLK_CTRL_HZ  : positive := 200_000_000;     -- Input clock frequency
+        SCLK_DIV     : positive := 2;               -- SCLK = CLK_CTRL_HZ / (2 * SCLK_DIV)
+        SAMPLE_DLY   : positive := 4;               -- Default RX sample delay (clk cycles)
         SPACE_W      : positive := 16;              -- Width of rd_space
         T_POWERUP_NS : natural  := 0;               -- 0 = datasheet value (see qspi_init)
         T_RESET_NS   : natural  := 0
@@ -128,8 +129,18 @@ begin
     init_done   <= init_done_i;
     init_err    <= init_err_i;
     init_active <= not (init_done_i or init_err_i);
-    smp_dly     <= sample_dly_ovr when sample_dly_ovr_valid = '1' else SAMPLE_DLY;
     busy        <= init_active or r_busy or w_busy or xact_busy;
+
+    process (clk)
+    begin
+        if rising_edge(clk) then
+            if reset_n = '0' or sample_dly_ovr_valid = '0' then
+                smp_dly <= SAMPLE_DLY;
+            else
+                smp_dly <= sample_dly_ovr;
+            end if;
+        end if;
+    end process;
 
     -------------------------------------------------------------------------------------------
     -- Arbiter

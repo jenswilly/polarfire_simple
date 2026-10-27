@@ -8,7 +8,7 @@ Source: `hdl/qspi_read_ctrl.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | Sets address bytes and latency (W25Q: 3 bytes + 4 dummy clocks; AS: 4 bytes + latency 8). |
-| `SCLK_DIV` | positive | 1 | SCLK = `clk` / (2·`SCLK_DIV`). |
+| `SCLK_DIV` | positive | 2 | SCLK = `clk` / (2·`SCLK_DIV`). |
 | `SPACE_W` | positive | 16 | Width of `rx_space`. |
 
 ## Ports

@@ -24,7 +24,7 @@ entity tb_spi_tx_path is
     generic (
         CPOL_I  : integer  := 0;
         CPHA_I  : integer  := 0;
-        CLK_DIV : positive := 7;
+        CLK_DIV : positive := 5;
         NSPARSE : natural  := 40;       -- Blocks with random gaps
         NBURST  : natural  := 600;      -- Back-to-back blocks (more than the 512-block FIFO)
         DEPTH   : positive := 512       -- FIFO depth, for the backpressure check
@@ -47,7 +47,7 @@ architecture sim of tb_spi_tx_path is
     constant BLOCK_BYTES : positive  := 10;
     constant W           : positive  := BLOCK_BYTES * 8;
     constant NBLOCKS     : natural   := NSPARSE + NBURST;
-    constant CLK_PERIOD  : time      := 8 ns;    -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD  : time      := 5 ns;    -- 200 MHz, same as the fabric clock
 
     -- Block number i -> 80 bits: five 16-bit fields that all depend on i
     function blk(i : natural) return std_logic_vector is

@@ -10,7 +10,7 @@ entity tb_button_debounce is
 end entity tb_button_debounce;
 
 architecture sim of tb_button_debounce is
-    constant CLK_PERIOD : time     := 8 ns;   -- 125 MHz
+    constant CLK_PERIOD : time     := 5 ns;   -- 200 MHz
     constant DB_CYCLES  : positive := 20;
     constant DB_TIME    : time     := DB_CYCLES * CLK_PERIOD;
 

@@ -94,8 +94,6 @@ read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarf
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/TargetConvertor.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/CoreAxi4Interconnect.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/AXI_IC/AXI_IC.v}
-read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET_1/CORERESET_1_0/core/corereset_pf.vhd}
-read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET_1/CORERESET_1.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET_0/core/corereset_pf.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/CORERESET/CORERESET.vhd}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/INIT_MONITOR/INIT_MONITOR_0/INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR.v}
@@ -103,7 +101,7 @@ read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarf
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/MSS_simple/MSS_simple.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.v}
 read_verilog -mode system_verilog {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0.v}
-read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/axi_led_reg.vhd}
+read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/axi_sys_ctrl.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd}

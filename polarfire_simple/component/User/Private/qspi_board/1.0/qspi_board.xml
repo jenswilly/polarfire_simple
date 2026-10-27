@@ -44,9 +44,9 @@
     </spirit:signals>
     <spirit:hwParameters>
       <spirit:hwParameter spirit:id="DEVICE_SEL" spirit:name="DEVICE_SEL" spirit:prompt="DEVICE_SEL:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="0" spirit:maximum="1">0</spirit:hwParameter>
-      <spirit:hwParameter spirit:id="CLK_HZ" spirit:name="CLK_HZ" spirit:prompt="CLK_HZ:" spirit:dataType="int" spirit:resolve="user">100000000</spirit:hwParameter>
-      <spirit:hwParameter spirit:id="SCLK_DIV" spirit:name="SCLK_DIV" spirit:prompt="SCLK_DIV:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="1" spirit:maximum="4">1</spirit:hwParameter>
-      <spirit:hwParameter spirit:id="SAMPLE_DLY" spirit:name="SAMPLE_DLY" spirit:prompt="SAMPLE_DLY:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="1" spirit:maximum="4">2</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="CLK_HZ" spirit:name="CLK_HZ" spirit:prompt="CLK_HZ:" spirit:dataType="int" spirit:resolve="user">200000000</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="SCLK_DIV" spirit:name="SCLK_DIV" spirit:prompt="SCLK_DIV:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="1" spirit:maximum="8">2</spirit:hwParameter>
+      <spirit:hwParameter spirit:id="SAMPLE_DLY" spirit:name="SAMPLE_DLY" spirit:prompt="SAMPLE_DLY:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="1" spirit:maximum="8">4</spirit:hwParameter>
       <spirit:hwParameter spirit:id="CALIBRATE" spirit:name="CALIBRATE" spirit:prompt="CALIBRATE:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="0" spirit:maximum="1">1</spirit:hwParameter>
       <spirit:hwParameter spirit:id="NBLK" spirit:name="NBLK" spirit:prompt="NBLK:" spirit:dataType="int" spirit:resolve="user">8</spirit:hwParameter>
       <spirit:hwParameter spirit:id="BLK_LEN" spirit:name="BLK_LEN" spirit:prompt="BLK_LEN:" spirit:dataType="int" spirit:resolve="user">880</spirit:hwParameter>

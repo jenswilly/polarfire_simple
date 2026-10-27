@@ -9,7 +9,7 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | Sets the CS# high times. |
 | `DIE2_PRESENT` | boolean | false | Second die on IO7:4. |
-| `CLK_HZ` | positive | 100 000 000 | `clk` frequency (CS# high times). |
+| `CLK_HZ` | positive | 200 000 000 | `clk` frequency (CS# high times). |
 
 ## Ports
 
@@ -28,7 +28,7 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | `cmd_latency` | in | 0–15 | Dummy/latency clocks. |
 | `cmd_dir` | in | `dir_t` | `DIR_NONE`, `DIR_TX` or `DIR_RX`. |
 | `cmd_len` | in | 16 | 4-line: host bytes (= data clocks); 1-line: bytes per die. ≥ 1 unless `DIR_NONE`. |
-| `cmd_sclk_div` | in | 1–4 | SCLK = `CLK_HZ` / (2·div) for this command. |
+| `cmd_sclk_div` | in | 1–8 | SCLK = `CLK_HZ` / (2·div) for this command. |
 | `cmd_write` | in | 1 | Use the device's write CS# high time afterwards. |
 | `s_axis_tdata` | in | 8 | TX byte. |
 | `s_axis_tvalid` | in | 1 | TX byte valid. |
@@ -38,7 +38,7 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | `m_axis_tready` | in | 1 | Consumer ready; must keep up (4-entry FIFO only). |
 | `m_axis_tlast` | out | 1 | Last byte of a command. |
 | `rx_overflow` | out | 1 | One-cycle pulse: an RX byte was dropped. |
-| `sample_dly` | in | 1–4 | RX sample delay; change only while `busy` = 0. |
+| `sample_dly` | in | 1–8 | RX sample delay; change only while `busy` = 0. |
 | `busy` | out | 1 | Command, PHY or RX output active. |
 | `sclk` | out | 2 | SCLK; index 0 = die 1, 1 = die 2. |
 | `cs_n` | out | 2 | CS#; index 0 = die 1, 1 = die 2. |
@@ -49,7 +49,7 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 ## Usage notes
 
 - Stream bytes: 4-line data = one `{die2_nibble, die1_nibble}` byte per SCLK cycle. 1-line data = two stream bytes per byte (die 1, then die 2; die 1 only without die 2).
-- RX has only a 4-entry FIFO (SCLK can't stop); the consumer must keep up or `rx_overflow` pulses. If TX data is late, SCLK pauses with CS# low.
+- RX has only a 4-entry FIFO (8 slots, so incoming words can be written before the overflow check; SCLK can't stop); the consumer must keep up or `rx_overflow` pulses. If TX data is late, SCLK pauses with CS# low.
 - The next command's opcode follows directly; the PHY enforces the CS# high time.
 
 ## Sub-components
@@ -60,7 +60,7 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 
 ## Testbench
 
-`sim/tb_qspi_xact.vhd` — `sim/run_tb.sh tb_qspi_xact`. Three configurations side by side (W25Q, AS 1 die, AS 2 dies) at 50 MHz SCLK, sample delay 2, 3 ns board delay.
+`sim/tb_qspi_xact.vhd` — `sim/run_tb.sh tb_qspi_xact`. Three configurations side by side (W25Q, AS 1 die, AS 2 dies) at 200 MHz `clk`, 50 MHz SCLK, sample delay 4, 3 ns board delay.
 
 | Test | Checks |
 |---|---|

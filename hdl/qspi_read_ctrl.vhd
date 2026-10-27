@@ -24,7 +24,7 @@ use work.qspi_pkg.all;
 entity qspi_read_ctrl is
     generic (
         DEVICE   : device_t := DEV_W25Q128JV;
-        SCLK_DIV : positive := 1;                   -- SCLK = input clock / (2 * SCLK_DIV)
+        SCLK_DIV : positive := 2;                   -- SCLK = input clock / (2 * SCLK_DIV)
         SPACE_W  : positive := 16                   -- Width of rx_space
     );
     port (

@@ -25,9 +25,9 @@ Source: `hdl/qspi_phy.vhd`. Used inside [qspi_xact](qspi_xact.md).
 | `ph_tx1` | in | 32 | Die 1 TX data, MSB first. |
 | `ph_tx2` | in | 32 | Die 2 TX data, MSB first. |
 | `ph_last` | in | 1 | Last phase: CS# goes high afterwards. |
-| `ph_sclk_div` | in | 1–4 | SCLK half-period in clocks; taken from the first phase. |
+| `ph_sclk_div` | in | 1–8 | SCLK half-period in clocks; taken from the first phase. |
 | `ph_cs_high` | in | `CS_HIGH_W` | Minimum CS# high time in clocks (≥ 1); from the last phase. |
-| `sample_dly` | in | 1–4 | RX sample point in clocks after the SCLK falling edge. Change only while `busy` = 0. |
+| `sample_dly` | in | 1–8 | RX sample point in clocks after the SCLK falling edge. Change only while `busy` = 0. |
 | `rx_valid` | out | 1 | One RX word per RX SCLK cycle. No backpressure. |
 | `rx_data` | out | 8 | `{die2_nibble, die1_nibble}`; in SPI1 each nibble is `000` & bit. |
 | `rx_last` | out | 1 | Last word of an RX phase. |
@@ -51,10 +51,10 @@ Source: `hdl/qspi_phy.vhd`. Used inside [qspi_xact](qspi_xact.md).
 
 | Test | Checks |
 |---|---|
-| Divider × delay | SCLK divider 1 and 2 × sample delay 1–4; every RX word and `rx_last` compared. |
+| Divider × delay | 200 MHz clock, SCLK dividers 1–8 × sample delays 1–8 (13 runs, including divider 2 / delay 4); every RX word and `rx_last` compared. |
 | Gaps | A run with gaps between descriptors. |
 | Wrong delay | Device delay not matching the sample delay returns wrong data. |
-| CS#/SCLK timing | First edge, exact high/low times, cycles per CS#, CS# high only after the last sample, CS# high time. |
+| CS#/SCLK timing | First edge, exact high/low times, cycles per CS#, CS# high exactly one clock after the last falling edge or the last sample (whichever is later), CS# high time. |
 | TX / OE | Bit order in SPI1 and QUAD4; IO2/IO3 high in SPI1, released in QUAD4 RX/dummy. |
 | Pin rules | SCLK toggles only with CS# low; CS#/OE change only with SCLK low; OE stable while CS# high; die-2 pins follow die 1. |
 | One die | `DIE2_I=0`: IO7:4 undriven, RX nibble 0. |

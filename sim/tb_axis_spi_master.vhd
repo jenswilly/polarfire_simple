@@ -9,7 +9,7 @@
 --   Finally reset_n is pulsed mid-frame and the DUT must return to idle.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 --
--- Defaults match the design (10-byte frames, CLK_DIV 7, 125 MHz). Integer generics can be
+-- Defaults: 10-byte frames, CLK_DIV 7, 200 MHz (the fabric clock). Integer generics can be
 -- overridden from the command line to cover other modes, e.g.
 --   sim/run_tb.sh tb_axis_spi_master -gCPOL_I=1 -gCPHA_I=1 -gMSB_I=0
 
@@ -46,7 +46,7 @@ architecture sim of tb_axis_spi_master is
     constant CPHA       : std_logic := to_sl(CPHA_I /= 0);
     constant MSBF       : boolean   := MSB_I /= 0;
     constant NBYTES     : natural   := (NFRAMES + 1) * FRAME_BYTES;
-    constant CLK_PERIOD : time      := 8 ns;    -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD : time      := 5 ns;    -- 200 MHz, same as the fabric clock
 
     constant CS_SETUP   : natural   := 1;
     constant CS_HOLD    : natural   := 1;

@@ -87,13 +87,13 @@
       <spirit:signal>
         <spirit:name>WDATA</spirit:name>
         <spirit:direction>in</spirit:direction>
-        <spirit:left>31</spirit:left>
+        <spirit:left>63</spirit:left>
         <spirit:right>0</spirit:right>
       </spirit:signal>
       <spirit:signal>
         <spirit:name>WSTRB</spirit:name>
         <spirit:direction>in</spirit:direction>
-        <spirit:left>3</spirit:left>
+        <spirit:left>7</spirit:left>
         <spirit:right>0</spirit:right>
       </spirit:signal>
       <spirit:signal>
@@ -141,7 +141,7 @@
       <spirit:signal>
         <spirit:name>RDATA</spirit:name>
         <spirit:direction>out</spirit:direction>
-        <spirit:left>31</spirit:left>
+        <spirit:left>63</spirit:left>
         <spirit:right>0</spirit:right>
       </spirit:signal>
       <spirit:signal>

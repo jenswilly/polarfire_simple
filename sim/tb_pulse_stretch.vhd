@@ -1,5 +1,5 @@
 -- Self-checking testbench for pulse_stretch
---   Sets STRETCH_CYCLES = 125 (1 us at 125 MHz) instead of the design default (125_000, 1 ms),
+--   Sets STRETCH_CYCLES = 200 (1 us at 200 MHz) instead of the design default (200_000, 1 ms),
 --   which keeps the simulation short. The checks scale with STRETCH.
 --   pulse_in is driven right after a clock edge, like the output of a flip-flop.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
@@ -11,8 +11,8 @@ entity tb_pulse_stretch is
 end entity tb_pulse_stretch;
 
 architecture sim of tb_pulse_stretch is
-    constant CLK_PERIOD : time     := 8 ns;   -- 125 MHz
-    constant STRETCH    : positive := 125;    -- STRETCH_CYCLES for the DUT
+    constant CLK_PERIOD : time     := 5 ns;   -- 200 MHz
+    constant STRETCH    : positive := 200;    -- STRETCH_CYCLES for the DUT
 
     signal clk       : std_logic := '0';
     signal rstn      : std_logic := '0';

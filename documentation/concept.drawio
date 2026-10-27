@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="7LpDnvs4L1mVZndboeZh" name="Page-1">
-        <mxGraphModel dx="652" dy="796" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1073" dy="995" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -53,23 +53,32 @@
                         <mxPoint x="-14" y="-12" as="offset"/>
                     </mxGeometry>
                 </mxCell>
+                <mxCell id="3KRHdUTowmYOdk0YRIQU-2" edge="1" parent="VtMnrhvA0qekyRPG6X0r-3" source="VtMnrhvA0qekyRPG6X0r-34" style="edgeStyle=none;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="3KRHdUTowmYOdk0YRIQU-1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
                 <mxCell id="VtMnrhvA0qekyRPG6X0r-34" parent="VtMnrhvA0qekyRPG6X0r-3" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;glass=0;shadow=0;" value="Arbiter" vertex="1">
                     <mxGeometry height="40" width="90" x="200" y="130" as="geometry"/>
                 </mxCell>
-                <mxCell id="VtMnrhvA0qekyRPG6X0r-43" edge="1" parent="VtMnrhvA0qekyRPG6X0r-3" source="VtMnrhvA0qekyRPG6X0r-35" style="edgeStyle=none;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="VtMnrhvA0qekyRPG6X0r-42">
+                <mxCell id="VtMnrhvA0qekyRPG6X0r-43" edge="1" parent="VtMnrhvA0qekyRPG6X0r-3" source="VtMnrhvA0qekyRPG6X0r-35" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="VtMnrhvA0qekyRPG6X0r-42">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="VtMnrhvA0qekyRPG6X0r-35" parent="VtMnrhvA0qekyRPG6X0r-3" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;glass=0;shadow=0;fillColor=#d5e8d4;strokeColor=#82b366;" value="MRAM (Dual QSPI) Controller" vertex="1">
                     <mxGeometry height="60" width="120" x="440" y="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="VtMnrhvA0qekyRPG6X0r-42" parent="VtMnrhvA0qekyRPG6X0r-3" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;glass=0;shadow=0;" value="Slice splitter" vertex="1">
-                    <mxGeometry height="40" width="120" x="350" y="170" as="geometry"/>
+                    <mxGeometry height="40" width="120" x="380" y="200" as="geometry"/>
                 </mxCell>
                 <mxCell id="VtMnrhvA0qekyRPG6X0r-12" parent="VtMnrhvA0qekyRPG6X0r-3" style="rounded=0;whiteSpace=wrap;html=1;glass=0;shadow=0;fillColor=#e1d5e7;strokeColor=#9673a6;" value="Beam 1 Steering Point FIFO" vertex="1">
                     <mxGeometry height="40" width="120" x="40" y="110" as="geometry"/>
                 </mxCell>
                 <mxCell id="VtMnrhvA0qekyRPG6X0r-36" edge="1" parent="VtMnrhvA0qekyRPG6X0r-3" source="VtMnrhvA0qekyRPG6X0r-12" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="VtMnrhvA0qekyRPG6X0r-34">
                     <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3KRHdUTowmYOdk0YRIQU-3" edge="1" parent="VtMnrhvA0qekyRPG6X0r-3" source="3KRHdUTowmYOdk0YRIQU-1" style="edgeStyle=none;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="VtMnrhvA0qekyRPG6X0r-35">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="3KRHdUTowmYOdk0YRIQU-1" parent="VtMnrhvA0qekyRPG6X0r-3" style="rounded=1;whiteSpace=wrap;html=1;roundedPerimeter=1;glass=0;shadow=0;" value="?" vertex="1">
+                    <mxGeometry height="40" width="90" x="320" y="110" as="geometry"/>
                 </mxCell>
                 <mxCell id="VtMnrhvA0qekyRPG6X0r-5" edge="1" parent="1" style="endArrow=classic;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="VtMnrhvA0qekyRPG6X0r-4" value="">
                     <mxGeometry height="50" relative="1" width="50" as="geometry">

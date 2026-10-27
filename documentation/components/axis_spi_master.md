@@ -8,7 +8,7 @@ Source: `hdl/axis_spi_master.vhd`. Not used in TOP (kept for later); the write-o
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `FRAME_BYTES` | positive | 10 | Bytes per CS_N assertion. |
-| `CLK_DIV` | positive | 7 | `clk` cycles per SCLK half-period (f_sclk = f_clk / (2·CLK_DIV); 8.93 MHz at 125 MHz). |
+| `CLK_DIV` | positive | 7 | `clk` cycles per SCLK half-period (f_sclk = f_clk / (2·CLK_DIV); 14.29 MHz at 200 MHz). |
 | `CPOL` | std_logic | '0' | SCLK idle level. |
 | `CPHA` | std_logic | '0' | 0: sample on leading edge, 1: on trailing edge. |
 | `MSB_FIRST` | boolean | true | Bit order on MOSI/MISO. |

@@ -7,7 +7,7 @@ Source: `hdl/button_debounce.vhd`.
 
 | Generic | Type | Default | Description |
 |---|---|---|---|
-| `DEBOUNCE_CYCLES` | positive | 1 250 000 | Clocks the input must be stable before the state changes (10 ms at 125 MHz). |
+| `DEBOUNCE_CYCLES` | positive | 2 000 000 | Clocks the input must be stable before the state changes (10 ms at 200 MHz). |
 | `ACTIVE_LOW` | boolean | true | true: `btn_in` = '0' means pressed. |
 
 ## Ports

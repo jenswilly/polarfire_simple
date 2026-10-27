@@ -25,8 +25,10 @@ package qspi_pkg is
     type cmd_lanes_t is (L111, L114, L144);
 
     -- PHY ranges (in clk_ctrl cycles)
-    constant SCLK_DIV_MAX   : positive := 4;   -- SCLK half-period: SCLK = clk_ctrl / (2 * sclk_div)
-    constant SAMPLE_DLY_MAX : positive := 4;   -- RX sample point after the SCLK falling edge
+    --   At clk_ctrl = 200 MHz: SCLK 100 .. 12.5 MHz, sample points 5 .. 40 ns after the falling
+    --   edge (timing_budget.md).
+    constant SCLK_DIV_MAX   : positive := 8;   -- SCLK half-period: SCLK = clk_ctrl / (2 * sclk_div)
+    constant SAMPLE_DLY_MAX : positive := 8;   -- RX sample point after the SCLK falling edge
 
     -- Opcodes used on both devices ([W] p.22-23, [A] Table 34)
     constant OP_WREN     : byte_t := x"06";   -- Write Enable

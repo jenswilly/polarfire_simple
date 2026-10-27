@@ -27,7 +27,7 @@ end entity tb_block_serializer;
 architecture sim of tb_block_serializer is
 
     constant W          : positive := BLOCK_BYTES * 8;
-    constant CLK_PERIOD : time     := 8 ns;    -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD : time     := 5 ns;    -- 200 MHz, same as the fabric clock
 
     -- Byte j (0 = sent first) of block i
     function byte_of(i, j : natural) return std_logic_vector is

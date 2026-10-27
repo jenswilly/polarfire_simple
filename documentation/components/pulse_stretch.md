@@ -7,7 +7,7 @@ Source: `hdl/pulse_stretch.vhd`.
 
 | Generic | Type | Default | Description |
 |---|---|---|---|
-| `STRETCH_CYCLES` | positive | 125 000 | Output length in clocks (1 ms at 125 MHz). |
+| `STRETCH_CYCLES` | positive | 200 000 | Output length in clocks (1 ms at 200 MHz). |
 
 ## Ports
 
@@ -20,11 +20,11 @@ Source: `hdl/pulse_stretch.vhd`.
 
 ## Testbench
 
-`sim/tb_pulse_stretch.vhd` — `sim/run_tb.sh tb_pulse_stretch`. Uses `STRETCH_CYCLES = 125` (1 µs).
+`sim/tb_pulse_stretch.vhd` — `sim/run_tb.sh tb_pulse_stretch`. Uses `STRETCH_CYCLES = 200` (1 µs at 200 MHz).
 
 | Test | Checks |
 |---|---|
-| Single pulse | A 1-cycle input gives exactly 125 cycles high, starting one clock later. |
-| Retrigger | A retrigger 50 cycles in merges into one pulse of 50 + 125 cycles. |
-| Long input | A 3-cycle input stays high until 125 cycles after its last cycle. |
+| Single pulse | A 1-cycle input gives exactly 200 cycles high, starting one clock later. |
+| Retrigger | A retrigger 50 cycles in merges into one pulse of 50 + 200 cycles. |
+| Long input | A 3-cycle input stays high until 200 cycles after its last cycle. |
 | Reset | Reset clears the output. |

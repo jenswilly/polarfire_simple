@@ -9,7 +9,7 @@ Source: `hdl/qspi_write.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | Memory type. |
 | `DIE2_PRESENT` | boolean | false | false: the upper nibble of each data byte is ignored. |
-| `SCLK_DIV` | positive | 1 | SCLK = `clk` / (2·`SCLK_DIV`). |
+| `SCLK_DIV` | positive | 2 | SCLK = `clk` / (2·`SCLK_DIV`). |
 
 ## Ports
 

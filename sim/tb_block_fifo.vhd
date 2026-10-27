@@ -29,7 +29,7 @@ architecture sim of tb_block_fifo is
 
     constant BLOCK_BYTES : positive := 10;
     constant W           : positive := BLOCK_BYTES * 8;
-    constant CLK_PERIOD  : time     := 8 ns;    -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD  : time     := 5 ns;    -- 200 MHz, same as the fabric clock
 
     -- Block number i -> 80 bits: five 16-bit fields that all depend on i
     function blk(i : natural) return std_logic_vector is

@@ -26,7 +26,7 @@ use work.util_pkg.all;
 entity axis_spi_wo_master is
     generic (
         FRAME_BYTES : positive  := 10;     -- Bytes per cs_n assertion
-        CLK_DIV     : positive  := 3;      -- Clk cycles per sclk half-period (20.83 MHz at 125 MHz)
+        CLK_DIV     : positive  := 5;      -- Clk cycles per sclk half-period (20 MHz at 200 MHz)
         CPOL        : std_logic := '0';    -- Sclk idle level
         CPHA        : std_logic := '0';    -- 0: slave samples on leading edge, 1: on trailing edge
         MSB_FIRST   : boolean   := true;

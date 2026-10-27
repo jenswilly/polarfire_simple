@@ -1,19 +1,21 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Self-checking testbench for qspi_bist + qspi_mram_ctrl against the device models
---   Five configurations side by side (4 blocks of 880 host bytes, clk_ctrl 100 MHz, SCLK 50 MHz,
---   short model times). Sample points are 10 ns apart; the device data is valid from
+--   Five configurations side by side (4 blocks of 880 host bytes, clk_ctrl 200 MHz, SCLK_DIV 2 =
+--   SCLK 50 MHz, short model times). Sample points are 5 ns apart; the device data is valid from
 --   tCO/tCLQV + board delay to one SCLK period + tOH/tCLQX + board delay after the falling edge.
---     0  W25Q128JV, no calibration, SAMPLE_DLY 2, board 3 ns          -> pass
---     1  W25Q128JV, calibration, board 3.5 ns (valid 9.5..25 ns), one round only (no LOOP_ROUNDS)
---                                                                     -> window {1,2}, delay 1, pass
---     2  AS308G208, 2 dies, calibration, SAMPLE_DLY 1, board 8 ns
---        (valid 17..29 ns): init fails with delay 1, retried with 2   -> window {2}, delay 2, pass
+--     0  W25Q128JV, no calibration, SAMPLE_DLY 4, board 3 ns          -> pass
+--     1  W25Q128JV, calibration, board 3 ns (valid 9..24.5 ns), one round only (no LOOP_ROUNDS)
+--                                                                     -> window {2,3,4}, delay 3, pass
+--     2  AS308G208, 2 dies, calibration, SAMPLE_DLY 1, board 8 ns (valid 17..29 ns): init fails
+--        with delays 1..3, retried up to 4                            -> window {4,5}, delay 4, pass
 --     3  AS308G208, 1 die, model ignores array writes, no calibration -> fail (data mismatch)
 --     4  AS308G208, 1 die, wrong ID, calibration                      -> fail (all init retries)
 --   Checks: pass and fail stay off until the first round ends (pass_count >= 1 when pass rises); pass and fail are never both on;
 --   passing configurations with LOOP_ROUNDS keep passing (pass_count grows to 3 with fail off);
 --   without LOOP_ROUNDS pass stays on, pass_count stays 1 and no more reads are requested;
---   fail stays latched;
+--   fail stays latched; the sample delay override (valid or value) only changes while the
+--   controller is idle (busy = 0 before the change), and the PHY is still idle one cycle later, when
+--   qspi_mram_ctrl's registered copy reaches it;
 --   cal_window and cal_dly as expected; no model protocol errors in the passing configurations.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
@@ -26,7 +28,7 @@ entity tb_qspi_bist is
 end entity tb_qspi_bist;
 
 architecture sim of tb_qspi_bist is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;     -- clk_ctrl 200 MHz
 
     type cfg_t is record
         dev       : device_t;
@@ -38,16 +40,16 @@ architecture sim of tb_qspi_bist is
         mem_ign   : boolean;
         as_id     : std_logic_vector(31 downto 0);
         pass      : boolean;                       -- Expected result
-        window    : std_logic_vector(4 downto 1);  -- Expected cal_window (calibrate only)
+        window    : std_logic_vector(SAMPLE_DLY_MAX downto 1);  -- Expected cal_window (calibrate only)
         dly       : positive;                      -- Expected cal_dly (calibrate only)
     end record;
     type cfg_arr_t is array (natural range <>) of cfg_t;
     constant CFGS : cfg_arr_t := (
-        (DEV_W25Q128JV, false, false, true,  2, 3 ns,   false, x"E6212C01", true,  "0000", 1),
-        (DEV_W25Q128JV, false, true,  false, 2, 3.5 ns, false, x"E6212C01", true,  "0011", 1),
-        (DEV_AS308G208, true,  true,  true,  1, 8 ns,   false, x"E6212C01", true,  "0010", 2),
-        (DEV_AS308G208, false, false, true,  2, 3 ns,   true,  x"E6212C01", false, "0000", 1),
-        (DEV_AS308G208, false, true,  true,  2, 3 ns,   false, x"E6212801", false, "0000", 1)
+        (DEV_W25Q128JV, false, false, true,  4, 3 ns, false, x"E6212C01", true,  "00000000", 1),
+        (DEV_W25Q128JV, false, true,  false, 4, 3 ns, false, x"E6212C01", true,  "00001110", 3),
+        (DEV_AS308G208, true,  true,  true,  1, 8 ns, false, x"E6212C01", true,  "00011000", 4),
+        (DEV_AS308G208, false, false, true,  4, 3 ns, true,  x"E6212C01", false, "00000000", 1),
+        (DEV_AS308G208, false, true,  true,  4, 3 ns, false, x"E6212801", false, "00000000", 1)
     );
     constant NCFG : positive := CFGS'length;
 
@@ -74,7 +76,7 @@ begin
         signal ovr_valid   : std_logic;
         signal ovr         : natural range 1 to SAMPLE_DLY_MAX;
         signal pass, fail  : std_logic;
-        signal cal_window  : std_logic_vector(4 downto 1);
+        signal cal_window  : std_logic_vector(SAMPLE_DLY_MAX downto 1);
         signal cal_dly     : natural range 1 to SAMPLE_DLY_MAX;
         signal pass_count  : unsigned(15 downto 0);
         signal sclk, cs_n  : std_logic_vector(1 downto 0);
@@ -82,6 +84,7 @@ begin
         signal io          : std_logic_vector(7 downto 0);
         signal mem_reset_n : std_logic;
         signal err1, err2  : natural := 0;
+        signal ovr_busy_errs : natural := 0;   -- Override changes while the controller was busy
     begin
         bist : entity work.qspi_bist
             generic map (DIE2_PRESENT => C.die2, NBLK => 4, BLK_LEN => 880, BLK_STRIDE => 16#4000#,
@@ -102,8 +105,8 @@ begin
                 pass_count => pass_count, state_dbg => open);
 
         ctrl : entity work.qspi_mram_ctrl
-            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_CTRL_HZ => 100_000_000,
-                         SCLK_DIV => 1, SAMPLE_DLY => C.smp_dly, SPACE_W => 16,
+            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_CTRL_HZ => 200_000_000,
+                         SCLK_DIV => 2, SAMPLE_DLY => C.smp_dly, SPACE_W => 16,
                          T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
             port map (
                 clk => clk, reset_n => rstn,
@@ -182,9 +185,37 @@ begin
                 end if;
                 check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
             end if;
+            check(ovr_busy_errs = 0, "sample delay override changed while busy ("
+                  & integer'image(ovr_busy_errs) & " times)");
             tb_errors(g) <= errors;
             finished(g)  <= true;
             wait;
+        end process;
+
+        -- The override must change only while busy = 0 (sampled at the edge where it changes), and
+        -- the PHY must still be idle at the next edge, where qspi_mram_ctrl's registered copy
+        -- changes the PHY's sample_dly. The controller itself may be busy again by then (the BIST
+        -- sends the next request right away), but a request takes several cycles to reach the PHY.
+        ovr_idle : process (clk)
+            alias phy_busy is << signal ctrl.xact.phy_busy : std_logic >>;
+            variable prev_v   : std_logic := '0';
+            variable prev_d   : natural range 1 to SAMPLE_DLY_MAX := 1;
+            variable chk_next : boolean := false;
+        begin
+            if rising_edge(clk) then
+                if chk_next and phy_busy /= '0' then
+                    ovr_busy_errs <= ovr_busy_errs + 1;
+                end if;
+                chk_next := false;
+                if ovr_valid /= prev_v or (ovr_valid = '1' and ovr /= prev_d) then
+                    if busy /= '0' then
+                        ovr_busy_errs <= ovr_busy_errs + 1;
+                    end if;
+                    chk_next := true;
+                end if;
+                prev_v := ovr_valid;
+                prev_d := ovr;
+            end if;
         end process;
 
         never_both : process (pass, fail)

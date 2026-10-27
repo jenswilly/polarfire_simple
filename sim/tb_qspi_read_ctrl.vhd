@@ -1,7 +1,7 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Self-checking testbench for qspi_read_ctrl (with qspi_xact and qspi_phy) against preloaded models
 --   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
---   clk_ctrl 100 MHz, SCLK 50 MHz, sample delay 2, 3 ns board delay. init_done is driven by the
+--   clk_ctrl 200 MHz, SCLK 50 MHz, sample delay 4, 3 ns board delay. init_done is driven by the
 --   testbench (qspi_init is tested in tb_qspi_init); the models need no configuration for EBh.
 --   Downstream is a byte buffer of CAP bytes (rx_space = CAP - fill) with its own consumer.
 --     1. Requests before init_done are dropped with req_err.
@@ -9,7 +9,7 @@
 --     3. Timing: 8 non-contiguous blocks of 880 host bytes, all requested at once, large buffer
 --        and a fast consumer. Reports the time from the first request to the last byte, which
 --        must be 140.8 us (7040 data clocks) + overhead, at most 150 us.
---     4. Credit starvation: 1000-byte buffer, consumer takes one byte every 8 clk cycles (a
+--     4. Credit starvation: 1000-byte buffer, consumer takes one byte every 16 clk cycles (a
 --        quarter of the read rate). Requests must wait for space, counting the bytes of earlier
 --        requests still in flight: the buffer must never overflow.
 --        Includes a read that ends exactly at the end of the device.
@@ -28,7 +28,7 @@ entity tb_qspi_read_ctrl is
 end entity tb_qspi_read_ctrl;
 
 architecture sim of tb_qspi_read_ctrl is
-    constant CLK_PERIOD : time := 10 ns;
+    constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
     constant NCFG       : positive := 3;
     constant SEED1      : positive := 5;
     constant SEED2      : positive := 9;
@@ -81,7 +81,7 @@ begin
         signal cap         : natural := 16384;
         signal fill        : natural := 0;
         signal max_fill    : natural := 0;
-        signal slow        : boolean := false;     -- Consumer takes one byte every 8 cycles
+        signal slow        : boolean := false;     -- Consumer takes one byte every 16 cycles
         signal overflows   : natural := 0;
         signal ovf_count   : natural := 0;
         signal err_pulses  : natural := 0;
@@ -95,7 +95,7 @@ begin
         signal t_last_byte   : time := 0 ns;
     begin
         rc : entity work.qspi_read_ctrl
-            generic map (DEVICE => DEV, SCLK_DIV => 1, SPACE_W => 16)
+            generic map (DEVICE => DEV, SCLK_DIV => 2, SPACE_W => 16)
             port map (
                 clk => clk, reset_n => rstn, init_done => init_done,
                 s_axis_req_tdata => req_tdata, s_axis_req_tvalid => req_tvalid,
@@ -111,7 +111,7 @@ begin
                 m_axis_tlast => m_tlast);
 
         xact : entity work.qspi_xact
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 100_000_000)
+            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => cmd_valid, cmd_ready => cmd_ready, cmd_op => cmd_op,
@@ -122,7 +122,7 @@ begin
                 s_axis_tdata => x"00", s_axis_tvalid => '0', s_axis_tready => open,
                 m_axis_tdata => x_tdata, m_axis_tvalid => x_tvalid, m_axis_tready => x_tready,
                 m_axis_tlast => x_tlast, rx_overflow => rx_ovf,
-                sample_dly => 2, busy => xact_busy,
+                sample_dly => 4, busy => xact_busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
         pads : for i in 0 to 7 generate
@@ -192,7 +192,7 @@ begin
                     end if;
                 end if;
                 cyc := cyc + 1;
-                if f > 0 and (not slow or cyc mod 8 = 0) then
+                if f > 0 and (not slow or cyc mod 16 = 0) then
                     f := f - 1;
                 end if;
                 if f > cap then

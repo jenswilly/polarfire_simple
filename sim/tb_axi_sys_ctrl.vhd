@@ -1,5 +1,8 @@
 -- Self-checking testbench for axi_sys_ctrl
 --   Drives AXI4-Lite reads/writes and checks LED bits, the ID register and DEBUG_PULSE.
+--   The bus is 64 bits wide. axi_write/axi_read model a 32-bit access from FIC_0 through the
+--   interconnect: data and strobes in the lane selected by address bit 2, the other lane filled with
+--   junk and its strobes off. Reads check that both lanes carry the same value.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
 library ieee;
@@ -10,7 +13,7 @@ entity tb_axi_sys_ctrl is
 end entity tb_axi_sys_ctrl;
 
 architecture sim of tb_axi_sys_ctrl is
-    constant CLK_PERIOD : time := 8 ns;   -- 125 MHz, same as the fabric clock
+    constant CLK_PERIOD : time := 5 ns;   -- 200 MHz, same as the fabric clock
 
     signal clk     : std_logic := '0';
     signal rstn    : std_logic := '0';
@@ -26,9 +29,9 @@ architecture sim of tb_axi_sys_ctrl is
     signal bvalid  : std_logic;
     signal arready : std_logic;
     signal rvalid  : std_logic;
-    signal wdata   : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdata   : std_logic_vector(31 downto 0);
-    signal wstrb   : std_logic_vector(3 downto 0) := "1111";
+    signal wdata   : std_logic_vector(63 downto 0) := (others => '0');
+    signal rdata   : std_logic_vector(63 downto 0);
+    signal wstrb   : std_logic_vector(7 downto 0) := (others => '0');
     signal bresp   : std_logic_vector(1 downto 0);
     signal rresp   : std_logic_vector(1 downto 0);
     signal led2    : std_logic;
@@ -71,12 +74,21 @@ begin
             end if;
         end procedure;
 
-        -- AXI4-Lite write; bready_delay holds off BREADY to model a slow initiator
+        -- 32-bit AXI4-Lite write on the 64-bit bus; bready_delay holds off BREADY to model a slow
+        -- initiator. strb is the 4-bit strobe of the addressed lane; the other lane gets
+        -- junk = not value with strobes off.
         procedure axi_write(addr : natural; value : std_logic_vector(31 downto 0);
-                            bready_delay : natural := 0) is
+                            bready_delay : natural := 0;
+                            strb : std_logic_vector(3 downto 0) := "1111") is
         begin
             awaddr  <= std_logic_vector(to_unsigned(addr, awaddr'length));
-            wdata   <= value;
+            if (addr / 4) mod 2 = 1 then
+                wdata <= value & not value;
+                wstrb <= strb & "0000";
+            else
+                wdata <= not value & value;
+                wstrb <= "0000" & strb;
+            end if;
             awvalid <= '1';
             wvalid  <= '1';
             loop
@@ -115,7 +127,13 @@ begin
                 wait until rising_edge(clk);
                 exit when rvalid = '1';
             end loop;
-            value  := rdata;
+            -- The initiator takes the lane selected by address bit 2; both must match
+            if (addr / 4) mod 2 = 1 then
+                value := rdata(63 downto 32);
+            else
+                value := rdata(31 downto 0);
+            end if;
+            check(rdata(63 downto 32) = rdata(31 downto 0), "RDATA lanes differ at offset " & integer'image(addr));
             rready <= '0';
             check(rresp = "00", "RRESP not OKAY");
         end procedure;
@@ -134,6 +152,23 @@ begin
         axi_read(16#0#, data);
         check(data = x"00000003", "LED register should read back 3");
         check(pulse_cycles = 0, "LED write must not pulse DEBUG_PULSE");
+
+        -- The other lane must be ignored: lower-lane write of 1 with junk 0xFFFFFFFE in the upper lane
+        axi_write(16#0#, x"00000001");
+        check(led2 = '1' and led3 = '0', "LED write must use the lower lane only");
+        -- Byte 0 strobe off: no effect
+        axi_write(16#0#, x"00000003", strb => "1110");
+        check(led2 = '1' and led3 = '0', "LED write with WSTRB byte 0 off must be ignored");
+        -- Upper-lane offsets (0x4 ID, 0xC unused) don't write: lower-lane junk 0xFFFFFFFC
+        -- (bits 1:0 = 00) and the 0x4/0xC decode must leave the LEDs alone
+        axi_write(16#4#, x"00000003");
+        axi_write(16#C#, x"00000003");
+        check(led2 = '1' and led3 = '0', "writes to 0x4/0xC must not change the LEDs");
+        axi_read(16#0#, data);
+        check(data = x"00000001", "LED register should read back 1");
+        -- Alias at 0x10 (only bits 3:2 decoded), lower lane
+        axi_write(16#10#, x"00000003");
+        check(led2 = '1' and led3 = '1', "LED write at alias 0x10 should set both LEDs");
 
         -- DEBUG: writing 1 gives exactly one pulse cycle
         axi_write(16#8#, x"00000001");

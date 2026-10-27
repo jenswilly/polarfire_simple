@@ -9,9 +9,9 @@ Source: `hdl/qspi_mram_ctrl.vhd`. Diagram: `documentation/qspi_controller.drawio
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | `DEV_W25Q128JV` or `DEV_AS308G208` (`qspi_pkg`). |
 | `DIE2_PRESENT` | boolean | false | Second die on IO7:4 / `sclk(1)` / `cs_n(1)`. |
-| `CLK_CTRL_HZ` | positive | 100 000 000 | `clk` frequency. |
-| `SCLK_DIV` | positive | 1 | SCLK = `CLK_CTRL_HZ` / (2·`SCLK_DIV`), max 4. |
-| `SAMPLE_DLY` | positive | 2 | Default RX sample delay in clocks after the SCLK falling edge (1–4). |
+| `CLK_CTRL_HZ` | positive | 200 000 000 | `clk` frequency. |
+| `SCLK_DIV` | positive | 2 | SCLK = `CLK_CTRL_HZ` / (2·`SCLK_DIV`), max 8. |
+| `SAMPLE_DLY` | positive | 4 | Default RX sample delay in clocks after the SCLK falling edge (1–8). |
 | `SPACE_W` | positive | 16 | Width of `rd_space`. |
 | `T_POWERUP_NS` | natural | 0 | Power-up wait; 0 = datasheet value. |
 | `T_RESET_NS` | natural | 0 | Reset time; 0 = datasheet value. |
@@ -50,7 +50,7 @@ Source: `hdl/qspi_mram_ctrl.vhd`. Diagram: `documentation/qspi_controller.drawio
 | `s_axis_wr_tready` | out | 1 | Byte accepted. |
 | **Calibration** | | | |
 | `sample_dly_ovr_valid` | in | 1 | Use `sample_dly_ovr` instead of `SAMPLE_DLY`. Change only while `busy` = 0. |
-| `sample_dly_ovr` | in | 1–4 | Sample delay override (clocks). |
+| `sample_dly_ovr` | in | 1–8 | Sample delay override (clocks); registered, takes effect one clock later. |
 | **Pins** | | | |
 | `sclk` | out | 2 | SCLK; index 0 = die 1, 1 = die 2. |
 | `cs_n` | out | 2 | CS#; index 0 = die 1, 1 = die 2. |
@@ -89,6 +89,6 @@ Source: `hdl/qspi_mram_ctrl.vhd`. Diagram: `documentation/qspi_controller.drawio
 | Write | 8 blocks of 880 host bytes; a read requested during the first write waits for it. |
 | Write during read | A write requested while a read is delivering data does not cut the read short. |
 | Read back | 8 blocks back to back (144.5 µs W25Q, 145.5 µs AS); all data compared. |
-| Sample delay override | `SAMPLE_DLY` = 3 fails with a 3 ns board delay; `sample_dly_ovr` = 2 works. |
+| Sample delay override | `SAMPLE_DLY` = 6 fails with a 3 ns board delay; `sample_dly_ovr` = 4 works. |
 | `init_restart` | Requests during the rerun give `rd_req_err` / `wr_req_err`; a read afterwards works. |
 | Protocol | Models report no protocol errors. |

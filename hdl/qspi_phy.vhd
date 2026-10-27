@@ -145,19 +145,25 @@ architecture rtl of qspi_phy is
     signal half      : std_logic := '0';                          -- 0: SCLK low half, 1: high half
     signal div_l     : natural range 1 to SCLK_DIV_MAX := 1;
     signal div_cnt   : natural range 0 to SCLK_DIV_MAX - 1 := 0;
+    signal div_one   : std_logic := '1';                          -- div_l = 1
     signal clk_left  : unsigned(NCLK_W - 1 downto 0) := (others => '0');   -- Incl. current cycle
+    signal clk_one   : std_logic := '0';                          -- clk_left = 1
     signal cur_quad  : std_logic := '0';
     signal cur_dir   : dir_t := DIR_NONE;
     signal cur_last  : std_logic := '0';
     signal sh1, sh2  : std_logic_vector(31 downto 0) := (others => '0');
     signal cs_high_l : unsigned(CS_HIGH_W - 1 downto 0) := (others => '0');
     signal cs_cnt    : unsigned(CS_HIGH_W - 1 downto 0) := (others => '0');
+    signal cs_zero   : std_logic := '1';                          -- cs_cnt = 0
 
     -- RX sample tokens: entered at the launching falling edge, shifted every clk cycle. A token
     -- in stage sample_dly + 1 means io_i_r holds its sample.
     signal tok_v     : std_logic_vector(1 to NSTAGE) := (others => '0');
     signal tok_q     : std_logic_vector(1 to NSTAGE) := (others => '0');   -- QUAD4 cycle
     signal tok_l     : std_logic_vector(1 to NSTAGE) := (others => '0');   -- Last of RX phase
+    -- A launched RX cycle is not captured yet (tok_v(1 .. sample_dly) after this edge), computed
+    -- one cycle ahead. Valid in S_END: the cycle before it never launches.
+    signal pend_r    : std_logic := '0';
 
     -- Pad registers
     signal sclk_r    : std_logic_vector(1 downto 0) := "00";
@@ -178,16 +184,16 @@ architecture rtl of qspi_phy is
     signal rx_data_r  : std_logic_vector(7 downto 0) := (others => '0');
     signal rx_last_r  : std_logic := '0';
 
-    signal end_tick  : std_logic;
+    signal end_tick  : std_logic := '0';                          -- div_cnt = div_l - 1
 begin
-    end_tick <= '1' when div_cnt = div_l - 1 else '0';
-
-    ph_ready <= '1' when (state = S_IDLE and cs_cnt = 0) or state = S_WAIT
-                         or (state = S_RUN and half = '1' and end_tick = '1' and clk_left = 1
+    -- end_tick, cs_zero and clk_one are registered compares (set one cycle ahead): ph_ready feeds
+    -- qspi_xact's descriptor logic, which is the critical path at 200 MHz.
+    ph_ready <= '1' when (state = S_IDLE and cs_zero = '1') or state = S_WAIT
+                         or (state = S_RUN and half = '1' and end_tick = '1' and clk_one = '1'
                              and cur_last = '0')
                 else '0';
 
-    busy <= '0' when state = S_IDLE and cs_cnt = 0 else '1';
+    busy <= '0' when state = S_IDLE and cs_zero = '1' else '1';
 
     process (clk)
         -- Drive the pads for one SCLK cycle (both dies)
@@ -229,6 +235,11 @@ begin
             cur_dir   <= ph_dir;
             cur_last  <= ph_last;
             clk_left  <= ph_nclk;
+            if ph_nclk = 1 then
+                clk_one <= '1';
+            else
+                clk_one <= '0';
+            end if;
             sh1       <= ph_tx1;
             sh2       <= ph_tx2;
             cs_high_l <= ph_cs_high;
@@ -241,9 +252,18 @@ begin
         end procedure;
 
         variable nsh1, nsh2 : std_logic_vector(31 downto 0);
-        variable pending    : boolean;
+        variable pending    : std_logic;
     begin
         if rising_edge(clk) then
+            -- After the shift below, stage i + 1 holds today's tok_v(i)
+            pending := '0';
+            for i in 1 to SAMPLE_DLY_MAX - 1 loop
+                if i < sample_dly and tok_v(i) = '1' then
+                    pending := '1';
+                end if;
+            end loop;
+            pend_r <= pending;
+
             -- Input capture (pad register) and RX sample pipeline
             io_i_r <= io_i;
             if not DIE2_PRESENT then
@@ -266,20 +286,38 @@ begin
 
             case state is
                 when S_IDLE =>
-                    if cs_cnt /= 0 then
+                    if cs_zero = '0' then
                         cs_cnt <= cs_cnt - 1;
+                        if cs_cnt = 1 then
+                            cs_zero <= '1';
+                        end if;
                     elsif ph_valid = '1' then
                         cs_n_r <= "00";
                         div_l  <= ph_sclk_div;
                         load_phase;
+                        if ph_sclk_div = 1 then
+                            div_one  <= '1';
+                            end_tick <= '1';
+                        else
+                            div_one  <= '0';
+                            end_tick <= '0';
+                        end if;
                         state  <= S_RUN;
                     end if;
 
                 when S_RUN =>
+                    -- A loaded phase also restarts at div_cnt = 0 (load_phase), so end_tick stays
+                    -- right through S_WAIT and phase changes.
                     if end_tick = '1' then
-                        div_cnt <= 0;
+                        div_cnt  <= 0;
+                        end_tick <= div_one;
                     else
-                        div_cnt <= div_cnt + 1;
+                        div_cnt  <= div_cnt + 1;
+                        if div_cnt + 2 = div_l then
+                            end_tick <= '1';
+                        else
+                            end_tick <= '0';
+                        end if;
                     end if;
 
                     if end_tick = '1' and half = '0' then
@@ -288,8 +326,11 @@ begin
                     elsif end_tick = '1' then               -- Falling edge: next SCLK cycle
                         sclk_r <= "00";
                         half   <= '0';
-                        if clk_left > 1 then
+                        if clk_one = '0' then
                             clk_left <= clk_left - 1;
+                            if clk_left = 2 then
+                                clk_one <= '1';
+                            end if;
                             nsh1 := shift_tx(cur_quad, sh1);
                             nsh2 := shift_tx(cur_quad, sh2);
                             sh1  <= nsh1;
@@ -315,18 +356,17 @@ begin
 
                 when S_END =>
                     -- CS# high once every launched RX cycle has been captured
-                    pending := false;
-                    for i in 1 to SAMPLE_DLY_MAX loop
-                        if i <= sample_dly and tok_v(i) = '1' then
-                            pending := true;
-                        end if;
-                    end loop;
-                    if not pending then
+                    if pend_r = '0' then
                         -- The pads keep their state: after a QUAD4 read the device needs its
                         -- output disable time (tSHQZ/tHZCS) before IO may be driven again.
                         -- The next transaction sets them together with CS# low.
                         cs_n_r <= "11";
                         cs_cnt <= cs_high_l - 1;
+                        if cs_high_l = 1 then
+                            cs_zero <= '1';
+                        else
+                            cs_zero <= '0';
+                        end if;
                         state  <= S_IDLE;
                     end if;
             end case;
@@ -336,7 +376,9 @@ begin
                 sclk_r   <= "00";
                 cs_n_r   <= "11";
                 cs_cnt   <= (others => '0');
+                cs_zero  <= '1';
                 tok_v    <= (others => '0');
+                pend_r   <= '0';
                 rx_valid_r <= '0';
                 io_i_r     <= (others => '0');
                 set_pads('0', DIR_NONE, (others => '0'), (others => '0'));
