@@ -87,8 +87,8 @@ SIZE="4913"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd,hdl"
 STATE="utd"
-TIME="1792567886"
-SIZE="4075"
+TIME="1793188232"
+SIZE="4515"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd,hdl"
 STATE="utd"
@@ -97,8 +97,8 @@ SIZE="2643"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd,hdl"
 STATE="utd"
-TIME="1793021657"
-SIZE="2526"
+TIME="1793190417"
+SIZE="2915"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd,hdl"
 STATE="utd"
@@ -132,8 +132,8 @@ SIZE="12871"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd,hdl"
 STATE="utd"
-TIME="1793098850"
-SIZE="17434"
+TIME="1793196773"
+SIZE="17909"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd,hdl"
 STATE="utd"
@@ -152,8 +152,8 @@ SIZE="12939"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd,hdl"
 STATE="utd"
-TIME="1793098850"
-SIZE="22883"
+TIME="1793199528"
+SIZE="22926"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd,hdl"
 STATE="utd"
@@ -162,8 +162,8 @@ SIZE="3872"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd,hdl"
 STATE="utd"
-TIME="1792567886"
-SIZE="2289"
+TIME="1793191705"
+SIZE="2554"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd,hdl"
 STATE="utd"
@@ -1318,13 +1318,13 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1793098850"
+TIME="1793198651"
 SIZE="12185"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1793098850"
-SIZE="43043"
+TIME="1793198651"
+SIZE="43231"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
@@ -1393,23 +1393,23 @@ SIZE="5837"
 ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
-TIME="1793021267"
+TIME="1793096073"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
 STATE="ood"
-TIME="1793021266"
-SIZE="3276322"
+TIME="1793096072"
+SIZE="2461228"
 ENDFILE
 VALUE "<project>/synthesis/TOP_syn.prj,prj"
 STATE="utd"
-TIME="1793021268"
-SIZE="26723"
+TIME="1793096073"
+SIZE="26451"
 ENDFILE
 VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
 STATE="utd"
-TIME="1793021267"
-SIZE="1361"
+TIME="1793096072"
+SIZE="1137"
 ENDFILE
 ENDLIST
 LIST UsedFile
@@ -1979,14 +1979,18 @@ ENDLIST
 ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
+Reports;Reports;0
+ReportsCurrentItem;Run Programming Action:TOP_PROGRAM.log
+StartPage;StartPage;0
+Constraint Manager;Constraint Manager;0
 SmartDesign;TOP;0
-ACTIVEVIEW;TOP
+ACTIVEVIEW;Reports
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
 SUBBLOCK "COREAXI4INTERCONNECT::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/CoreAxi4Interconnect.v","FALSE","FALSE"
 ENDLIST
-LIST "axi_sys_ctrl::work","","FALSE","FALSE"
+LIST "axi_sys_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_sys_ctrl.vhd","FALSE","FALSE"
 ENDLIST
 LIST "axis_spi_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd","FALSE","FALSE"
 ENDLIST
@@ -2590,6 +2594,7 @@ SUBBLOCK "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALS
 SUBBLOCK "INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR.v","TRUE","FALSE"
 SUBBLOCK "MSS_simple::work","component/work/MSS_simple/MSS_simple.v","TRUE","FALSE"
 SUBBLOCK "PF_CCC_C0::work","component/work/PF_CCC_C0/PF_CCC_C0.v","TRUE","FALSE"
+SUBBLOCK "axi_sys_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_sys_ctrl.vhd","FALSE","FALSE"
 SUBBLOCK "block_arbiter::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd","FALSE","FALSE"
 SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
 SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
@@ -2597,7 +2602,6 @@ SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl
 SUBBLOCK "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
 SUBBLOCK "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
 SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
-SUBBLOCK "axi_sys_ctrl::work","","FALSE","FALSE"
 ENDLIST
 LIST "util_pkg::work","/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd","FALSE","FALSE"
 ENDLIST
@@ -3683,6 +3687,9 @@ ENDLIST
 LIST "MEM_WgtR::work","component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WgtR.v","FALSE","TRUE"
 ENDLIST
 LIST "MEM_WltR::work","component/Actel/DirectCore/COREFIFO/4.0.139/rtl/vlog/test/user/MEM_WltR.v","FALSE","TRUE"
+ENDLIST
+LIST "tb_axi_sys_ctrl::work","/home/jenswilly/Projs/polarfire_simple/sim/tb_axi_sys_ctrl.vhd","FALSE","TRUE"
+SUBBLOCK "axi_sys_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_sys_ctrl.vhd","FALSE","FALSE"
 ENDLIST
 LIST "tb_axis_spi_master::work","/home/jenswilly/Projs/polarfire_simple/sim/tb_axis_spi_master.vhd","FALSE","TRUE"
 SUBBLOCK "axis_spi_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_master.vhd","FALSE","FALSE"

@@ -94,6 +94,8 @@ architecture rtl of qspi_xact is
     -- is a few ns shorter than in the fabric (hardware: 6-8 ns for 10 ns, 46-48 ns for 50 ns)
     constant CS_RD : positive := ns_to_cycles(P.t_cs_rd_ns, CLK_HZ) + 1;
     constant CS_WR : positive := ns_to_cycles(P.t_cs_wr_ns, CLK_HZ) + 1;
+
+    -- // TODO: Appears not used. Delete?
     constant BEATS_PER_BYTE1 : positive := 2 - boolean'pos(not DIE2_PRESENT);  -- 1-line data
 
     type state_t is (X_IDLE, X_ISSUE, X_RXWAIT);

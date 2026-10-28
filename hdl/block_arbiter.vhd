@@ -71,6 +71,7 @@ begin
             for i in 1 to NUM_PORTS loop
                 p := (p + 1) mod NUM_PORTS;
                 if s_valid(p) = '1' then
+                    -- Upstream has a valid block, select this producer
                     sel   <= p;
                     found <= '1';
                     exit;
@@ -87,22 +88,27 @@ begin
                 locked <= '0';
                 held   <= 0;
             elsif found = '1' then
+                -- A valid producer has been found this cycle
                 if m_ready = '1' then
+                    -- Downstream ready and has accepted the block. Update last served and unlock.
                     last   <= sel;
                     locked <= '0';
                 else
+                    -- Downstream not ready, hold the current selection and lock it.
                     held   <= sel;
                     locked <= '1';
                 end if;
             else
-                locked <= '0';                    -- Only if a producer broke the rules and dropped valid
+                locked <= '0';  -- Only if a producer broke the rules and dropped valid
             end if;
         end if;
     end process;
 
+    -- Assign data and set valid if an upstream producer was found
     m_data  <= s_data((sel + 1) * W - 1 downto sel * W);
     m_valid <= found;
 
+    -- Set ready(i) if downstream is ready and this producer is selected
     ready_gen : for i in 0 to NUM_PORTS - 1 generate
         s_ready(i) <= m_ready when found = '1' and sel = i else '0';
     end generate;

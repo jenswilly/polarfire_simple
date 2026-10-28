@@ -17,7 +17,7 @@ Outputs:
 | SPI SCLK | `spi_tx_path` | B19, RPi header pin 35 (GPIO19) |
 | SPI MOSI | `spi_tx_path` | B15, RPi header pin 36 (GPIO16) |
 | SPI CS_N | `spi_tx_path` | B17, RPi header pin 37 (GPIO26) |
-| (unused) | Tied low | B14, RPi header pin 38 (GPIO20) |
+| SPI busy | `spi_tx_path` | B14, RPi header pin 38 (GPIO20) |
 | QSPI SCLK | `qspi_board` | G18, RPi header pin 11 (GPIO17), yellow wire |
 | QSPI CS# | `qspi_board`, pull-up | F21, RPi header pin 13 (GPIO27), orange wire |
 | QSPI IO0 | `qspi_board` | F20, RPi header pin 15 (GPIO22), green wire |

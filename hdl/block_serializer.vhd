@@ -51,15 +51,20 @@ begin
                 active <= '0';
                 count  <= 0;
             elsif active = '0' then
+                -- Not currently active
                 if s_valid = '1' then
+                    -- Upstream has valid data: grab data block and set active
                     shift  <= s_data;
                     count  <= 0;
                     active <= '1';
                 end if;
             elsif m_axis_tready = '1' then
+                -- Currently active and downstream is ready
                 if count = BLOCK_BYTES - 1 then
+                    -- Last byte has been sent, deactivate
                     active <= '0';
                 else
+                    -- Not the last byte, shift out the next byte and increment count
                     shift <= shift(W - 9 downto 0) & x"00";
                     count <= count + 1;
                 end if;
@@ -67,7 +72,8 @@ begin
         end if;
     end process;
 
-    s_ready       <= not active;
+    -- Ready to accept from upstream when not currently active
+    s_ready       <=   not active;
 
     m_axis_tdata  <= shift(W - 1 downto W - 8);
     m_axis_tvalid <= active;
