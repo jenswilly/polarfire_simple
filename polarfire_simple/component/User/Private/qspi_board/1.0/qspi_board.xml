@@ -41,6 +41,10 @@
         <spirit:name>bist_fail</spirit:name>
         <spirit:direction>out</spirit:direction>
       </spirit:signal>
+      <spirit:signal>
+        <spirit:name>busy_out</spirit:name>
+        <spirit:direction>out</spirit:direction>
+      </spirit:signal>
     </spirit:signals>
     <spirit:hwParameters>
       <spirit:hwParameter spirit:id="DEVICE_SEL" spirit:name="DEVICE_SEL" spirit:prompt="DEVICE_SEL:" spirit:dataType="int" spirit:resolve="user" spirit:minimum="0" spirit:maximum="1">0</spirit:hwParameter>

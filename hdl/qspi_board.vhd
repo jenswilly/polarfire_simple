@@ -41,7 +41,9 @@ entity qspi_board is
         qspi_io   : inout std_logic_vector(3 downto 0);
 
         bist_pass : out   std_logic;
-        bist_fail : out   std_logic
+        bist_fail : out   std_logic;
+
+        busy_out  : out   std_logic
     );
 end entity qspi_board;
 
@@ -113,4 +115,6 @@ begin
         qspi_io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
     end generate;
     io_i <= "0000" & qspi_io;
+
+    busy_out <= busy;
 end architecture rtl;

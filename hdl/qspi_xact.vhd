@@ -26,7 +26,7 @@
 --   stream is late, SCLK pauses (CS# stays low).
 --
 -- CS# high time after the command: the device's write value if cmd_write = '1' (WREN, writes,
--- erase, register writes), else the read value (device_facts.md ยง1), converted with CLK_HZ.
+-- erase, register writes), else the read value (device_facts.md ง1), converted with CLK_HZ.
 --
 -- cmd_ready is high when idle. A command with RX data is finished after its last RX byte, a
 -- command without RX data after its last phase has gone to the PHY, so the next command's

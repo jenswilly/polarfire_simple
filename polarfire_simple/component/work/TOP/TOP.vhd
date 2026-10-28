@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Wed Oct 28 15:44:11 2026
+-- Created by SmartDesign Wed Oct 28 16:57:25 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -384,6 +384,7 @@ signal DEBUG_net_0                               : std_logic;
 signal DM_net_0                                  : std_logic_vector(1 downto 0);
 signal INIT_MONITOR_0_DEVICE_INIT_DONE           : std_logic;
 signal INIT_MONITOR_0_FABRIC_POR_N               : std_logic;
+signal LED1_net_0                                : std_logic;
 signal LED2_net_0                                : std_logic;
 signal LED3_net_0                                : std_logic;
 signal LED4_net_0                                : std_logic;
@@ -460,6 +461,7 @@ signal WE_N_net_1                                : std_logic;
 signal CAS_N_net_1                               : std_logic;
 signal ACT_N_net_1                               : std_logic;
 signal BG0_net_1                                 : std_logic;
+signal LED1_net_1                                : std_logic;
 signal UART0_TX_net_1                            : std_logic;
 signal LED2_net_1                                : std_logic;
 signal LED3_net_1                                : std_logic;
@@ -498,7 +500,6 @@ begin
 ----------------------------------------------------------------------
 -- TieOff assignments
 ----------------------------------------------------------------------
- LED1             <= '0';
  LED7             <= '0';
 ----------------------------------------------------------------------
 -- Top level output port assignments
@@ -525,6 +526,8 @@ begin
  ACT_N            <= ACT_N_net_1;
  BG0_net_1        <= BG0_net_0;
  BG0              <= BG0_net_1;
+ LED1_net_1       <= LED1_net_0;
+ LED1             <= LED1_net_1;
  UART0_TX_net_1   <= UART0_TX_net_0;
  UART0_TX         <= UART0_TX_net_1;
  LED2_net_1       <= LED2_net_0;
@@ -881,6 +884,7 @@ qspi_board_0 : entity work.qspi_board
         qspi_cs_n => QSPI_CS_N_net_0,
         bist_pass => LED5_net_0,
         bist_fail => LED6_net_0,
+        busy_out  => LED1_net_0,
         -- Inouts
         qspi_io   => QSPI_IO 
         );
