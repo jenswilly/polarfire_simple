@@ -1,5 +1,5 @@
 # Microchip Technology Inc.
-# Date: 2026-Oct-27 10:27:37
+# Date: 2026-Oct-28 18:19:03
 # This file was generated based on the following SDC source files:
 #   /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/AXI_IC/AXI_IC_0/AXI_IC.sdc
 #   /home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/MSS_simple/MSS_simple.sdc
