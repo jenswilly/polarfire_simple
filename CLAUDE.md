@@ -9,7 +9,7 @@ Learning project: PolarFire SoC Discovery Kit, Libero SoC 2026.1, and SoftConsol
   - SmartDesign result: `polarfire_simple/component/work/TOP/TOP.vhd`
   - IP configs: `polarfire_simple/component/work/<comp>/<comp>.cxf` (`configurableElement` values)
 - HDL is **VHDL** (project is set to VHDL-2008). Do not write Verilog.
-  - RTL must stay within what Synplify Pro supports: no `process(all)`, no unconstrained record elements, no generics on packages. Testbenches may use full VHDL-2008.
+  - Synplify Pro 2026.1 (with `-vhdl2008`, as in `syn_check.sh`) accepts `process(all)`, unconstrained record elements (constrained at the port/signal) and generic packages (`package … is new … generic map`). Checked with `syn_check.sh` on 2026-10-28; check any other VHDL-2008 feature the same way before using it in RTL. Ports of blocks placed in SmartDesign should still be `std_logic`/`std_logic_vector` (SmartDesign has no array ports, see Gotchas).
   - `hdl/` conventions: one entity per file, file name = entity name, header comment describing the block, `clk` + synchronous active-low `reset_n`, valid/ready and AXI4-Stream port naming as in `spi_tx_path` / `block_serializer`.
 - **QSPI device facts are never guessed.** Opcodes, registers, latencies and timing come from the datasheets in `documentation/` and are recorded in `documentation/device_facts.md` with a page/table reference. Missing or ambiguous values are `TBD` with a question to the user. `hdl/qspi_pkg.vhd` and `sim/models/` take their values from that file.
 - Hand-written sources live outside the Libero folder (`hdl/`, `constraints/`, `mss/`) and are *linked* into the project, not imported.
