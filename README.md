@@ -74,6 +74,15 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 - L2 cache split: LIM 4 ways, scratchpad 4 ways. The scratchpad is needed by the HSS.
 - MMUART_0 is routed to the fabric. FIC_0 AXI4 initiator is enabled. All other peripherals and FICs are off.
 
+### Timing Constants
+
+Several components have generics that need to be adjusted when clock frequency change:
+
+* button_debounce.vhd: `DEBOUNCE_CYCLES`
+* spi_tx_path.vdh: `CLK_DIV`
+* pulse_stretch_0 HDL+ component: `STRETCH_CYCLES`
+* qspi_board_0 HDL+ component: `CLK_HZ` and `SCLK_DIV`
+
 ## Repository layout
 
 ```

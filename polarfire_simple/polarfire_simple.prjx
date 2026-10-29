@@ -1393,22 +1393,22 @@ SIZE="5837"
 ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
-TIME="1793198692"
+TIME="1793207984"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
 STATE="utd"
-TIME="1793198691"
-SIZE="2468803"
+TIME="1793207983"
+SIZE="2456281"
 ENDFILE
 VALUE "<project>/synthesis/TOP_syn.prj,prj"
 STATE="utd"
-TIME="1793198692"
+TIME="1793207984"
 SIZE="26451"
 ENDFILE
 VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
 STATE="utd"
-TIME="1793198691"
+TIME="1793207983"
 SIZE="1137"
 ENDFILE
 ENDLIST
@@ -1774,8 +1774,8 @@ NAME="Synplify Pro ME"
 FUNCTION="Synthesis"
 TOOL="Synplify Pro ME"
 LOCATION="/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Synplify_Pro/bin/synplify_pro"
-PARAM="-licensetype synplifypro_actel -batch -log synplify.log"
-BATCH=1
+PARAM=""
+BATCH=0
 LICENSE=""
 IS32BIT="1"
 EndProfile
@@ -1981,11 +1981,9 @@ ENDLIST
 ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
-Reports;Reports;0
-ReportsCurrentItem;Place and Route:TOP_glb_net_report.xml
-StartPage;StartPage;0
+HDL;/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd;0
 SmartDesign;TOP;0
-ACTIVEVIEW;Reports
+ACTIVEVIEW;/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
