@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Wed Oct 28 18:18:53 2026
+-- Created by SmartDesign Fri Oct 30 12:02:20 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -18,46 +18,62 @@ entity TOP is
     -- Port list
     port(
         -- Inputs
-        REFCLK        : in    std_logic;
-        REFCLK_N      : in    std_logic;
-        REF_CLK_50MHz : in    std_logic;
-        SWITCH2       : in    std_logic;
-        UART0_RX      : in    std_logic;
+        MMUART_1_RXD    : in    std_logic;
+        MMUART_4_RXD    : in    std_logic;
+        REFCLK          : in    std_logic;
+        REFCLK_N        : in    std_logic;
+        REF_CLK_50MHz   : in    std_logic;
+        SD_CD           : in    std_logic;
+        SWITCH2         : in    std_logic;
+        UART0_RX        : in    std_logic;
         -- Outputs
-        A             : out   std_logic_vector(13 downto 0);
-        ACT_N         : out   std_logic;
-        BA            : out   std_logic_vector(1 downto 0);
-        BG0           : out   std_logic;
-        CAS_N         : out   std_logic;
-        CK0           : out   std_logic;
-        CK0_N         : out   std_logic;
-        CKE0          : out   std_logic;
-        CS0_N         : out   std_logic;
-        DEBUG         : out   std_logic;
-        DM            : out   std_logic_vector(1 downto 0);
-        LED1          : out   std_logic;
-        LED2          : out   std_logic;
-        LED3          : out   std_logic;
-        LED4          : out   std_logic;
-        LED5          : out   std_logic;
-        LED6          : out   std_logic;
-        LED7          : out   std_logic;
-        ODT0          : out   std_logic;
-        QSPI_CS_N     : out   std_logic;
-        QSPI_SCLK     : out   std_logic;
-        RAS_N         : out   std_logic;
-        RESET_N       : out   std_logic;
-        RPi_GPIO16    : out   std_logic;
-        RPi_GPIO19    : out   std_logic;
-        RPi_GPIO20    : out   std_logic;
-        RPi_GPIO26    : out   std_logic;
-        UART0_TX      : out   std_logic;
-        WE_N          : out   std_logic;
+        A               : out   std_logic_vector(13 downto 0);
+        ACT_N           : out   std_logic;
+        BA              : out   std_logic_vector(1 downto 0);
+        BG0             : out   std_logic;
+        CAS_N           : out   std_logic;
+        CK0             : out   std_logic;
+        CK0_N           : out   std_logic;
+        CKE0            : out   std_logic;
+        CS0_N           : out   std_logic;
+        DEBUG           : out   std_logic;
+        DM              : out   std_logic_vector(1 downto 0);
+        LED1            : out   std_logic;
+        LED2            : out   std_logic;
+        LED3            : out   std_logic;
+        LED4            : out   std_logic;
+        LED5            : out   std_logic;
+        LED6            : out   std_logic;
+        LED7            : out   std_logic;
+        MMUART_1_TXD    : out   std_logic;
+        MMUART_4_TXD    : out   std_logic;
+        ODT0            : out   std_logic;
+        QSPI_CS_N       : out   std_logic;
+        QSPI_SCLK       : out   std_logic;
+        RAS_N           : out   std_logic;
+        RESET_N         : out   std_logic;
+        RPi_GPIO16      : out   std_logic;
+        RPi_GPIO19      : out   std_logic;
+        RPi_GPIO20      : out   std_logic;
+        RPi_GPIO26      : out   std_logic;
+        SD_CLK          : out   std_logic;
+        SD_VOLT_CMD_DIR : out   std_logic;
+        SD_VOLT_DIR_0   : out   std_logic;
+        SD_VOLT_DIR_1_3 : out   std_logic;
+        SD_VOLT_EN      : out   std_logic;
+        SD_VOLT_SEL     : out   std_logic;
+        UART0_TX        : out   std_logic;
+        WE_N            : out   std_logic;
         -- Inouts
-        DQ            : inout std_logic_vector(15 downto 0);
-        DQS           : inout std_logic_vector(1 downto 0);
-        DQS_N         : inout std_logic_vector(1 downto 0);
-        QSPI_IO       : inout std_logic_vector(3 downto 0)
+        DQ              : inout std_logic_vector(15 downto 0);
+        DQS             : inout std_logic_vector(1 downto 0);
+        DQS_N           : inout std_logic_vector(1 downto 0);
+        QSPI_IO         : inout std_logic_vector(3 downto 0);
+        SD_CMD          : inout std_logic;
+        SD_DATA0        : inout std_logic;
+        SD_DATA1        : inout std_logic;
+        SD_DATA2        : inout std_logic;
+        SD_DATA3        : inout std_logic
         );
 end TOP;
 ----------------------------------------------------------------------
@@ -237,9 +253,12 @@ component MSS_simple
         FIC_0_AXI4_M_RVALID  : in    std_logic;
         FIC_0_AXI4_M_WREADY  : in    std_logic;
         MMUART_0_RXD_F2M     : in    std_logic;
+        MMUART_1_RXD         : in    std_logic;
+        MMUART_4_RXD         : in    std_logic;
         MSS_RESET_N_F2M      : in    std_logic;
         REFCLK               : in    std_logic;
         REFCLK_N             : in    std_logic;
+        SD_CD                : in    std_logic;
         -- Outputs
         A                    : out   std_logic_vector(13 downto 0);
         ACT_N                : out   std_logic;
@@ -280,17 +299,30 @@ component MSS_simple
         FIC_0_DLL_LOCK_M2F   : out   std_logic;
         MMUART_0_TXD_M2F     : out   std_logic;
         MMUART_0_TXD_OE_M2F  : out   std_logic;
+        MMUART_1_TXD         : out   std_logic;
+        MMUART_4_TXD         : out   std_logic;
         MSS_RESET_N_M2F      : out   std_logic;
         ODT0                 : out   std_logic;
         PLL_CPU_LOCK_M2F     : out   std_logic;
         PLL_DDR_LOCK_M2F     : out   std_logic;
         RAS_N                : out   std_logic;
         RESET_N              : out   std_logic;
+        SD_CLK               : out   std_logic;
+        SD_VOLT_CMD_DIR      : out   std_logic;
+        SD_VOLT_DIR_0        : out   std_logic;
+        SD_VOLT_DIR_1_3      : out   std_logic;
+        SD_VOLT_EN           : out   std_logic;
+        SD_VOLT_SEL          : out   std_logic;
         WE_N                 : out   std_logic;
         -- Inouts
         DQ                   : inout std_logic_vector(15 downto 0);
         DQS                  : inout std_logic_vector(1 downto 0);
-        DQS_N                : inout std_logic_vector(1 downto 0)
+        DQS_N                : inout std_logic_vector(1 downto 0);
+        SD_CMD               : inout std_logic;
+        SD_DATA0             : inout std_logic;
+        SD_DATA1             : inout std_logic;
+        SD_DATA2             : inout std_logic;
+        SD_DATA3             : inout std_logic
         );
 end component;
 -- OR2
@@ -390,6 +422,8 @@ signal LED3_net_0                                : std_logic;
 signal LED4_net_0                                : std_logic;
 signal LED5_net_0                                : std_logic;
 signal LED6_net_0                                : std_logic;
+signal MMUART_1_TXD_net_0                        : std_logic;
+signal MMUART_4_TXD_net_0                        : std_logic;
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR  : std_logic_vector(37 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST : std_logic_vector(1 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE : std_logic_vector(3 downto 0);
@@ -443,6 +477,12 @@ signal RPi_GPIO16_net_0                          : std_logic;
 signal RPi_GPIO19_net_0                          : std_logic;
 signal RPi_GPIO20_net_0                          : std_logic;
 signal RPi_GPIO26_net_0                          : std_logic;
+signal SD_CLK_net_0                              : std_logic;
+signal SD_VOLT_CMD_DIR_net_0                     : std_logic;
+signal SD_VOLT_DIR_0_net_0                       : std_logic;
+signal SD_VOLT_DIR_1_3_net_0                     : std_logic;
+signal SD_VOLT_EN_net_0                          : std_logic;
+signal SD_VOLT_SEL_net_0                         : std_logic;
 signal spi_tx_path_0_s_ready                     : std_logic;
 signal test_block_producer_0_m_data              : std_logic_vector(79 downto 0);
 signal test_block_producer_0_m_valid             : std_logic;
@@ -478,6 +518,14 @@ signal QSPI_CS_N_net_1                           : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
+signal MMUART_1_TXD_net_1                        : std_logic;
+signal MMUART_4_TXD_net_1                        : std_logic;
+signal SD_CLK_net_1                              : std_logic;
+signal SD_VOLT_SEL_net_1                         : std_logic;
+signal SD_VOLT_EN_net_1                          : std_logic;
+signal SD_VOLT_CMD_DIR_net_1                     : std_logic;
+signal SD_VOLT_DIR_0_net_1                       : std_logic;
+signal SD_VOLT_DIR_1_3_net_1                     : std_logic;
 signal s_data_net_0                              : std_logic_vector(159 downto 0);
 signal s_valid_net_0                             : std_logic_vector(1 downto 0);
 signal s_ready_net_0                             : std_logic_vector(1 downto 0);
@@ -500,66 +548,82 @@ begin
 ----------------------------------------------------------------------
 -- TieOff assignments
 ----------------------------------------------------------------------
- LED7             <= '0';
+ LED7                  <= '0';
 ----------------------------------------------------------------------
 -- Top level output port assignments
 ----------------------------------------------------------------------
- RESET_N_net_1    <= RESET_N_net_0;
- RESET_N          <= RESET_N_net_1;
- CKE0_net_1       <= CKE0_net_0;
- CKE0             <= CKE0_net_1;
- CS0_N_net_1      <= CS0_N_net_0;
- CS0_N            <= CS0_N_net_1;
- ODT0_net_1       <= ODT0_net_0;
- ODT0             <= ODT0_net_1;
- CK0_net_1        <= CK0_net_0;
- CK0              <= CK0_net_1;
- CK0_N_net_1      <= CK0_N_net_0;
- CK0_N            <= CK0_N_net_1;
- RAS_N_net_1      <= RAS_N_net_0;
- RAS_N            <= RAS_N_net_1;
- WE_N_net_1       <= WE_N_net_0;
- WE_N             <= WE_N_net_1;
- CAS_N_net_1      <= CAS_N_net_0;
- CAS_N            <= CAS_N_net_1;
- ACT_N_net_1      <= ACT_N_net_0;
- ACT_N            <= ACT_N_net_1;
- BG0_net_1        <= BG0_net_0;
- BG0              <= BG0_net_1;
- LED1_net_1       <= LED1_net_0;
- LED1             <= LED1_net_1;
- UART0_TX_net_1   <= UART0_TX_net_0;
- UART0_TX         <= UART0_TX_net_1;
- LED2_net_1       <= LED2_net_0;
- LED2             <= LED2_net_1;
- LED3_net_1       <= LED3_net_0;
- LED3             <= LED3_net_1;
- LED4_net_1       <= LED4_net_0;
- LED4             <= LED4_net_1;
- LED5_net_1       <= LED5_net_0;
- LED5             <= LED5_net_1;
- LED6_net_1       <= LED6_net_0;
- LED6             <= LED6_net_1;
- DEBUG_net_1      <= DEBUG_net_0;
- DEBUG            <= DEBUG_net_1;
- RPi_GPIO16_net_1 <= RPi_GPIO16_net_0;
- RPi_GPIO16       <= RPi_GPIO16_net_1;
- RPi_GPIO19_net_1 <= RPi_GPIO19_net_0;
- RPi_GPIO19       <= RPi_GPIO19_net_1;
- RPi_GPIO20_net_1 <= RPi_GPIO20_net_0;
- RPi_GPIO20       <= RPi_GPIO20_net_1;
- RPi_GPIO26_net_1 <= RPi_GPIO26_net_0;
- RPi_GPIO26       <= RPi_GPIO26_net_1;
- QSPI_SCLK_net_1  <= QSPI_SCLK_net_0;
- QSPI_SCLK        <= QSPI_SCLK_net_1;
- QSPI_CS_N_net_1  <= QSPI_CS_N_net_0;
- QSPI_CS_N        <= QSPI_CS_N_net_1;
- BA_net_1         <= BA_net_0;
- BA(1 downto 0)   <= BA_net_1;
- DM_net_1         <= DM_net_0;
- DM(1 downto 0)   <= DM_net_1;
- A_net_1          <= A_net_0;
- A(13 downto 0)   <= A_net_1;
+ RESET_N_net_1         <= RESET_N_net_0;
+ RESET_N               <= RESET_N_net_1;
+ CKE0_net_1            <= CKE0_net_0;
+ CKE0                  <= CKE0_net_1;
+ CS0_N_net_1           <= CS0_N_net_0;
+ CS0_N                 <= CS0_N_net_1;
+ ODT0_net_1            <= ODT0_net_0;
+ ODT0                  <= ODT0_net_1;
+ CK0_net_1             <= CK0_net_0;
+ CK0                   <= CK0_net_1;
+ CK0_N_net_1           <= CK0_N_net_0;
+ CK0_N                 <= CK0_N_net_1;
+ RAS_N_net_1           <= RAS_N_net_0;
+ RAS_N                 <= RAS_N_net_1;
+ WE_N_net_1            <= WE_N_net_0;
+ WE_N                  <= WE_N_net_1;
+ CAS_N_net_1           <= CAS_N_net_0;
+ CAS_N                 <= CAS_N_net_1;
+ ACT_N_net_1           <= ACT_N_net_0;
+ ACT_N                 <= ACT_N_net_1;
+ BG0_net_1             <= BG0_net_0;
+ BG0                   <= BG0_net_1;
+ LED1_net_1            <= LED1_net_0;
+ LED1                  <= LED1_net_1;
+ UART0_TX_net_1        <= UART0_TX_net_0;
+ UART0_TX              <= UART0_TX_net_1;
+ LED2_net_1            <= LED2_net_0;
+ LED2                  <= LED2_net_1;
+ LED3_net_1            <= LED3_net_0;
+ LED3                  <= LED3_net_1;
+ LED4_net_1            <= LED4_net_0;
+ LED4                  <= LED4_net_1;
+ LED5_net_1            <= LED5_net_0;
+ LED5                  <= LED5_net_1;
+ LED6_net_1            <= LED6_net_0;
+ LED6                  <= LED6_net_1;
+ DEBUG_net_1           <= DEBUG_net_0;
+ DEBUG                 <= DEBUG_net_1;
+ RPi_GPIO16_net_1      <= RPi_GPIO16_net_0;
+ RPi_GPIO16            <= RPi_GPIO16_net_1;
+ RPi_GPIO19_net_1      <= RPi_GPIO19_net_0;
+ RPi_GPIO19            <= RPi_GPIO19_net_1;
+ RPi_GPIO20_net_1      <= RPi_GPIO20_net_0;
+ RPi_GPIO20            <= RPi_GPIO20_net_1;
+ RPi_GPIO26_net_1      <= RPi_GPIO26_net_0;
+ RPi_GPIO26            <= RPi_GPIO26_net_1;
+ QSPI_SCLK_net_1       <= QSPI_SCLK_net_0;
+ QSPI_SCLK             <= QSPI_SCLK_net_1;
+ QSPI_CS_N_net_1       <= QSPI_CS_N_net_0;
+ QSPI_CS_N             <= QSPI_CS_N_net_1;
+ BA_net_1              <= BA_net_0;
+ BA(1 downto 0)        <= BA_net_1;
+ DM_net_1              <= DM_net_0;
+ DM(1 downto 0)        <= DM_net_1;
+ A_net_1               <= A_net_0;
+ A(13 downto 0)        <= A_net_1;
+ MMUART_1_TXD_net_1    <= MMUART_1_TXD_net_0;
+ MMUART_1_TXD          <= MMUART_1_TXD_net_1;
+ MMUART_4_TXD_net_1    <= MMUART_4_TXD_net_0;
+ MMUART_4_TXD          <= MMUART_4_TXD_net_1;
+ SD_CLK_net_1          <= SD_CLK_net_0;
+ SD_CLK                <= SD_CLK_net_1;
+ SD_VOLT_SEL_net_1     <= SD_VOLT_SEL_net_0;
+ SD_VOLT_SEL           <= SD_VOLT_SEL_net_1;
+ SD_VOLT_EN_net_1      <= SD_VOLT_EN_net_0;
+ SD_VOLT_EN            <= SD_VOLT_EN_net_1;
+ SD_VOLT_CMD_DIR_net_1 <= SD_VOLT_CMD_DIR_net_0;
+ SD_VOLT_CMD_DIR       <= SD_VOLT_CMD_DIR_net_1;
+ SD_VOLT_DIR_0_net_1   <= SD_VOLT_DIR_0_net_0;
+ SD_VOLT_DIR_0         <= SD_VOLT_DIR_0_net_1;
+ SD_VOLT_DIR_1_3_net_1 <= SD_VOLT_DIR_1_3_net_0;
+ SD_VOLT_DIR_1_3       <= SD_VOLT_DIR_1_3_net_1;
 ----------------------------------------------------------------------
 -- Slices assignments
 ----------------------------------------------------------------------
@@ -767,27 +831,48 @@ MSS_simple_0 : MSS_simple
         FIC_0_ACLK           => PF_CCC_C0_0_OUT0_FABCLK_0,
         FIC_0_AXI4_M_AWREADY => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWREADY,
         FIC_0_AXI4_M_WREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_WREADY,
+        FIC_0_AXI4_M_BID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BID,
+        FIC_0_AXI4_M_BRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_BRESP,
         FIC_0_AXI4_M_BVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_BVALID,
         FIC_0_AXI4_M_ARREADY => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARREADY,
+        FIC_0_AXI4_M_RID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RID,
+        FIC_0_AXI4_M_RDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RDATA,
+        FIC_0_AXI4_M_RRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RRESP,
         FIC_0_AXI4_M_RLAST   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RLAST,
         FIC_0_AXI4_M_RVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_RVALID,
         MMUART_0_RXD_F2M     => UART0_RX,
         MSS_RESET_N_F2M      => VCC_net,
+        MMUART_1_RXD         => MMUART_1_RXD,
+        MMUART_4_RXD         => MMUART_4_RXD,
+        SD_CD                => SD_CD,
         REFCLK               => REFCLK,
         REFCLK_N             => REFCLK_N,
-        FIC_0_AXI4_M_BID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BID,
-        FIC_0_AXI4_M_BRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_BRESP,
-        FIC_0_AXI4_M_RID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RID,
-        FIC_0_AXI4_M_RDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RDATA,
-        FIC_0_AXI4_M_RRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RRESP,
         -- Outputs
         FIC_0_DLL_LOCK_M2F   => MSS_simple_0_FIC_0_DLL_LOCK_M2F,
+        FIC_0_AXI4_M_AWID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWID,
+        FIC_0_AXI4_M_AWADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWADDR,
+        FIC_0_AXI4_M_AWLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLEN,
+        FIC_0_AXI4_M_AWSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWSIZE,
+        FIC_0_AXI4_M_AWBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWBURST,
         FIC_0_AXI4_M_AWLOCK  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLOCK,
+        FIC_0_AXI4_M_AWQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWQOS,
+        FIC_0_AXI4_M_AWCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWCACHE,
+        FIC_0_AXI4_M_AWPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWPROT,
         FIC_0_AXI4_M_AWVALID => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWVALID,
+        FIC_0_AXI4_M_WDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WDATA,
+        FIC_0_AXI4_M_WSTRB   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WSTRB,
         FIC_0_AXI4_M_WLAST   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WLAST,
         FIC_0_AXI4_M_WVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID,
         FIC_0_AXI4_M_BREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_BREADY,
+        FIC_0_AXI4_M_ARID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARID,
+        FIC_0_AXI4_M_ARADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR,
+        FIC_0_AXI4_M_ARLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLEN,
+        FIC_0_AXI4_M_ARSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARSIZE,
+        FIC_0_AXI4_M_ARBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST,
         FIC_0_AXI4_M_ARLOCK  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLOCK,
+        FIC_0_AXI4_M_ARQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARQOS,
+        FIC_0_AXI4_M_ARCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE,
+        FIC_0_AXI4_M_ARPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARPROT,
         FIC_0_AXI4_M_ARVALID => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARVALID,
         FIC_0_AXI4_M_RREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_RREADY,
         MMUART_0_TXD_M2F     => UART0_TX_net_0,
@@ -795,6 +880,17 @@ MSS_simple_0 : MSS_simple
         PLL_CPU_LOCK_M2F     => OPEN,
         PLL_DDR_LOCK_M2F     => OPEN,
         MSS_RESET_N_M2F      => MSS_simple_0_MSS_RESET_N_M2F,
+        MMUART_1_TXD         => MMUART_1_TXD_net_0,
+        MMUART_4_TXD         => MMUART_4_TXD_net_0,
+        SD_CLK               => SD_CLK_net_0,
+        SD_VOLT_SEL          => SD_VOLT_SEL_net_0,
+        SD_VOLT_EN           => SD_VOLT_EN_net_0,
+        SD_VOLT_CMD_DIR      => SD_VOLT_CMD_DIR_net_0,
+        SD_VOLT_DIR_0        => SD_VOLT_DIR_0_net_0,
+        SD_VOLT_DIR_1_3      => SD_VOLT_DIR_1_3_net_0,
+        BA                   => BA_net_0,
+        DM                   => DM_net_0,
+        A                    => A_net_0,
         RESET_N              => RESET_N_net_0,
         CKE0                 => CKE0_net_0,
         CS0_N                => CS0_N_net_0,
@@ -806,28 +902,12 @@ MSS_simple_0 : MSS_simple
         CAS_N                => CAS_N_net_0,
         ACT_N                => ACT_N_net_0,
         BG0                  => BG0_net_0,
-        FIC_0_AXI4_M_AWID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWID,
-        FIC_0_AXI4_M_AWADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWADDR,
-        FIC_0_AXI4_M_AWLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLEN,
-        FIC_0_AXI4_M_AWSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWSIZE,
-        FIC_0_AXI4_M_AWBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWBURST,
-        FIC_0_AXI4_M_AWQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWQOS,
-        FIC_0_AXI4_M_AWCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWCACHE,
-        FIC_0_AXI4_M_AWPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWPROT,
-        FIC_0_AXI4_M_WDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WDATA,
-        FIC_0_AXI4_M_WSTRB   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WSTRB,
-        FIC_0_AXI4_M_ARID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARID,
-        FIC_0_AXI4_M_ARADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR,
-        FIC_0_AXI4_M_ARLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLEN,
-        FIC_0_AXI4_M_ARSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARSIZE,
-        FIC_0_AXI4_M_ARBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST,
-        FIC_0_AXI4_M_ARQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARQOS,
-        FIC_0_AXI4_M_ARCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE,
-        FIC_0_AXI4_M_ARPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARPROT,
-        BA                   => BA_net_0,
-        DM                   => DM_net_0,
-        A                    => A_net_0,
         -- Inouts
+        SD_CMD               => SD_CMD,
+        SD_DATA0             => SD_DATA0,
+        SD_DATA1             => SD_DATA1,
+        SD_DATA2             => SD_DATA2,
+        SD_DATA3             => SD_DATA3,
         DQ                   => DQ,
         DQS                  => DQS,
         DQS_N                => DQS_N 

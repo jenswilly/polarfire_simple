@@ -1,0 +1,5 @@
+# HSS configuration: replaces these symbols in the board's def_config
+# (boards/mpfs-disco-kit/def_config). Used by build_hss.sh.
+
+# Our MSS configuration instead of the reference design's
+CONFIG_SOC_FPGA_DESIGN_XML="/workspace/mss/MSS_simple_mss_cfg.xml"

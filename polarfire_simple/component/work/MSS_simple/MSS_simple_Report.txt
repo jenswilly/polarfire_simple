@@ -7,7 +7,7 @@ Design Information
 | Die                   | MPFS095T                  |
 | Package               | FCSG325                   |
 | Version               | 2026.1                    |
-| Date                  | Wed Oct  7 10:25:06 2026
+| Date                  | Fri Oct 30 11:59:52 2026
  |
 +-----------------------+---------------------------+
 
@@ -36,97 +36,97 @@ MSS to/from Fabric Interface Controllers
 
 
 Peripherals
-+------------------------+---------+
-| Peripheral Name        | Enabled |
-+------------------------+---------+
-| eMMC                   | UNUSED  |
-| USB                    | UNUSED  |
-| SD/SDIO                | UNUSED  |
-| Gigabit Ethernet MAC_0 | UNUSED  |
-| Gigabit Ethernet MAC_1 | UNUSED  |
-| QSPI                   | UNUSED  |
-| SPI_0                  | UNUSED  |
-| SPI_1                  | UNUSED  |
-| MMUART_0               | FABRIC  |
-| MMUART_1               | UNUSED  |
-| MMUART_2               | UNUSED  |
-| MMUART_3               | UNUSED  |
-| MMUART_4               | UNUSED  |
-| I2C_0                  | UNUSED  |
-| I2C_1                  | UNUSED  |
-| CAN_0                  | UNUSED  |
-| CAN_1                  | UNUSED  |
-| GPIO_0_0               | UNUSED  |
-| GPIO_0_1               | UNUSED  |
-| GPIO_0_2               | UNUSED  |
-| GPIO_0_3               | UNUSED  |
-| GPIO_0_4               | UNUSED  |
-| GPIO_0_5               | UNUSED  |
-| GPIO_0_6               | UNUSED  |
-| GPIO_0_7               | UNUSED  |
-| GPIO_0_8               | UNUSED  |
-| GPIO_0_9               | UNUSED  |
-| GPIO_0_10              | UNUSED  |
-| GPIO_0_11              | UNUSED  |
-| GPIO_0_12              | UNUSED  |
-| GPIO_0_13              | UNUSED  |
-| GPIO_1_0               | UNUSED  |
-| GPIO_1_1               | UNUSED  |
-| GPIO_1_2               | UNUSED  |
-| GPIO_1_3               | UNUSED  |
-| GPIO_1_4               | UNUSED  |
-| GPIO_1_5               | UNUSED  |
-| GPIO_1_6               | UNUSED  |
-| GPIO_1_7               | UNUSED  |
-| GPIO_1_8               | UNUSED  |
-| GPIO_1_9               | UNUSED  |
-| GPIO_1_10              | UNUSED  |
-| GPIO_1_11              | UNUSED  |
-| GPIO_1_12              | UNUSED  |
-| GPIO_1_13              | UNUSED  |
-| GPIO_1_14              | UNUSED  |
-| GPIO_1_15              | UNUSED  |
-| GPIO_1_16              | UNUSED  |
-| GPIO_1_17              | UNUSED  |
-| GPIO_1_18              | UNUSED  |
-| GPIO_1_19              | UNUSED  |
-| GPIO_1_20              | UNUSED  |
-| GPIO_1_21              | UNUSED  |
-| GPIO_1_22              | UNUSED  |
-| GPIO_1_23              | UNUSED  |
-| GPIO_2_0               | UNUSED  |
-| GPIO_2_1               | UNUSED  |
-| GPIO_2_2               | UNUSED  |
-| GPIO_2_3               | UNUSED  |
-| GPIO_2_4               | UNUSED  |
-| GPIO_2_5               | UNUSED  |
-| GPIO_2_6               | UNUSED  |
-| GPIO_2_7               | UNUSED  |
-| GPIO_2_8               | UNUSED  |
-| GPIO_2_9               | UNUSED  |
-| GPIO_2_10              | UNUSED  |
-| GPIO_2_11              | UNUSED  |
-| GPIO_2_12              | UNUSED  |
-| GPIO_2_13              | UNUSED  |
-| GPIO_2_14              | UNUSED  |
-| GPIO_2_15              | UNUSED  |
-| GPIO_2_16              | UNUSED  |
-| GPIO_2_17              | UNUSED  |
-| GPIO_2_18              | UNUSED  |
-| GPIO_2_19              | UNUSED  |
-| GPIO_2_20              | UNUSED  |
-| GPIO_2_21              | UNUSED  |
-| GPIO_2_22              | UNUSED  |
-| GPIO_2_23              | UNUSED  |
-| GPIO_2_24              | UNUSED  |
-| GPIO_2_25              | UNUSED  |
-| GPIO_2_26              | UNUSED  |
-| GPIO_2_27              | UNUSED  |
-| GPIO_2_28              | UNUSED  |
-| GPIO_2_29              | UNUSED  |
-| GPIO_2_30              | UNUSED  |
-| GPIO_2_31              | UNUSED  |
-+------------------------+---------+
++------------------------+----------+
+| Peripheral Name        | Enabled  |
++------------------------+----------+
+| eMMC                   | UNUSED   |
+| USB                    | UNUSED   |
+| SD/SDIO                | MSSIO_B4 |
+| Gigabit Ethernet MAC_0 | UNUSED   |
+| Gigabit Ethernet MAC_1 | UNUSED   |
+| QSPI                   | UNUSED   |
+| SPI_0                  | UNUSED   |
+| SPI_1                  | UNUSED   |
+| MMUART_0               | FABRIC   |
+| MMUART_1               | MSSIO_B2 |
+| MMUART_2               | UNUSED   |
+| MMUART_3               | UNUSED   |
+| MMUART_4               | MSSIO_B2 |
+| I2C_0                  | UNUSED   |
+| I2C_1                  | UNUSED   |
+| CAN_0                  | UNUSED   |
+| CAN_1                  | UNUSED   |
+| GPIO_0_0               | UNUSED   |
+| GPIO_0_1               | UNUSED   |
+| GPIO_0_2               | UNUSED   |
+| GPIO_0_3               | UNUSED   |
+| GPIO_0_4               | UNUSED   |
+| GPIO_0_5               | UNUSED   |
+| GPIO_0_6               | UNUSED   |
+| GPIO_0_7               | UNUSED   |
+| GPIO_0_8               | UNUSED   |
+| GPIO_0_9               | UNUSED   |
+| GPIO_0_10              | UNUSED   |
+| GPIO_0_11              | UNUSED   |
+| GPIO_0_12              | UNUSED   |
+| GPIO_0_13              | UNUSED   |
+| GPIO_1_0               | UNUSED   |
+| GPIO_1_1               | UNUSED   |
+| GPIO_1_2               | UNUSED   |
+| GPIO_1_3               | UNUSED   |
+| GPIO_1_4               | UNUSED   |
+| GPIO_1_5               | UNUSED   |
+| GPIO_1_6               | UNUSED   |
+| GPIO_1_7               | UNUSED   |
+| GPIO_1_8               | UNUSED   |
+| GPIO_1_9               | UNUSED   |
+| GPIO_1_10              | UNUSED   |
+| GPIO_1_11              | UNUSED   |
+| GPIO_1_12              | UNUSED   |
+| GPIO_1_13              | UNUSED   |
+| GPIO_1_14              | UNUSED   |
+| GPIO_1_15              | UNUSED   |
+| GPIO_1_16              | UNUSED   |
+| GPIO_1_17              | UNUSED   |
+| GPIO_1_18              | UNUSED   |
+| GPIO_1_19              | UNUSED   |
+| GPIO_1_20              | UNUSED   |
+| GPIO_1_21              | UNUSED   |
+| GPIO_1_22              | UNUSED   |
+| GPIO_1_23              | UNUSED   |
+| GPIO_2_0               | UNUSED   |
+| GPIO_2_1               | UNUSED   |
+| GPIO_2_2               | UNUSED   |
+| GPIO_2_3               | UNUSED   |
+| GPIO_2_4               | UNUSED   |
+| GPIO_2_5               | UNUSED   |
+| GPIO_2_6               | UNUSED   |
+| GPIO_2_7               | UNUSED   |
+| GPIO_2_8               | UNUSED   |
+| GPIO_2_9               | UNUSED   |
+| GPIO_2_10              | UNUSED   |
+| GPIO_2_11              | UNUSED   |
+| GPIO_2_12              | UNUSED   |
+| GPIO_2_13              | UNUSED   |
+| GPIO_2_14              | UNUSED   |
+| GPIO_2_15              | UNUSED   |
+| GPIO_2_16              | UNUSED   |
+| GPIO_2_17              | UNUSED   |
+| GPIO_2_18              | UNUSED   |
+| GPIO_2_19              | UNUSED   |
+| GPIO_2_20              | UNUSED   |
+| GPIO_2_21              | UNUSED   |
+| GPIO_2_22              | UNUSED   |
+| GPIO_2_23              | UNUSED   |
+| GPIO_2_24              | UNUSED   |
+| GPIO_2_25              | UNUSED   |
+| GPIO_2_26              | UNUSED   |
+| GPIO_2_27              | UNUSED   |
+| GPIO_2_28              | UNUSED   |
+| GPIO_2_29              | UNUSED   |
+| GPIO_2_30              | UNUSED   |
+| GPIO_2_31              | UNUSED   |
++------------------------+----------+
 
 
 
@@ -189,6 +189,22 @@ List of Ports
 | PLL_CPU_LOCK_M2F          | OUTPUT    |
 | PLL_DDR_LOCK_M2F          | OUTPUT    |
 | MSS_RESET_N_M2F           | OUTPUT    |
+| MMUART_1_RXD              | INPUT     |
+| MMUART_1_TXD              | OUTPUT    |
+| MMUART_4_RXD              | INPUT     |
+| MMUART_4_TXD              | OUTPUT    |
+| SD_CLK                    | OUTPUT    |
+| SD_CMD                    | INOUT     |
+| SD_DATA0                  | INOUT     |
+| SD_DATA1                  | INOUT     |
+| SD_DATA2                  | INOUT     |
+| SD_DATA3                  | INOUT     |
+| SD_CD                     | INPUT     |
+| SD_VOLT_SEL               | OUTPUT    |
+| SD_VOLT_EN                | OUTPUT    |
+| SD_VOLT_CMD_DIR           | OUTPUT    |
+| SD_VOLT_DIR_0             | OUTPUT    |
+| SD_VOLT_DIR_1_3           | OUTPUT    |
 | REFCLK                    | INPUT     |
 | REFCLK_N                  | INPUT     |
 | BA[1:0]                   | OUTPUT    |
@@ -219,6 +235,30 @@ I/O REFCLK Port settings
 | REFCLK_N  | P4               | INPUT     | LVDS25       | OFF             | 100                | OFF                  | OFF     |
 | REFCLK    | P5               | INPUT     | LVDS25       | OFF             | 100                | OFF                  | OFF     |
 +-----------+------------------+-----------+--------------+-----------------+--------------------+----------------------+---------+
+
+
+
+MSSIO Port Settings
++-----------------+----------------+------------------+-----------+---------------+---------+-------------+-----------------+-------------------------------+-------------------+------------------------------+
+| Port Name       | MSS I/O Number | Package Pin Name | Direction | Resistor Pull | Persist | Clamp Diode | Schmitt Trigger | Low Power Mode Input Receiver | Output Drive (mA) | Low Power Mode Output Buffer |
++-----------------+----------------+------------------+-----------+---------------+---------+-------------+-----------------+-------------------------------+-------------------+------------------------------+
+| SD_CLK          | MSSIO0         | L2               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 8                 | OFF                          |
+| SD_CMD          | MSSIO1         | M4               | INOUT     | UP            | OFF     | OFF         | OFF             | OFF                           | 10                | OFF                          |
+| SD_DATA0        | MSSIO2         | L3               | INOUT     | UP            | OFF     | OFF         | OFF             | OFF                           | 10                | OFF                          |
+| SD_DATA1        | MSSIO3         | K1               | INOUT     | UP            | OFF     | OFF         | OFF             | OFF                           | 10                | OFF                          |
+| SD_DATA2        | MSSIO4         | M5               | INOUT     | UP            | OFF     | OFF         | OFF             | OFF                           | 10                | OFF                          |
+| SD_DATA3        | MSSIO5         | L5               | INOUT     | UP            | OFF     | OFF         | OFF             | OFF                           | 10                | OFF                          |
+| SD_CD           | MSSIO6         | K2               | INPUT     | UP            | OFF     | OFF         | OFF             | OFF                           | --                | --                           |
+| SD_VOLT_SEL     | MSSIO9         | K7               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 10                | OFF                          |
+| SD_VOLT_EN      | MSSIO10        | H1               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 10                | OFF                          |
+| SD_VOLT_CMD_DIR | MSSIO11        | K4               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 10                | OFF                          |
+| SD_VOLT_DIR_0   | MSSIO12        | K5               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 10                | OFF                          |
+| SD_VOLT_DIR_1_3 | MSSIO13        | J1               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 10                | OFF                          |
+| MMUART_4_RXD    | MSSIO15        | G2               | INPUT     | UP            | OFF     | OFF         | OFF             | OFF                           | --                | --                           |
+| MMUART_4_TXD    | MSSIO16        | H4               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 8                 | OFF                          |
+| MMUART_1_RXD    | MSSIO19        | F2               | INPUT     | UP            | OFF     | OFF         | OFF             | OFF                           | --                | --                           |
+| MMUART_1_TXD    | MSSIO20        | F4               | OUTPUT    | UP            | OFF     | OFF         | --              | --                            | 8                 | OFF                          |
++-----------------+----------------+------------------+-----------+---------------+---------+-------------+-----------------+-------------------------------+-------------------+------------------------------+
 
 
 

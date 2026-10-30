@@ -60,3 +60,5 @@ softconsole/*/.settings/
 # ---- RTEMS ----
 # Generated from rtems/dts/mpfs-discovery-kit.dts by rtems/dts/build_dtb.sh
 rtems/dts/mpfs-discovery-kit-dtb.h
+# HSS build output (hss/build_hss.sh, hss/make_envm_hex.sh)
+hss/build/

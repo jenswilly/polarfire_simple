@@ -3,7 +3,10 @@
 # By default ftdi_sio binds only interface 2. These rules:
 #   1. add 1514:2008 to ftdi_sio so all four interfaces get a ttyUSB,
 #   2. unbind interface 0 again, because that's JTAG (Libero / OpenOCD),
-#   3. create /dev/pfsoc-uart0 for interface 3 (channel D = MSS MMUART0).
+#   3. create stable names for the UARTs (schematic sheets 7 and 10):
+#      /dev/pfsoc-uart1  interface 1 (channel B = MSS MMUART1, HSS console)
+#      /dev/pfsoc-uart4  interface 2 (channel C = MSS MMUART4, HSS U54_1)
+#      /dev/pfsoc-uart0  interface 3 (channel D = MSS MMUART0 via fabric, application console)
 #
 # Install:
 #   sudo cp tools/99-pfsoc-discovery-uart.rules /etc/udev/rules.d/
@@ -20,6 +23,10 @@ ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", DRIVER=="ftdi_s
   ATTR{bInterfaceNumber}=="00", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
   RUN+="/bin/sh -c 'echo %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
 
-# 3. Stable name for the console UART (interface 3).
+# 3. Stable names for the UARTs.
+ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="01", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+  SYMLINK+="pfsoc-uart1", GROUP="dialout", MODE="0660"
+ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="02", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+  SYMLINK+="pfsoc-uart4", GROUP="dialout", MODE="0660"
 ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="03", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
   SYMLINK+="pfsoc-uart0", GROUP="dialout", MODE="0660"

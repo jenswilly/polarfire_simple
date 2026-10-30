@@ -65,13 +65,33 @@ RUN cd /opt/rtems/src && \
     rm rtems-6.2.tar.xz && \
     mv rtems-6.2 rtems
 
-# HSS payload generator: wraps the RTEMS ELF into an HSS boot image
+# pkg-config for rtems-cmake (reads the BSP's .pc file). Installed here
+# rather than in apt-packages.txt so the toolchain layer stays cached.
+RUN sudo apt-get update && \
+    sudo apt-get install -y pkg-config && \
+    sudo rm -rf /var/lib/apt/lists/*
+
+# HSS (Hart Software Services) source, built by /workspace/hss/build_hss.sh,
+# and the HSS payload generator, which wraps the RTEMS ELF into an HSS boot
+# image
 ARG HSS_VERSION=v2026.04.1
-RUN cd /opt/rtems/src && \
-    git clone --depth 1 --branch ${HSS_VERSION} https://github.com/polarfire-soc/hart-software-services.git hss && \
-    make -C hss/tools/hss-payload-generator && \
-    sudo install -m 755 hss/tools/hss-payload-generator/hss-payload-generator /usr/local/bin/ && \
-    rm -rf hss
+ENV HSS_SRC="/opt/hss"
+RUN sudo mkdir -p ${HSS_SRC} && \
+    sudo chown ubuntu:ubuntu ${HSS_SRC} && \
+    git clone --depth 1 --branch ${HSS_VERSION} https://github.com/polarfire-soc/hart-software-services.git ${HSS_SRC} && \
+    make -C ${HSS_SRC}/tools/hss-payload-generator && \
+    sudo install -m 755 ${HSS_SRC}/tools/hss-payload-generator/hss-payload-generator /usr/local/bin/ && \
+    make -C ${HSS_SRC}/tools/hss-payload-generator clean
+
+# xPack GNU RISC-V Embedded GCC, the toolchain the HSS expects
+ARG XPACK_VERSION=15.2.0-1
+ARG XPACK_SHA256=aaaa8060c914851a3e5ee1ba82cc3d6f80972f90638a05c6e823a37557a33758
+RUN cd /tmp && \
+    wget -q https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v${XPACK_VERSION}/xpack-riscv-none-elf-gcc-${XPACK_VERSION}-linux-x64.tar.gz && \
+    echo "${XPACK_SHA256}  xpack-riscv-none-elf-gcc-${XPACK_VERSION}-linux-x64.tar.gz" | sha256sum -c - && \
+    sudo tar xzf xpack-riscv-none-elf-gcc-${XPACK_VERSION}-linux-x64.tar.gz -C /opt && \
+    rm xpack-riscv-none-elf-gcc-${XPACK_VERSION}-linux-x64.tar.gz
+ENV PATH="$PATH:/opt/xpack-riscv-none-elf-gcc-${XPACK_VERSION}/bin"
 
 # Default command
 CMD ["/bin/bash"]
