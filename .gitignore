@@ -1,3 +1,5 @@
+build/
+
 # ---- Libero project (polarfire_simple/) : keep config, drop build output ----
 # Synthesis, place & route, bitstreams and programming files (all regenerable)
 polarfire_simple/synthesis/
