@@ -56,3 +56,7 @@ softconsole/*/.settings/
 
 # ---- Misc ----
 .DS_Store
+
+# ---- RTEMS ----
+# Generated from rtems/dts/mpfs-discovery-kit.dts by rtems/dts/build_dtb.sh
+rtems/dts/mpfs-discovery-kit-dtb.h

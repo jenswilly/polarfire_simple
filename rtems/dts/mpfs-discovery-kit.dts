@@ -1,0 +1,296 @@
+/* SPDX-License-Identifier: BSD-2-Clause */
+
+/*
+ * Device tree for RTEMS (riscv/mpfs64imafdc) on the PolarFire SoC Discovery
+ * Kit with the MSS configuration in mss/MSS_simple.cfg.
+ *
+ * Based on bsps/riscv/riscv/dts/mpfs.dts (Icicle Kit) from RTEMS 6.2.
+ * Changes:
+ * - Console on MMUART0 (FTDI channel D). MMUART1 is unused in our MSS.
+ * - Memory: 896 MB of DDR in the cached 64-bit window, as configured in
+ *   the MSS (DDR_CACHED_64BIT_MEM_SIZE). The HSS stages the boot image at
+ *   0x10_3FC0_0000 (CONFIG_SERVICE_BOOT_DDR_TARGET_ADDR), above this range.
+ * - Removed nodes that RTEMS doesn't use and that describe Icicle Kit
+ *   hardware (eMMC/SD, SPI0, I2C1 with PAC1934, Ethernet, GPIO).
+ *
+ * The RTEMS BSP reads only: /cpus (timebase-frequency, harts and their
+ * interrupt controllers), the fixed-clock "msspllclk", /memory, the CLINT,
+ * the PLIC, /chosen stdout-path and ns16550a UARTs. It ignores "status",
+ * and RISCV_CONSOLE_MAX_NS16550_DEVICES is 1, so only the console UART may
+ * be an ns16550a node.
+ *
+ * Build the header for BSP_DTB_HEADER_PATH with rtems/dts/build_dtb.sh.
+ */
+
+/*
+ * Copyright (C) Padmarao Begari <padmarao.begari@microchip.com>
+ * Copyright (C) 2022 Microchip Technology Inc.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *	notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *	notice, this list of conditions and the following disclaimer in the
+ *	documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+/dts-v1/;
+
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+
+	model = "Microchip PolarFire-SoC Discovery Kit";
+	compatible = "microchip,mpfs-disco-kit", "microchip,mpfs";
+
+	aliases {
+		serial0 = &uart0;
+	};
+
+	chosen {
+		stdout-path = "serial0";
+	};
+
+	cpucomplex: cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* mtime runs at 1 MHz */
+		timebase-frequency = <1000000>;
+
+		cpu0: cpu@0 {
+			clock-frequency = <0>;
+			compatible = "sifive,e51", "sifive,rocket0", "riscv";
+			device_type = "cpu";
+			i-cache-block-size = <64>;
+			i-cache-sets = <128>;
+			i-cache-size = <16384>;
+			reg = <0>;
+			riscv,isa = "rv64imac";
+			status = "disabled";
+			cpu0intc: interrupt-controller {
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+
+		cpu1: cpu@1 {
+			clock-frequency = <0>;
+			compatible = "sifive,u54-mc", "sifive,rocket0", "riscv";
+			d-cache-block-size = <64>;
+			d-cache-sets = <64>;
+			d-cache-size = <32768>;
+			d-tlb-sets = <1>;
+			d-tlb-size = <32>;
+			device_type = "cpu";
+			i-cache-block-size = <64>;
+			i-cache-sets = <64>;
+			i-cache-size = <32768>;
+			i-tlb-sets = <1>;
+			i-tlb-size = <32>;
+			mmu-type = "riscv,sv39";
+			reg = <1>;
+			riscv,isa = "rv64imafdc";
+			tlb-split;
+			status = "okay";
+			cpu1intc: interrupt-controller {
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+
+		cpu2: cpu@2 {
+			clock-frequency = <0>;
+			compatible = "sifive,u54-mc", "sifive,rocket0", "riscv";
+			d-cache-block-size = <64>;
+			d-cache-sets = <64>;
+			d-cache-size = <32768>;
+			d-tlb-sets = <1>;
+			d-tlb-size = <32>;
+			device_type = "cpu";
+			i-cache-block-size = <64>;
+			i-cache-sets = <64>;
+			i-cache-size = <32768>;
+			i-tlb-sets = <1>;
+			i-tlb-size = <32>;
+			mmu-type = "riscv,sv39";
+			reg = <2>;
+			riscv,isa = "rv64imafdc";
+			tlb-split;
+			status = "okay";
+			cpu2intc: interrupt-controller {
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+
+		cpu3: cpu@3 {
+			clock-frequency = <0>;
+			compatible = "sifive,u54-mc", "sifive,rocket0", "riscv";
+			d-cache-block-size = <64>;
+			d-cache-sets = <64>;
+			d-cache-size = <32768>;
+			d-tlb-sets = <1>;
+			d-tlb-size = <32>;
+			device_type = "cpu";
+			i-cache-block-size = <64>;
+			i-cache-sets = <64>;
+			i-cache-size = <32768>;
+			i-tlb-sets = <1>;
+			i-tlb-size = <32>;
+			mmu-type = "riscv,sv39";
+			reg = <3>;
+			riscv,isa = "rv64imafdc";
+			tlb-split;
+			status = "okay";
+			cpu3intc: interrupt-controller {
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+
+		cpu4: cpu@4 {
+			clock-frequency = <0>;
+			compatible = "sifive,u54-mc", "sifive,rocket0", "riscv";
+			d-cache-block-size = <64>;
+			d-cache-sets = <64>;
+			d-cache-size = <32768>;
+			d-tlb-sets = <1>;
+			d-tlb-size = <32>;
+			device_type = "cpu";
+			i-cache-block-size = <64>;
+			i-cache-sets = <64>;
+			i-cache-size = <32768>;
+			i-tlb-sets = <1>;
+			i-tlb-size = <32>;
+			mmu-type = "riscv,sv39";
+			reg = <4>;
+			riscv,isa = "rv64imafdc";
+			tlb-split;
+			status = "okay";
+			cpu4intc: interrupt-controller {
+				#address-cells = <0>;
+				#interrupt-cells = <1>;
+				compatible = "riscv,cpu-intc";
+				interrupt-controller;
+			};
+		};
+	};
+
+	/* MSS PLL output, MSS_PLLOUT_FREQ = 600 MHz */
+	refclk: refclk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <600000000>;
+		clock-output-names = "msspllclk";
+	};
+
+	/* Cached 64-bit DDR window, 896 MB (DDR_CACHED_64BIT_MEM_SIZE) */
+	ddr: memory@1000000000 {
+		device_type = "memory";
+		reg = <0x00000010 0x00000000 0x00000000 0x38000000>;
+	};
+
+	soc: soc {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		compatible = "microchip,mpfs-soc", "simple-bus";
+		ranges;
+
+		clint0: clint@2000000 {
+			compatible = "riscv,clint0";
+			interrupts-extended = <&cpu0intc 3 &cpu0intc 7
+						&cpu1intc 3 &cpu1intc 7
+						&cpu2intc 3 &cpu2intc 7
+						&cpu3intc 3 &cpu3intc 7
+						&cpu4intc 3 &cpu4intc 7>;
+			reg = <0x0 0x2000000 0x0 0x10000>;
+			reg-names = "control";
+			clock-frequency = <1000000>;
+		};
+
+		cachecontroller: cache-controller@2010000 {
+			compatible = "sifive,fu540-c000-ccache", "cache";
+			cache-block-size = <64>;
+			cache-level = <2>;
+			cache-sets = <1024>;
+			cache-size = <2097152>;
+			cache-unified;
+			interrupt-parent = <&plic>;
+			interrupts = <1 2 3>;
+			reg = <0x0 0x2010000 0x0 0x1000>;
+		};
+
+		plic: interrupt-controller@c000000 {
+			#address-cells = <0>;
+			#interrupt-cells = <1>;
+			compatible = "riscv,plic0";
+			reg = <0x0 0xc000000 0x0 0x4000000>;
+			riscv,max-priority = <7>;
+			riscv,ndev = <186>;
+			interrupt-controller;
+			interrupts-extended = <
+				&cpu0intc 11
+				&cpu1intc 11 &cpu1intc 9
+				&cpu2intc 11 &cpu2intc 9
+				&cpu3intc 11 &cpu3intc 9
+				&cpu4intc 11 &cpu4intc 9>;
+		};
+
+		clkcfg: clkcfg@20002000 {
+			compatible = "microchip,mpfs-clkcfg";
+			reg = <0x0 0x20002000 0x0 0x1000>;
+			reg-names = "mss_sysreg";
+			clocks = <&refclk>;
+			#clock-cells = <1>;
+			clock-output-names = "cpu", "axi", "ahb", "envm",
+					"mac0", "mac1", "mmc", "timer",
+					"mmuart0", "mmuart1", "mmuart2",
+					"mmuart3", "mmuart4", "spi0", "spi1",
+					"i2c0", "i2c1", "can0", "can1", "usb",
+					"reserved", "rtc", "qspi", "gpio0",
+					"gpio1", "gpio2", "ddrc", "fic0",
+					"fic1", "fic2", "fic3", "athena",
+					"cfm";
+		};
+
+		/*
+		 * MMUART0: PLIC source 90 (77 + OFFSET_TO_MSS_GLOBAL_INTS in the
+		 * MPFS HAL), clocked by the APB clock: 600 MHz /
+		 * MSS_AHB_APB_CLK_DIV 4 = 150 MHz.
+		 */
+		uart0: serial@20000000 {
+			compatible = "ns16550a";
+			reg = <0x0 0x20000000 0x0 0x400>;
+			reg-io-width = <4>;
+			reg-shift = <2>;
+			interrupt-parent = <&plic>;
+			interrupts = <90>;
+			clock-frequency = <150000000>;
+			clocks = <&clkcfg 8>;
+			status = "okay";
+		};
+	};
+};
