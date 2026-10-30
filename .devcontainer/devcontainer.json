@@ -1,0 +1,31 @@
+{
+    "name": "RTEMS 6.2",
+    "dockerFile": "Dockerfile",
+    "remoteUser": "ubuntu",
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-python.python",
+                "xaver.clang-format"
+            ],
+            "settings": {
+                "C_Cpp.clang_format_style": "file",
+                "editor.defaultFormatter": "xaver.clang-format",
+                "editor.formatOnSave": true,
+                "python.defaultInterpreterPath": "/opt/rtems/venv/bin/python",
+                "python.terminal.activateEnvironment": true
+            }
+        }
+    },
+    "runArgs": [
+        "--network=host",
+        "--privileged",
+        "--device=/dev/bus/usb",
+        "-v",
+        "/dev:/dev"
+    ],
+    "postCreateCommand": "bash .devcontainer/scripts/post_configuration.sh"
+}
