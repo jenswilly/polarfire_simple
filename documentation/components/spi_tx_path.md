@@ -5,15 +5,17 @@ Source: `hdl/spi_tx_path.vhd`. Diagram: `documentation/spi_tx_path.drawio`.
 
 ## Generics
 
-| Generic | Type | Default | Description |
-|---|---|---|---|
-| `BLOCK_BYTES` | positive | 10 | Must match the CoreFIFO width / 8 (checked in `block_fifo`). |
-| `CLK_DIV` | positive | 5 | `clk` cycles per SCLK half-period (20 MHz at 200 MHz). |
-| `CPOL` | std_logic | '0' | SCLK idle level. |
-| `CPHA` | std_logic | '0' | 0: slave samples on leading edge, 1: on trailing edge. |
-| `CS_SETUP` | natural | 1 | Extra half-periods CS_N low before the first edge. |
-| `CS_HOLD` | natural | 1 | Half-periods after the last edge before CS_N goes high. |
-| `CS_IDLE` | natural | 2 | Minimum half-periods CS_N high between frames. |
+These will be propagated down as generics in sub-components.
+
+| Generic | Type | Default | Description | Used in components |
+|---|---|---|---|----|
+| `BLOCK_BYTES` | positive | 10 | Must match the CoreFIFO width / 8 (checked in `block_fifo`). | `block_fifo`, `block_serializer`, `axis_spi_wo_master` |
+| `CLK_DIV` | positive | 5 | `clk` cycles per SCLK half-period (20 MHz at 200 MHz). | `axis_spi_wo_master` |
+| `CPOL` | std_logic | '0' | SCLK idle level. | `axis_spi_wo_master` |
+| `CPHA` | std_logic | '0' | 0: slave samples on leading edge, 1: on trailing edge. | `axis_spi_wo_master` |
+| `CS_SETUP` | natural | 1 | Extra half-periods CS_N low before the first edge. | `axis_spi_wo_master` |
+| `CS_HOLD` | natural | 1 | Half-periods after the last edge before CS_N goes high. | `axis_spi_wo_master` |
+| `CS_IDLE` | natural | 2 | Minimum half-periods CS_N high between frames. | `axis_spi_wo_master` |
 
 ## Ports
 

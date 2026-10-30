@@ -14,8 +14,8 @@ use ieee.numeric_std.all;
 
 entity test_block_producer is
     generic (
-        BLOCKS_PER_PRESS : positive := 1;
-        FIRST_BYTE       : natural range 0 to 255 := 16#A5#   -- Byte 0 of every block
+        BLOCKS_PER_PRESS : positive := 1;   -- Number of blocks to produce per start pulse
+        FIRST_BYTE       : natural range 0 to 255 := 16#A5#   -- Byte 0 of every block (identifier)
     );
     port (
         clk      : in  std_logic;
@@ -45,7 +45,9 @@ begin
                 left    <= 0;
                 valid_r <= '0';
             elsif valid_r = '1' then
+                -- Currently sending a block. Data is already on m_data
                 if m_ready = '1' then
+                    -- Downstream has accepted the block. If last, deassert valid_r
                     seq <= seq + 1;
                     if left = 1 then
                         valid_r <= '0';
@@ -53,6 +55,7 @@ begin
                     left <= left - 1;
                 end if;
             elsif start_in = '1' then
+                -- Start of a new output burst
                 left    <= BLOCKS_PER_PRESS;
                 valid_r <= '1';
             end if;

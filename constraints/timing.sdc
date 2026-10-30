@@ -59,5 +59,5 @@ set_multicycle_path 4 -setup_only -from [ get_ports { QSPI_IO[*] } ]
 #     period (25 ns) before the sampling edge and SCLK/data reach the pins within a few ns of each
 #     other, so the receiver's setup/hold is met with a wide margin. Not checked by STA.
 set_false_path -from [ get_ports { SWITCH2 } ]
-set_false_path -to [ get_ports { LED2 LED3 LED4 LED5 LED6 DEBUG } ]
-set_false_path -to [ get_ports { RPi_GPIO19 RPi_GPIO16 RPi_GPIO26 } ]
+set_false_path -to [ get_ports { LED1 LED2 LED3 LED4 LED5 LED6 DEBUG } ]
+set_false_path -to [ get_ports { RPi_GPIO19 RPi_GPIO20 RPi_GPIO16 RPi_GPIO26 } ]

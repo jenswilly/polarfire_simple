@@ -21,6 +21,7 @@ set_io -port_name LED4 -pin_name U21 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED5 -pin_name AA18 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED6 -pin_name V16 -fixed true -DIRECTION OUTPUT
 set_io -port_name LED7 -pin_name U15 -fixed true -DIRECTION OUTPUT
+# LED8 is connected to MSS GPIO and must be routed to Fabric first
 
 # --------------------------------
 # QSPI Pins on Raspberry Pi header

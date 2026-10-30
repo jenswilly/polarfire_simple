@@ -20,7 +20,7 @@
 --   sclk_div clk cycles of setup and hold around each rising edge. CS# goes low together with
 --   the first data bit, and high at least one clk cycle after the last SCLK falling edge.
 --   In SPI1 phases IO2/IO3 and IO6/IO7 are driven high (WP#/HOLD# inactive, device_facts.md
---   ยง4.7) and IO0/IO4 are driven ('0' when not transmitting). After reset the pads have this
+--   ง4.7) and IO0/IO4 are driven ('0' when not transmitting). After reset the pads have this
 --   SPI1 pattern. When CS# goes high the pads keep the state of the last cycle, so after a
 --   QUAD4 read IO3:0 stay released (no contention while the device turns its outputs off)
 --   until the next transaction drives them again together with CS# low.
@@ -142,19 +142,19 @@ architecture rtl of qspi_phy is
     constant NSTAGE : positive := SAMPLE_DLY_MAX + 1;
 
     signal state     : state_t := S_IDLE;
-    signal half      : std_logic := '0';                          -- 0: SCLK low half, 1: high half
+    signal half      : std_logic := '0';                                 -- 0: SCLK low half, 1: high half
     signal div_l     : natural range 1 to SCLK_DIV_MAX := 1;
     signal div_cnt   : natural range 0 to SCLK_DIV_MAX - 1 := 0;
-    signal div_one   : std_logic := '1';                          -- div_l = 1
-    signal clk_left  : unsigned(NCLK_W - 1 downto 0) := (others => '0');   -- Incl. current cycle
-    signal clk_one   : std_logic := '0';                          -- clk_left = 1
-    signal cur_quad  : std_logic := '0';
-    signal cur_dir   : dir_t := DIR_NONE;
-    signal cur_last  : std_logic := '0';
-    signal sh1, sh2  : std_logic_vector(31 downto 0) := (others => '0');
+    signal div_one   : std_logic := '1';                                 -- div_l = 1
+    signal clk_left  : unsigned(NCLK_W - 1 downto 0) := (others => '0'); -- Incl. current cycle
+    signal clk_one   : std_logic := '0';                                 -- clk_left = 1
+    signal cur_quad  : std_logic := '0';                                 -- Current quad mode (0: single, 1: quad)
+    signal cur_dir   : dir_t := DIR_NONE;                                -- Current direction (DIR_TX, DIR_RX, DIR_NONE)
+    signal cur_last  : std_logic := '0';                                 -- 1 = current transfer is the last one
+    signal sh1, sh2  : std_logic_vector(31 downto 0) := (others => '0'); -- Shift registers for TX data
     signal cs_high_l : unsigned(CS_HIGH_W - 1 downto 0) := (others => '0');
     signal cs_cnt    : unsigned(CS_HIGH_W - 1 downto 0) := (others => '0');
-    signal cs_zero   : std_logic := '1';                          -- cs_cnt = 0
+    signal cs_zero   : std_logic := '1';                                 -- cs_cnt = 0
 
     -- RX sample tokens: entered at the launching falling edge, shifted every clk cycle. A token
     -- in stage sample_dly + 1 means io_i_r holds its sample.
@@ -287,11 +287,13 @@ begin
             case state is
                 when S_IDLE =>
                     if cs_zero = '0' then
+                        -- CS is still active, decrement counter
                         cs_cnt <= cs_cnt - 1;
                         if cs_cnt = 1 then
                             cs_zero <= '1';
                         end if;
                     elsif ph_valid = '1' then
+                        -- Start of a new phase transaction
                         cs_n_r <= "00";
                         div_l  <= ph_sclk_div;
                         load_phase;
@@ -372,6 +374,7 @@ begin
             end case;
 
             if reset_n = '0' then
+                -- Synchronous reset, active low
                 state    <= S_IDLE;
                 sclk_r   <= "00";
                 cs_n_r   <= "11";
@@ -383,7 +386,7 @@ begin
                 io_i_r     <= (others => '0');
                 set_pads('0', DIR_NONE, (others => '0'), (others => '0'));
             end if;
-        end if;
+        end if; -- rising_edge(clk)
     end process;
 
     rx_valid <= rx_valid_r;

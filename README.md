@@ -17,7 +17,7 @@ Outputs:
 | SPI SCLK | `spi_tx_path` | B19, RPi header pin 35 (GPIO19) |
 | SPI MOSI | `spi_tx_path` | B15, RPi header pin 36 (GPIO16) |
 | SPI CS_N | `spi_tx_path` | B17, RPi header pin 37 (GPIO26) |
-| (unused) | Tied low | B14, RPi header pin 38 (GPIO20) |
+| SPI busy | `spi_tx_path` | B14, RPi header pin 38 (GPIO20) |
 | QSPI SCLK | `qspi_board` | G18, RPi header pin 11 (GPIO17), yellow wire |
 | QSPI CS# | `qspi_board`, pull-up | F21, RPi header pin 13 (GPIO27), orange wire |
 | QSPI IO0 | `qspi_board` | F20, RPi header pin 15 (GPIO22), green wire |
@@ -73,6 +73,15 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 - DDR4, x16, 1 GB, 800 MHz (DDR4-1600), CL12. Timings are copied from Microchip's Discovery Kit reference design.
 - L2 cache split: LIM 4 ways, scratchpad 4 ways. The scratchpad is needed by the HSS.
 - MMUART_0 is routed to the fabric. FIC_0 AXI4 initiator is enabled. All other peripherals and FICs are off.
+
+### Timing Constants
+
+Several components have generics that need to be adjusted when clock frequency change:
+
+* button_debounce.vhd: `DEBOUNCE_CYCLES`
+* spi_tx_path.vdh: `CLK_DIV`
+* pulse_stretch_0 HDL+ component: `STRETCH_CYCLES`
+* qspi_board_0 HDL+ component: `CLK_HZ` and `SCLK_DIV`
 
 ## Repository layout
 

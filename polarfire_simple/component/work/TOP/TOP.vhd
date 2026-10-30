@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Tue Oct 27 11:03:17 2026
+-- Created by SmartDesign Wed Oct 28 18:18:53 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -384,6 +384,7 @@ signal DEBUG_net_0                               : std_logic;
 signal DM_net_0                                  : std_logic_vector(1 downto 0);
 signal INIT_MONITOR_0_DEVICE_INIT_DONE           : std_logic;
 signal INIT_MONITOR_0_FABRIC_POR_N               : std_logic;
+signal LED1_net_0                                : std_logic;
 signal LED2_net_0                                : std_logic;
 signal LED3_net_0                                : std_logic;
 signal LED4_net_0                                : std_logic;
@@ -440,6 +441,7 @@ signal RAS_N_net_0                               : std_logic;
 signal RESET_N_net_0                             : std_logic;
 signal RPi_GPIO16_net_0                          : std_logic;
 signal RPi_GPIO19_net_0                          : std_logic;
+signal RPi_GPIO20_net_0                          : std_logic;
 signal RPi_GPIO26_net_0                          : std_logic;
 signal spi_tx_path_0_s_ready                     : std_logic;
 signal test_block_producer_0_m_data              : std_logic_vector(79 downto 0);
@@ -459,6 +461,7 @@ signal WE_N_net_1                                : std_logic;
 signal CAS_N_net_1                               : std_logic;
 signal ACT_N_net_1                               : std_logic;
 signal BG0_net_1                                 : std_logic;
+signal LED1_net_1                                : std_logic;
 signal UART0_TX_net_1                            : std_logic;
 signal LED2_net_1                                : std_logic;
 signal LED3_net_1                                : std_logic;
@@ -468,6 +471,7 @@ signal LED6_net_1                                : std_logic;
 signal DEBUG_net_1                               : std_logic;
 signal RPi_GPIO16_net_1                          : std_logic;
 signal RPi_GPIO19_net_1                          : std_logic;
+signal RPi_GPIO20_net_1                          : std_logic;
 signal RPi_GPIO26_net_1                          : std_logic;
 signal QSPI_SCLK_net_1                           : std_logic;
 signal QSPI_CS_N_net_1                           : std_logic;
@@ -496,9 +500,7 @@ begin
 ----------------------------------------------------------------------
 -- TieOff assignments
 ----------------------------------------------------------------------
- LED1             <= '0';
  LED7             <= '0';
- RPi_GPIO20       <= '0';
 ----------------------------------------------------------------------
 -- Top level output port assignments
 ----------------------------------------------------------------------
@@ -524,6 +526,8 @@ begin
  ACT_N            <= ACT_N_net_1;
  BG0_net_1        <= BG0_net_0;
  BG0              <= BG0_net_1;
+ LED1_net_1       <= LED1_net_0;
+ LED1             <= LED1_net_1;
  UART0_TX_net_1   <= UART0_TX_net_0;
  UART0_TX         <= UART0_TX_net_1;
  LED2_net_1       <= LED2_net_0;
@@ -542,6 +546,8 @@ begin
  RPi_GPIO16       <= RPi_GPIO16_net_1;
  RPi_GPIO19_net_1 <= RPi_GPIO19_net_0;
  RPi_GPIO19       <= RPi_GPIO19_net_1;
+ RPi_GPIO20_net_1 <= RPi_GPIO20_net_0;
+ RPi_GPIO20       <= RPi_GPIO20_net_1;
  RPi_GPIO26_net_1 <= RPi_GPIO26_net_0;
  RPi_GPIO26       <= RPi_GPIO26_net_1;
  QSPI_SCLK_net_1  <= QSPI_SCLK_net_0;
@@ -582,6 +588,17 @@ AXI_IC_0 : AXI_IC
         -- Inputs
         ACLK                 => PF_CCC_C0_0_OUT0_FABCLK_0,
         ARESETN              => CORERESET_0_FABRIC_RESET_N_0,
+        INITIATOR0_AWVALID   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWVALID,
+        INITIATOR0_WLAST     => MSS_simple_0_FIC_0_AXI4_INITIATOR_WLAST,
+        INITIATOR0_WVALID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID,
+        INITIATOR0_BREADY    => MSS_simple_0_FIC_0_AXI4_INITIATOR_BREADY,
+        INITIATOR0_ARVALID   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARVALID,
+        INITIATOR0_RREADY    => MSS_simple_0_FIC_0_AXI4_INITIATOR_RREADY,
+        TARGET0_AWREADY      => AXI_IC_0_AXI4Lmtarget0_AWREADY,
+        TARGET0_WREADY       => AXI_IC_0_AXI4Lmtarget0_WREADY,
+        TARGET0_BVALID       => AXI_IC_0_AXI4Lmtarget0_BVALID,
+        TARGET0_ARREADY      => AXI_IC_0_AXI4Lmtarget0_ARREADY,
+        TARGET0_RVALID       => AXI_IC_0_AXI4Lmtarget0_RVALID,
         INITIATOR0_AWID      => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWID,
         INITIATOR0_AWADDR    => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWADDR,
         INITIATOR0_AWLEN     => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLEN,
@@ -592,12 +609,8 @@ AXI_IC_0 : AXI_IC
         INITIATOR0_AWPROT    => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWPROT,
         INITIATOR0_AWQOS     => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWQOS,
         INITIATOR0_AWREGION  => INITIATOR0_AWREGION_const_net_0, -- tied to X"0" from definition
-        INITIATOR0_AWVALID   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWVALID,
         INITIATOR0_WDATA     => MSS_simple_0_FIC_0_AXI4_INITIATOR_WDATA,
         INITIATOR0_WSTRB     => MSS_simple_0_FIC_0_AXI4_INITIATOR_WSTRB,
-        INITIATOR0_WLAST     => MSS_simple_0_FIC_0_AXI4_INITIATOR_WLAST,
-        INITIATOR0_WVALID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID,
-        INITIATOR0_BREADY    => MSS_simple_0_FIC_0_AXI4_INITIATOR_BREADY,
         INITIATOR0_ARID      => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARID,
         INITIATOR0_ARADDR    => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR,
         INITIATOR0_ARLEN     => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLEN,
@@ -608,44 +621,37 @@ AXI_IC_0 : AXI_IC
         INITIATOR0_ARPROT    => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARPROT,
         INITIATOR0_ARQOS     => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARQOS,
         INITIATOR0_ARREGION  => INITIATOR0_ARREGION_const_net_0, -- tied to X"0" from definition
-        INITIATOR0_ARVALID   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARVALID,
-        INITIATOR0_RREADY    => MSS_simple_0_FIC_0_AXI4_INITIATOR_RREADY,
         INITIATOR0_AWUSER(0) => GND_net, -- tied to '0' from definition
         INITIATOR0_WUSER(0)  => GND_net, -- tied to '0' from definition
         INITIATOR0_ARUSER(0) => GND_net, -- tied to '0' from definition
-        TARGET0_AWREADY      => AXI_IC_0_AXI4Lmtarget0_AWREADY,
-        TARGET0_WREADY       => AXI_IC_0_AXI4Lmtarget0_WREADY,
         TARGET0_BRESP        => AXI_IC_0_AXI4Lmtarget0_BRESP,
-        TARGET0_BVALID       => AXI_IC_0_AXI4Lmtarget0_BVALID,
-        TARGET0_ARREADY      => AXI_IC_0_AXI4Lmtarget0_ARREADY,
         TARGET0_RDATA        => AXI_IC_0_AXI4Lmtarget0_RDATA,
         TARGET0_RRESP        => AXI_IC_0_AXI4Lmtarget0_RRESP,
-        TARGET0_RVALID       => AXI_IC_0_AXI4Lmtarget0_RVALID,
         -- Outputs
         INITIATOR0_AWREADY   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWREADY,
         INITIATOR0_WREADY    => MSS_simple_0_FIC_0_AXI4_INITIATOR_WREADY,
-        INITIATOR0_BID       => MSS_simple_0_FIC_0_AXI4_INITIATOR_BID,
-        INITIATOR0_BRESP     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BRESP,
         INITIATOR0_BVALID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_BVALID,
         INITIATOR0_ARREADY   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARREADY,
+        INITIATOR0_RLAST     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RLAST,
+        INITIATOR0_RVALID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_RVALID,
+        TARGET0_AWVALID      => AXI_IC_0_AXI4Lmtarget0_AWVALID,
+        TARGET0_WVALID       => AXI_IC_0_AXI4Lmtarget0_WVALID,
+        TARGET0_BREADY       => AXI_IC_0_AXI4Lmtarget0_BREADY,
+        TARGET0_ARVALID      => AXI_IC_0_AXI4Lmtarget0_ARVALID,
+        TARGET0_RREADY       => AXI_IC_0_AXI4Lmtarget0_RREADY,
+        INITIATOR0_BID       => MSS_simple_0_FIC_0_AXI4_INITIATOR_BID,
+        INITIATOR0_BRESP     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BRESP,
         INITIATOR0_RID       => MSS_simple_0_FIC_0_AXI4_INITIATOR_RID,
         INITIATOR0_RDATA     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RDATA,
         INITIATOR0_RRESP     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RRESP,
-        INITIATOR0_RLAST     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RLAST,
-        INITIATOR0_RVALID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_RVALID,
         INITIATOR0_BUSER     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BUSER,
         INITIATOR0_RUSER     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RUSER,
         TARGET0_AWADDR       => AXI_IC_0_AXI4Lmtarget0_AWADDR,
-        TARGET0_AWVALID      => AXI_IC_0_AXI4Lmtarget0_AWVALID,
         TARGET0_AWPROT       => AXI_IC_0_AXI4Lmtarget0_AWPROT,
         TARGET0_WDATA        => AXI_IC_0_AXI4Lmtarget0_WDATA,
         TARGET0_WSTRB        => AXI_IC_0_AXI4Lmtarget0_WSTRB,
-        TARGET0_WVALID       => AXI_IC_0_AXI4Lmtarget0_WVALID,
-        TARGET0_BREADY       => AXI_IC_0_AXI4Lmtarget0_BREADY,
         TARGET0_ARADDR       => AXI_IC_0_AXI4Lmtarget0_ARADDR,
-        TARGET0_ARPROT       => AXI_IC_0_AXI4Lmtarget0_ARPROT,
-        TARGET0_ARVALID      => AXI_IC_0_AXI4Lmtarget0_ARVALID,
-        TARGET0_RREADY       => AXI_IC_0_AXI4Lmtarget0_RREADY 
+        TARGET0_ARPROT       => AXI_IC_0_AXI4Lmtarget0_ARPROT 
         );
 -- axi_sys_ctrl_0
 axi_sys_ctrl_0 : entity work.axi_sys_ctrl
@@ -656,29 +662,29 @@ axi_sys_ctrl_0 : entity work.axi_sys_ctrl
         -- Inputs
         ACLK        => PF_CCC_C0_0_OUT0_FABCLK_0,
         ARESETN     => CORERESET_0_FABRIC_RESET_N_0,
-        AWADDR      => AXI_IC_0_AXI4Lmtarget0_AWADDR,
-        AWPROT      => AXI_IC_0_AXI4Lmtarget0_AWPROT,
         AWVALID     => AXI_IC_0_AXI4Lmtarget0_AWVALID,
-        WDATA       => AXI_IC_0_AXI4Lmtarget0_WDATA,
-        WSTRB       => AXI_IC_0_AXI4Lmtarget0_WSTRB,
         WVALID      => AXI_IC_0_AXI4Lmtarget0_WVALID,
         BREADY      => AXI_IC_0_AXI4Lmtarget0_BREADY,
-        ARADDR      => AXI_IC_0_AXI4Lmtarget0_ARADDR,
-        ARPROT      => AXI_IC_0_AXI4Lmtarget0_ARPROT,
         ARVALID     => AXI_IC_0_AXI4Lmtarget0_ARVALID,
         RREADY      => AXI_IC_0_AXI4Lmtarget0_RREADY,
+        AWADDR      => AXI_IC_0_AXI4Lmtarget0_AWADDR,
+        AWPROT      => AXI_IC_0_AXI4Lmtarget0_AWPROT,
+        WDATA       => AXI_IC_0_AXI4Lmtarget0_WDATA,
+        WSTRB       => AXI_IC_0_AXI4Lmtarget0_WSTRB,
+        ARADDR      => AXI_IC_0_AXI4Lmtarget0_ARADDR,
+        ARPROT      => AXI_IC_0_AXI4Lmtarget0_ARPROT,
         -- Outputs
         AWREADY     => AXI_IC_0_AXI4Lmtarget0_AWREADY,
         WREADY      => AXI_IC_0_AXI4Lmtarget0_WREADY,
-        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
         BVALID      => AXI_IC_0_AXI4Lmtarget0_BVALID,
         ARREADY     => AXI_IC_0_AXI4Lmtarget0_ARREADY,
-        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
-        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP,
         RVALID      => AXI_IC_0_AXI4Lmtarget0_RVALID,
         LED2        => LED2_net_0,
         LED3        => LED3_net_0,
-        DEBUG_PULSE => axi_sys_ctrl_0_DEBUG_PULSE 
+        DEBUG_PULSE => axi_sys_ctrl_0_DEBUG_PULSE,
+        BRESP       => AXI_IC_0_AXI4Lmtarget0_BRESP,
+        RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
+        RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP 
         );
 -- block_arbiter_0
 block_arbiter_0 : entity work.block_arbiter
@@ -878,6 +884,7 @@ qspi_board_0 : entity work.qspi_board
         qspi_cs_n => QSPI_CS_N_net_0,
         bist_pass => LED5_net_0,
         bist_fail => LED6_net_0,
+        busy_out  => LED1_net_0,
         -- Inouts
         qspi_io   => QSPI_IO 
         );
@@ -894,7 +901,7 @@ spi_tx_path_0 : spi_tx_path
         spi_sclk => RPi_GPIO19_net_0,
         spi_mosi => RPi_GPIO16_net_0,
         spi_cs_n => RPi_GPIO26_net_0,
-        busy_out => OPEN 
+        busy_out => RPi_GPIO20_net_0 
         );
 -- test_block_producer_0
 test_block_producer_0 : entity work.test_block_producer
