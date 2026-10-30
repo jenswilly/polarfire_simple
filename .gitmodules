@@ -1,0 +1,3 @@
+[submodule "rtems/rtems-cmake"]
+	path = rtems/rtems-cmake
+	url = https://github.com/robamu-org/rtems-cmake.git

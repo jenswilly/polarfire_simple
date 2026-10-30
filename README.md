@@ -72,7 +72,9 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 - Reference clock 125 MHz, CPU clock 600 MHz, AXI clock 300 MHz, AHB/APB clock 150 MHz.
 - DDR4, x16, 1 GB, 800 MHz (DDR4-1600), CL12. Timings are copied from Microchip's Discovery Kit reference design.
 - L2 cache split: LIM 4 ways, scratchpad 4 ways. The scratchpad is needed by the HSS.
-- MMUART_0 is routed to the fabric. FIC_0 AXI4 initiator is enabled. All other peripherals and FICs are off.
+- MMUART_0 is routed to the fabric (FTDI channel D). FIC_0 AXI4 initiator is enabled.
+- For the HSS (as in Microchip's reference design): MMUART_1 and MMUART_4 on MSSIO_B2 (FTDI channels B and C), SD card on MSSIO_B4 (`SD_PORTS_DISABLE`, `SD_VOLT_SEL_IS_INVERTED` = true, SDR104). Their pads are top-level ports of TOP.
+- All other peripherals and FICs are off.
 
 ### Timing Constants
 
@@ -119,6 +121,10 @@ sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSi
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
+hss/                HSS (Hart Software Services) build: build_hss.sh (devcontainer), make_envm_hex.sh (host), config_overrides
+rtems/              RTEMS 6.2: config.ini (BSP options), dts/ (Discovery Kit device tree), rtems-cmake (submodule),
+                    led_test/ (RTEMS version of the LED test, CMake), write_sd.sh (boot image -> microSD)
+.devcontainer/      RTEMS toolchain, BSP build, HSS source and xPack GCC
 tools/              Libero license-server start/stop scripts (see tools/README.md), syn_check.sh (batch Synplify check),
                     and the udev rule for the board's UARTs
 ```
@@ -248,6 +254,23 @@ After a software change, rebuild, then edit the eNVM client and select the hex a
 
 For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-harts debug`. The JTAG reset and halt overrides the eNVM program until the next power cycle.
 
+## RTEMS on U54_1 (HSS boot)
+The HSS runs on the E51 from eNVM. It sets up clocks and DDR, loads the RTEMS image from the microSD card into DDR and starts it on U54_1 in machine mode (no OpenSBI). This replaces `led_test` in eNVM.
+
+UARTs (udev rule in `tools/`): HSS console on `/dev/pfsoc-uart1` (MMUART1), RTEMS console on `/dev/pfsoc-uart0` (MMUART0), all 115200 8N1.
+
+1. **Devcontainer:** the image builds the RTEMS 6.2 toolchain and contains the HSS source and xPack GCC. `postCreateCommand` builds and installs the BSP `riscv/mpfs64imafdc` with `rtems/config.ini` and the device tree `rtems/dts/mpfs-discovery-kit.dts` (console MMUART0, 896 MB DDR at `0x10_0000_0000`). Run `.devcontainer/scripts/post_configuration.sh` again after changing either.
+2. **HSS** (after every MSS change): `hss/build_hss.sh` in the devcontainer, then `hss/make_envm_hex.sh` on the host. Use `hss/build/bootmode1/hss-envm-wrapper-bm1-p0.hex` as the Libero Boot Mode 1 eNVM client (see above) and program.
+3. **Application** (devcontainer):
+   ```bash
+   cmake -S rtems/led_test -B rtems/led_test/build -G Ninja
+   cmake --build rtems/led_test/build
+   ```
+   This builds `led_test.elf` and the HSS boot image `payload.bin` (`rtems/led_test/hss-payload.yaml`).
+4. **SD card** (host): `sudo rtems/write_sd.sh /dev/sdX`. It erases the card, creates a GPT with one EF02 partition (the type the HSS looks for) and writes `payload.bin` into it. The image must be smaller than 4 MiB (the HSS staging area at `0x10_3FC0_0000`).
+
+The HSS zeroes all NOBITS sections of the ELF before it starts it, including the 256 MB RTEMS `.work` area. That costs a moment at every boot but is harmless.
+
 ## Status / next steps
 - [x] FPGA design built and programmed. SWITCH1 → LED1 works.
 - [x] Bare-metal app (LIM debug): AXI reads and writes to `0x6000_0000` work, LED2/LED3 count, UART output works.
@@ -257,6 +280,7 @@ For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-hart
 - [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
 - [x] QSPI controller + BIST integrated into `TOP`, with timing constraints: synthesis, place and route and timing pass.
 - [x] QSPI hardware bring-up on the W25Q128JV breakout: BIST passes at 50 MHz SCLK, calibration window {2}, timing met (`documentation/bringup.md`). This was with the old 100 MHz `clk_ctrl`.
+- [ ] RTEMS on U54_1: devcontainer, BSP with Discovery Kit device tree, HSS build and RTEMS `led_test` build done. Still to do on the board: HSS console on MMUART1, SD boot, LED test output on MMUART0.
 - [ ] Single 200 MHz fabric clock (OUT0 for everything, OUT1 and `CORERESET_1` removed): HDL, testbenches, `timing.sdc` and Libero changes done; `axi_sys_ctrl` widened to a 64-bit bus (no interconnect DownConverter). Verify Timing passes with full constraint coverage (`timing_budget.md`); the BIST passes on the breakout (calibration window {3, 4, 5}, delay 4). Still to do on the board: SPI TX at 20 MHz, DEBUG pulse 1 ms, AXI register access from software.
 - [ ] QSPI on the AS308G208 dual-die PCB: on hold, see "Remaining work" under QSPI controller and BIST.
 - [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).
