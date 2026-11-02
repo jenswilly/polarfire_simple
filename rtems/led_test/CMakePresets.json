@@ -1,0 +1,23 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "mpfs",
+            "displayName": "RTEMS 6 riscv/mpfs64imafdc (U54_1 via HSS)",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "RTEMS_PREFIX": "/opt/rtems/6",
+                "RTEMS_BSP": "riscv/mpfs64imafdc"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "mpfs",
+            "displayName": "led_test.elf + payload.bin",
+            "configurePreset": "mpfs"
+        }
+    ]
+}

@@ -263,10 +263,11 @@ UARTs (udev rule in `tools/`): HSS console on `/dev/pfsoc-uart1` (MMUART1), RTEM
 2. **HSS** (after every MSS change): `hss/build_hss.sh` in the devcontainer, then `hss/make_envm_hex.sh` on the host. Use `hss/build/bootmode1/hss-envm-wrapper-bm1-p0.hex` as the Libero Boot Mode 1 eNVM client (see above) and program.
 3. **Application** (devcontainer):
    ```bash
-   cmake -S rtems/led_test -B rtems/led_test/build -G Ninja
-   cmake --build rtems/led_test/build
+   cd rtems/led_test
+   cmake --preset mpfs
+   cmake --build --preset mpfs
    ```
-   This builds `led_test.elf` and the HSS boot image `payload.bin` (`rtems/led_test/hss-payload.yaml`).
+   This builds `led_test.elf` and the HSS boot image `payload.bin` (`rtems/led_test/hss-payload.yaml`) in `rtems/led_test/build/`. The preset (`rtems/led_test/CMakePresets.json`) sets Ninja, the build directory, `RTEMS_PREFIX` and `RTEMS_BSP`. In VS Code, CMake Tools uses the same preset (`.vscode/settings.json`): select configure preset `mpfs`, then Build.
 4. **SD card** (host): `sudo rtems/write_sd.sh /dev/sdX`. It erases the card, creates a GPT with one EF02 partition (the type the HSS looks for) and writes `payload.bin` into it. The image must be smaller than 4 MiB (the HSS staging area at `0x10_3FC0_0000`).
 
 The HSS zeroes all NOBITS sections of the ELF before it starts it, including the 256 MB RTEMS `.work` area. That costs a moment at every boot but is harmless.

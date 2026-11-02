@@ -2,8 +2,10 @@
 # Same function as the bare-metal softconsole/led_test.
 #
 # Build in the devcontainer:
-#   cmake -S rtems/led_test -B rtems/led_test/build -G Ninja
-#   cmake --build rtems/led_test/build
+#   cd rtems/led_test
+#   cmake --preset mpfs
+#   cmake --build --preset mpfs
+# (CMakePresets.json; VS Code CMake Tools uses the same presets)
 # Output: build/led_test.elf and the HSS boot image build/payload.bin
 
 cmake_minimum_required(VERSION 3.20)
