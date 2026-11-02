@@ -3,3 +3,8 @@
 
 # Our MSS configuration instead of the reference design's
 CONFIG_SOC_FPGA_DESIGN_XML="/workspace/mss/MSS_simple_mss_cfg.xml"
+
+# No Mi-V IHC in our fabric (and FIC_3 is unused): HSS_IHCInit reads the IHC
+# version register at 0x5000_0000 and hangs after "Initializing Mi-V IHC V2".
+# The OpenSBI IPC services depend on it and drop out with it.
+CONFIG_USE_IHC_V2=n

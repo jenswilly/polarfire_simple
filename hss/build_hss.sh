@@ -29,6 +29,12 @@ keys=$(sed -E 's/=.*/=/' <<<"$overrides")
     grep -v -F "$keys" "$WORK/boards/$BOARD/def_config"
     echo "$overrides"
 } > "$WORK/.config.new"
+# Let Kconfig resolve it: the Makefiles include .config directly, so a
+# disabled symbol must become "# ... is not set" (make's ifdef is true for
+# "=n") and symbols whose dependencies are now off must be dropped.
+(cd "$WORK" && BOARD=$BOARD OPENSBI_SRC_DIR=thirdparty/opensbi \
+    KCONFIG_CONFIG=.config.new PYTHONPATH=thirdparty/Kconfiglib \
+    python3 thirdparty/Kconfiglib/olddefconfig.py Kconfig >/dev/null)
 if cmp -s "$WORK/.config.new" "$WORK/.config"; then
     rm "$WORK/.config.new"
 else
@@ -39,6 +45,12 @@ fi
 # isn't in the container. Its "SC_INSTALL_DIR environment variable is unset"
 # and "cannot stat ...bm1-p0.hex" messages are expected and don't fail the
 # build; make_envm_hex.sh does that step on the host.
+#
+# Two make runs: build/hss-l2scratch.bin (compressed into the wrapper) is only
+# a side effect of linking hss-l2scratch.elf, with no rule of its own. In a
+# single run make checks its timestamp before the relink and keeps the old
+# .bin.deflate, so the wrapper would still contain the previous HSS.
+make -C "$WORK" -j"$(nproc)" BOARD="$BOARD" hss-l2scratch.elf
 make -C "$WORK" -j"$(nproc)" BOARD="$BOARD" hss-envm-wrapper.elf
 
 cp "$WORK/build/hss-envm-wrapper.elf" "$HSS_DIR/build/"

@@ -8,9 +8,9 @@ Goal: RTEMS 6.2 on U54_1 of the Discovery Kit, booted by the HSS, with the same 
 - MSS and Libero changes for the HSS: MMUART1, MMUART4, SD card.
 - HSS build (`hss/build_hss.sh`, `hss/make_envm_hex.sh`); eNVM client points at the HSS hex.
 - RTEMS `led_test` (CMake via rtems-cmake), HSS payload config, `rtems/write_sd.sh`.
+- **Board bring-up: HSS.** Program the bitstream with the HSS in eNVM. Check the HSS console on `/dev/pfsoc-uart1`: banner, DDR training, SD card found, "no boot image".
 
 ## Next steps
-1. **Board bring-up: HSS.** Program the bitstream with the HSS in eNVM. Check the HSS console on `/dev/pfsoc-uart1`: banner, DDR training, SD card found, "no boot image".
 2. **Board bring-up: RTEMS.** Write `payload.bin` to a microSD card (`sudo rtems/write_sd.sh /dev/sdX`) and boot. Check on `/dev/pfsoc-uart0`: banner, ID register `0x1ED50001`, LED counter and readback; LED2/LED3 count.
 3. **CMake presets.** Add `rtems/led_test/CMakePresets.json` (CMake reads only this file name, not `CMakePresets.txt`):
    - a configure preset with the Ninja generator, `binaryDir` `${sourceDir}/build`, and the cache variables `RTEMS_PREFIX` and `RTEMS_BSP`;
