@@ -1,0 +1,13 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "led_test: build",
+            "type": "shell",
+            "command": "cmake --build --preset mpfs",
+            "options": { "cwd": "${workspaceFolder}/rtems/led_test" },
+            "group": "build",
+            "problemMatcher": "$gcc"
+        }
+    ]
+}

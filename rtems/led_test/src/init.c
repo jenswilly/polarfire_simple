@@ -9,8 +9,8 @@
  * resets and released the fabric reset. The console is MMUART0 (device tree
  * rtems/dts/mpfs-discovery-kit.dts).
  */
-#include <rtems.h>
 #include <inttypes.h>
+#include <rtems.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -32,8 +32,7 @@ static rtems_task Init(rtems_task_argument argument) {
     count = (count + 1U) & 0x3U;
     LED_REG = count;
 
-    printf("LED <- %" PRIu32 ", readback %" PRIu32 "\n", count,
-           LED_REG & 0x3U);
+    printf("LED <- %" PRIu32 ", readback %" PRIu32 "\n", count, LED_REG & 0x3U);
   }
 }
 

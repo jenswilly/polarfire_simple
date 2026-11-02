@@ -2,8 +2,34 @@
     "version": "0.2.0",
     "configurations": [
         {
-            // Attach to RTEMS on U54_1. Start tools/openocd_mpfs.sh on the host
-            // first. Halts the hart where it is (no load, no reset); stopping the
+            // Build, load led_test.elf into DDR and run it on U54_1 (the same
+            // steps as rtems/led_test/load.gdb). Start tools/openocd_mpfs.sh
+            // first; the HSS must have booted. Stopping the debug session
+            // detaches and the program keeps running.
+            "name": "RTEMS led_test: load and run U54_1",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/rtems/led_test/build/led_test.elf",
+            "cwd": "${workspaceFolder}/rtems/led_test",
+            "preLaunchTask": "led_test: build",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/opt/rtems/6/bin/riscv-rtems6-gdb",
+            "miDebuggerServerAddress": "localhost:3333",
+            "useExtendedRemote": true,
+            "setupCommands": [
+                { "text": "set mem inaccessible-by-default off" }
+            ],
+            "postRemoteConnectCommands": [
+                { "text": "load" },
+                { "text": "set $mstatus = $mstatus & ~0x8" },
+                { "text": "set $mie = 0" },
+                { "text": "set $pc = _start" },
+                { "text": "exit" }
+            ]
+        },
+        {
+            // Attach to RTEMS on U54_1. Start tools/openocd_mpfs.sh first.
+            // Halts the hart where it is (no load, no reset); stopping the
             // debug session detaches and OpenOCD resumes the hart.
             "name": "RTEMS led_test: attach U54_1",
             "type": "cppdbg",

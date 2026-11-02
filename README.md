@@ -274,14 +274,19 @@ The HSS zeroes all NOBITS sections of the ELF before it starts it, including the
 
 ### Debugging RTEMS over JTAG
 
-GDB in the devcontainer attaches to the running application through SoftConsole's OpenOCD on the host. Nothing is loaded or reset: attaching halts U54_1 where it is, and detaching resumes it.
+GDB in the devcontainer connects to U54_1 through SoftConsole's OpenOCD. It can attach to the running application, or load a new build into DDR and start it without writing the SD card.
 
 1. **Host or devcontainer:** `tools/openocd_mpfs.sh` (default hart 1 = U54_1; GDB port 3333). It sets `COREID` so OpenOCD has a target for that hart only. The default (`COREID -1`) makes all five harts one SMP target, so a halt would also stop the E51 running the HSS. OpenOCD uses JTAG: stop it (Ctrl-C) before programming in Libero.
-2. **Devcontainer** (`--network=host`, so `localhost:3333` reaches OpenOCD wherever it runs):
+2. **Attach** (devcontainer, `--network=host`, so `localhost:3333` reaches OpenOCD wherever it runs). Nothing is loaded or reset: attaching halts U54_1 where it is, and detaching resumes it. The ELF must be the one the board runs.
    - command line, from `rtems/led_test`: `riscv-rtems6-gdb -x attach.gdb build/led_test.elf`
    - VS Code: Run and Debug → "RTEMS led_test: attach U54_1" (`.vscode/launch.json`)
+3. **Load and run** a new build without writing the SD card:
+   - command line, from `rtems/led_test`: `riscv-rtems6-gdb -x load.gdb build/led_test.elf` loads the ELF into DDR, starts it on U54_1 and stops at `Init` (`continue` runs it)
+   - VS Code: "RTEMS led_test: load and run U54_1" builds (task "led_test: build"), loads and runs
 
-The ELF must be the one the board runs (the same build as the `payload.bin` on the SD card). OpenOCD has no RTEMS thread support, so GDB sees only the thread that is running when it halts. The application is built with `-O2`, so stepping jumps around and some variables are `<optimized out>`.
+   The HSS must have booted first, so DDR is trained. The SD card can hold an older payload: GDB stops it and starts the new build, which runs until the next reset; a reset boots the SD card image again. `_start` sets up `gp`, `mtvec` and `sp` and clears `.bss` itself. GDB only disables interrupts before the jump (`mstatus.MIE`, `mie`), so an interrupt from the old program can't fire before the new `mtvec` is set.
+
+OpenOCD has no RTEMS thread support, so GDB sees only the thread that is running when it halts. The application is built with `-O2`, so stepping jumps around and some variables are `<optimized out>`.
 
 ## Status / next steps
 - [x] FPGA design built and programmed. SWITCH1 → LED1 works.
