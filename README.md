@@ -280,7 +280,7 @@ The HSS zeroes all NOBITS sections of the ELF before it starts it, including the
 - [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
 - [x] QSPI controller + BIST integrated into `TOP`, with timing constraints: synthesis, place and route and timing pass.
 - [x] QSPI hardware bring-up on the W25Q128JV breakout: BIST passes at 50 MHz SCLK, calibration window {2}, timing met (`documentation/bringup.md`). This was with the old 100 MHz `clk_ctrl`.
-- [ ] RTEMS on U54_1: devcontainer, BSP with Discovery Kit device tree, HSS build and RTEMS `led_test` build done. Still to do on the board: HSS console on MMUART1, SD boot, LED test output on MMUART0.
+- [x] RTEMS on U54_1: the HSS (eNVM) boots `led_test` from the SD card. HSS console on MMUART1, LED test output on MMUART0, LED2/LED3 count.
 - [ ] Single 200 MHz fabric clock (OUT0 for everything, OUT1 and `CORERESET_1` removed): HDL, testbenches, `timing.sdc` and Libero changes done; `axi_sys_ctrl` widened to a 64-bit bus (no interconnect DownConverter). Verify Timing passes with full constraint coverage (`timing_budget.md`); the BIST passes on the breakout (calibration window {3, 4, 5}, delay 4). Still to do on the board: SPI TX at 20 MHz, DEBUG pulse 1 ms, AXI register access from software.
 - [ ] QSPI on the AS308G208 dual-die PCB: on hold, see "Remaining work" under QSPI controller and BIST.
 - [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).

@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "/workspace/rtems/led_test"
+    "cmake.sourceDirectory": "/workspace/rtems/led_test",
+    "cmake.buildDirectory": "/workspace/rtems/led_test/build"
 }
