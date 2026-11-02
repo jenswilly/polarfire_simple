@@ -272,6 +272,17 @@ UARTs (udev rule in `tools/`): HSS console on `/dev/pfsoc-uart1` (MMUART1), RTEM
 
 The HSS zeroes all NOBITS sections of the ELF before it starts it, including the 256 MB RTEMS `.work` area. That costs a moment at every boot but is harmless.
 
+### Debugging RTEMS over JTAG
+
+GDB in the devcontainer attaches to the running application through SoftConsole's OpenOCD on the host. Nothing is loaded or reset: attaching halts U54_1 where it is, and detaching resumes it.
+
+1. **Host:** `tools/openocd_mpfs.sh` (default hart 1 = U54_1; GDB port 3333). It sets `COREID` so OpenOCD has a target for that hart only. The default (`COREID -1`) makes all five harts one SMP target, so a halt would also stop the E51 running the HSS. OpenOCD uses JTAG: stop it (Ctrl-C) before programming in Libero.
+2. **Devcontainer** (`--network=host`, so `localhost:3333` is the host's OpenOCD):
+   - command line, from `rtems/led_test`: `riscv-rtems6-gdb -x attach.gdb build/led_test.elf`
+   - VS Code: Run and Debug → "RTEMS led_test: attach U54_1" (`.vscode/launch.json`)
+
+The ELF must be the one the board runs (the same build as the `payload.bin` on the SD card). OpenOCD has no RTEMS thread support, so GDB sees only the thread that is running when it halts. The application is built with `-O2`, so stepping jumps around and some variables are `<optimized out>`.
+
 ## Status / next steps
 - [x] FPGA design built and programmed. SWITCH1 → LED1 works.
 - [x] Bare-metal app (LIM debug): AXI reads and writes to `0x6000_0000` work, LED2/LED3 count, UART output works.

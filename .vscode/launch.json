@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Attach to RTEMS on U54_1. Start tools/openocd_mpfs.sh on the host
+            // first. Halts the hart where it is (no load, no reset); stopping the
+            // debug session detaches and OpenOCD resumes the hart.
+            "name": "RTEMS led_test: attach U54_1",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/rtems/led_test/build/led_test.elf",
+            "cwd": "${workspaceFolder}/rtems/led_test",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/opt/rtems/6/bin/riscv-rtems6-gdb",
+            "miDebuggerServerAddress": "localhost:3333",
+            "useExtendedRemote": true,
+            "stopAtConnect": true,
+            "setupCommands": [
+                { "text": "set mem inaccessible-by-default off" }
+            ]
+        }
+    ]
+}

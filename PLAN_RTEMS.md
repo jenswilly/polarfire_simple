@@ -11,10 +11,10 @@ Goal: RTEMS 6.2 on U54_1 of the Discovery Kit, booted by the HSS, with the same 
 - **Board bring-up: HSS.** Program the bitstream with the HSS in eNVM. Check the HSS console on `/dev/pfsoc-uart1`: banner, DDR training, SD card found, "no boot image".
 - **Board bring-up: RTEMS.** Write `payload.bin` to a microSD card (`sudo rtems/write_sd.sh /dev/sdX`) and boot. Check on `/dev/pfsoc-uart0`: banner, ID register `0x1ED50001`, LED counter and readback; LED2/LED3 count.
 - CMake presets: `rtems/led_test/CMakePresets.json` (configure/build preset `mpfs`, Ninja, `build/`), used by the command line and VS Code CMake Tools.
+- Debugging over JTAG: `tools/openocd_mpfs.sh` (host, U54_1 only), `rtems/led_test/attach.gdb` and `.vscode/launch.json` (devcontainer). Attach, breakpoints and detach/resume checked on the board. README: "Debugging RTEMS over JTAG".
 
 ## Next steps
-1. **Debugging over JTAG.** Run SoftConsole's OpenOCD on the host (`microsemi-riscv.cfg`, `set DEVICE MPFS`) and connect `riscv-rtems6-gdb` from the devcontainer (`--network=host`, `target extended-remote localhost:3333`) to hart 1 after the HSS has started RTEMS. Document the steps; optionally add a VS Code launch configuration.
-2. **Faster development loop.** Load `led_test.elf` with GDB into DDR instead of writing the SD card for every change (HSS boots with no or an old payload, then GDB loads and starts the new image on U54_1).
-3. **Boot time (optional).** The HSS zeroes the 256 MB `.work` section at every boot. Check how long it takes (HSS log timestamps) and, if it matters, reduce `RISCV_RAM_REGION_SIZE` in `rtems/config.ini` (the work area end still comes from the device tree).
-4. **Later: boot from QSPI flash.** The HSS QSPI boot service uses the MSS QSPI controller, but our W25Q128 breakout is on fabric pins driven by `qspi_board`. Options: a custom HSS boot source that reads through the fabric controller, or moving the flash to the MSS QSPI pins. Decide before starting.
-5. **Docs.** Add the RTEMS/HSS facts to CLAUDE.md (build flow, UART mapping, staging limit of 4 MiB) and update `documentation/top_level.drawio` with the new MSS pads.
+1. **Faster development loop.** Load `led_test.elf` with GDB into DDR instead of writing the SD card for every change (HSS boots with no or an old payload, then GDB loads and starts the new image on U54_1).
+2. **Boot time (optional).** The HSS zeroes the 256 MB `.work` section at every boot. Check how long it takes (HSS log timestamps) and, if it matters, reduce `RISCV_RAM_REGION_SIZE` in `rtems/config.ini` (the work area end still comes from the device tree).
+3. **Later: boot from QSPI flash.** The HSS QSPI boot service uses the MSS QSPI controller, but our W25Q128 breakout is on fabric pins driven by `qspi_board`. Options: a custom HSS boot source that reads through the fabric controller, or moving the flash to the MSS QSPI pins. Decide before starting.
+4. **Docs.** Add the RTEMS/HSS facts to CLAUDE.md (build flow, UART mapping, staging limit of 4 MiB) and update `documentation/top_level.drawio` with the new MSS pads.
