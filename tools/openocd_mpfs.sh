@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 #
-# Starts SoftConsole's OpenOCD as a GDB server for one PolarFire SoC hart, on
-# the host (it needs the board's FlashPro5 JTAG, interface 0):
+# Starts SoftConsole's OpenOCD as a GDB server for one PolarFire SoC hart
+# (through the board's FlashPro5 JTAG, interface 0). Runs on the host or in the
+# devcontainer, which mounts SoftConsole and sets SC_INSTALL_DIR:
 #
 #   tools/openocd_mpfs.sh [HART]
 #
 # HART is 0 (E51) .. 4 (U54_4); default 1 = U54_1, where RTEMS runs.
 # GDB port 3333, telnet 4444. The devcontainer uses --network=host, so
-# riscv-rtems6-gdb there connects with "target extended-remote localhost:3333".
+# localhost:3333 is the same port in both places. The pgrep check below only
+# sees OpenOCD instances on the same side (host or container); one on the
+# other side shows up as port 3333 already in use.
 #
 # One hart only (COREID): with the default COREID -1 all five harts are one
 # SMP target, and halting it would also stop the E51 running the HSS.

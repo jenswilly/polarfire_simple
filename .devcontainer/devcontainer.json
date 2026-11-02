@@ -21,6 +21,18 @@
             }
         }
     },
+    // Host installs of SoftConsole (OpenOCD, mpfsBootmodeProgrammer) and Libero
+    // (fpgenprog), read-only at the same paths as on the host, because
+    // scripts and Libero files contain these absolute paths. Only tools that
+    // need no license are used from here; the license server stays on the host.
+    "mounts": [
+        "source=${localEnv:HOME}/Microchip/SoftConsole-v2022.2-RISC-V-747,target=${localEnv:HOME}/Microchip/SoftConsole-v2022.2-RISC-V-747,type=bind,readonly",
+        "source=/usr/local/microchip,target=/usr/local/microchip,type=bind,readonly"
+    ],
+    "containerEnv": {
+        "SC_INSTALL_DIR": "${localEnv:HOME}/Microchip/SoftConsole-v2022.2-RISC-V-747",
+        "FPGENPROG": "/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/fpgenprog"
+    },
     "runArgs": [
         "--network=host",
         "--privileged",

@@ -4,10 +4,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Copy package lists
 COPY apt-packages.txt /tmp/apt-packages.txt
 
-# Install packages
-RUN apt-get update && \
+# Install packages. i386 is for the 32-bit Libero tools (fpbitgen, run by
+# fpgenprog). The empty /etc/redhat-release keeps Libero's
+# actel_setup_vars_nomotif from writing to stderr (see CLAUDE.md).
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
     xargs -a /tmp/apt-packages.txt apt-get install -y && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    touch /etc/redhat-release
 
 # Generate and set locale
 RUN locale-gen en_US.UTF-8
@@ -64,12 +68,6 @@ RUN cd /opt/rtems/src && \
     tar xJf rtems-6.2.tar.xz && \
     rm rtems-6.2.tar.xz && \
     mv rtems-6.2 rtems
-
-# pkg-config for rtems-cmake (reads the BSP's .pc file). Installed here
-# rather than in apt-packages.txt so the toolchain layer stays cached.
-RUN sudo apt-get update && \
-    sudo apt-get install -y pkg-config && \
-    sudo rm -rf /var/lib/apt/lists/*
 
 # HSS (Hart Software Services) source, built by /workspace/hss/build_hss.sh,
 # and the HSS payload generator, which wraps the RTEMS ELF into an HSS boot

@@ -121,7 +121,7 @@ sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSi
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
-hss/                HSS (Hart Software Services) build: build_hss.sh (devcontainer), make_envm_hex.sh (host), config_overrides
+hss/                HSS (Hart Software Services) build: build_hss.sh (devcontainer), make_envm_hex.sh, config_overrides
 rtems/              RTEMS 6.2: config.ini (BSP options), dts/ (Discovery Kit device tree), rtems-cmake (submodule),
                     led_test/ (RTEMS version of the LED test, CMake), write_sd.sh (boot image -> microSD)
 .devcontainer/      RTEMS toolchain, BSP build, HSS source and xPack GCC
@@ -259,8 +259,8 @@ The HSS runs on the E51 from eNVM. It sets up clocks and DDR, loads the RTEMS im
 
 UARTs (udev rule in `tools/`): HSS console on `/dev/pfsoc-uart1` (MMUART1), RTEMS console on `/dev/pfsoc-uart0` (MMUART0), all 115200 8N1.
 
-1. **Devcontainer:** the image builds the RTEMS 6.2 toolchain and contains the HSS source and xPack GCC. `postCreateCommand` builds and installs the BSP `riscv/mpfs64imafdc` with `rtems/config.ini` and the device tree `rtems/dts/mpfs-discovery-kit.dts` (console MMUART0, 896 MB DDR at `0x10_0000_0000`). Run `.devcontainer/scripts/post_configuration.sh` again after changing either.
-2. **HSS** (after every MSS change): `hss/build_hss.sh` in the devcontainer, then `hss/make_envm_hex.sh` on the host. Use `hss/build/bootmode1/hss-envm-wrapper-bm1-p0.hex` as the Libero Boot Mode 1 eNVM client (see above) and program.
+1. **Devcontainer:** the image builds the RTEMS 6.2 toolchain and contains the HSS source and xPack GCC. `postCreateCommand` builds and installs the BSP `riscv/mpfs64imafdc` with `rtems/config.ini` and the device tree `rtems/dts/mpfs-discovery-kit.dts` (console MMUART0, 896 MB DDR at `0x10_0000_0000`). Run `.devcontainer/scripts/post_configuration.sh` again after changing either. The host's SoftConsole and `/usr/local/microchip` (Libero) are mounted read-only at their host paths, with `SC_INSTALL_DIR` and `FPGENPROG` set, so OpenOCD and `mpfsBootmodeProgrammer`/`fpgenprog` also run in the container. These need no license. The Libero license server stays on the host.
+2. **HSS** (after every MSS change): `hss/build_hss.sh` in the devcontainer. It also runs `hss/make_envm_hex.sh`, which can run on the host too. Use `hss/build/bootmode1/hss-envm-wrapper-bm1-p0.hex` as the Libero Boot Mode 1 eNVM client (see above) and program.
 3. **Application** (devcontainer):
    ```bash
    cd rtems/led_test
@@ -276,8 +276,8 @@ The HSS zeroes all NOBITS sections of the ELF before it starts it, including the
 
 GDB in the devcontainer attaches to the running application through SoftConsole's OpenOCD on the host. Nothing is loaded or reset: attaching halts U54_1 where it is, and detaching resumes it.
 
-1. **Host:** `tools/openocd_mpfs.sh` (default hart 1 = U54_1; GDB port 3333). It sets `COREID` so OpenOCD has a target for that hart only. The default (`COREID -1`) makes all five harts one SMP target, so a halt would also stop the E51 running the HSS. OpenOCD uses JTAG: stop it (Ctrl-C) before programming in Libero.
-2. **Devcontainer** (`--network=host`, so `localhost:3333` is the host's OpenOCD):
+1. **Host or devcontainer:** `tools/openocd_mpfs.sh` (default hart 1 = U54_1; GDB port 3333). It sets `COREID` so OpenOCD has a target for that hart only. The default (`COREID -1`) makes all five harts one SMP target, so a halt would also stop the E51 running the HSS. OpenOCD uses JTAG: stop it (Ctrl-C) before programming in Libero.
+2. **Devcontainer** (`--network=host`, so `localhost:3333` reaches OpenOCD wherever it runs):
    - command line, from `rtems/led_test`: `riscv-rtems6-gdb -x attach.gdb build/led_test.elf`
    - VS Code: Run and Debug → "RTEMS led_test: attach U54_1" (`.vscode/launch.json`)
 

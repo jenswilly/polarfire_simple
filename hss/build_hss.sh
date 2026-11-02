@@ -4,8 +4,10 @@
 # configuration. Runs in the devcontainer (HSS source in $HSS_SRC, xPack
 # riscv-none-elf-gcc on the PATH).
 #
-# Output: hss/build/hss-envm-wrapper.elf. Turn it into the Libero eNVM client
-# hex on the host with hss/make_envm_hex.sh.
+# Output: hss/build/hss-envm-wrapper.elf and, when SoftConsole and Libero are
+# mounted (SC_INSTALL_DIR, FPGENPROG in devcontainer.json), the Libero eNVM
+# client hex hss/build/bootmode1/hss-envm-wrapper-bm1-p0.hex via
+# hss/make_envm_hex.sh.
 
 set -eu
 
@@ -16,9 +18,10 @@ HSS_DIR=$(cd "$(dirname "$0")" && pwd)
 WORK="$HSS_DIR/build/hart-software-services"
 
 # Build in a copy of the source; only newer files are copied, so rebuilds
-# are incremental
+# are incremental. --remove-destination because git's object files are
+# read-only, and a new image (new clone of $HSS_SRC) makes every file newer.
 mkdir -p "$WORK"
-cp -a -u "$HSS_SRC/." "$WORK/"
+cp -a -u --remove-destination "$HSS_SRC/." "$WORK/"
 
 # .config = board def_config with the symbols from config_overrides replaced.
 # Only replaced when it changes, so make doesn't regenerate config.h for
@@ -41,17 +44,23 @@ else
     mv "$WORK/.config.new" "$WORK/.config"
 fi
 
-# The wrapper target also calls SoftConsole's mpfsBootmodeProgrammer, which
-# isn't in the container. Its "SC_INSTALL_DIR environment variable is unset"
-# and "cannot stat ...bm1-p0.hex" messages are expected and don't fail the
-# build; make_envm_hex.sh does that step on the host.
+# The wrapper target also calls SoftConsole's mpfsBootmodeProgrammer. It runs
+# with SC_INSTALL_DIR unset, so its "SC_INSTALL_DIR environment variable is
+# unset" and "cannot stat ...bm1-p0.hex" messages are expected and don't fail
+# the build; make_envm_hex.sh does that step afterwards.
 #
 # Two make runs: build/hss-l2scratch.bin (compressed into the wrapper) is only
 # a side effect of linking hss-l2scratch.elf, with no rule of its own. In a
 # single run make checks its timestamp before the relink and keeps the old
 # .bin.deflate, so the wrapper would still contain the previous HSS.
 make -C "$WORK" -j"$(nproc)" BOARD="$BOARD" hss-l2scratch.elf
-make -C "$WORK" -j"$(nproc)" BOARD="$BOARD" hss-envm-wrapper.elf
+env -u SC_INSTALL_DIR make -C "$WORK" -j"$(nproc)" BOARD="$BOARD" hss-envm-wrapper.elf
 
 cp "$WORK/build/hss-envm-wrapper.elf" "$HSS_DIR/build/"
 echo "Wrote $HSS_DIR/build/hss-envm-wrapper.elf"
+
+if [ -n "${SC_INSTALL_DIR:-}" ] && [ -d "$SC_INSTALL_DIR" ]; then
+    "$HSS_DIR/make_envm_hex.sh"
+else
+    echo "SoftConsole not found (SC_INSTALL_DIR); run hss/make_envm_hex.sh on the host"
+fi
