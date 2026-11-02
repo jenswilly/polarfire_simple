@@ -23,10 +23,12 @@ ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", DRIVER=="ftdi_s
   ATTR{bInterfaceNumber}=="00", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
   RUN+="/bin/sh -c 'echo %k > /sys/bus/usb/drivers/ftdi_sio/unbind'"
 
-# 3. Stable names for the UARTs.
-ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="01", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+# 3. Stable names for the UARTs. All ATTRS{} keys of a rule must match on the same sysfs device,
+#    and bInterfaceNumber (interface) and idVendor (device) are on different ones, so match the
+#    ID_* properties from the usb_id builtin instead. ACTION!="remove" so udevadm trigger works too.
+ACTION!="remove", SUBSYSTEM=="tty", ENV{ID_VENDOR_ID}=="1514", ENV{ID_MODEL_ID}=="2008", ENV{ID_USB_INTERFACE_NUM}=="01", \
   SYMLINK+="pfsoc-uart1", GROUP="dialout", MODE="0660"
-ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="02", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+ACTION!="remove", SUBSYSTEM=="tty", ENV{ID_VENDOR_ID}=="1514", ENV{ID_MODEL_ID}=="2008", ENV{ID_USB_INTERFACE_NUM}=="02", \
   SYMLINK+="pfsoc-uart4", GROUP="dialout", MODE="0660"
-ACTION=="add", SUBSYSTEM=="tty", ATTRS{bInterfaceNumber}=="03", ATTRS{idVendor}=="1514", ATTRS{idProduct}=="2008", \
+ACTION!="remove", SUBSYSTEM=="tty", ENV{ID_VENDOR_ID}=="1514", ENV{ID_MODEL_ID}=="2008", ENV{ID_USB_INTERFACE_NUM}=="03", \
   SYMLINK+="pfsoc-uart0", GROUP="dialout", MODE="0660"
