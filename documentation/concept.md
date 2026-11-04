@@ -65,6 +65,7 @@ FPGA fabric will run five main components (and several "interface" and "sub-" co
 * **Hardware:** early access to boards with real components for SoC, MRAM, Ethernet PHY, QSPI Flash, watchdog, ADC is 
   required. This is not just a nice-to-have since micro- and nanosecond timing requirements are not possible to verify
   on prototype-only components and timing changes can require major redesign.
+* **Security:** what kind of signing/encryption of SoC payloads do we need?
 
 ## Hardware Components
 
