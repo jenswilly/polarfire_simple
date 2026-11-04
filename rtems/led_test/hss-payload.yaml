@@ -1,0 +1,11 @@
+# HSS payload configuration for hss-payload-generator (run by CMakeLists.txt
+# in the build directory). RTEMS runs on U54_1 in machine mode without
+# OpenSBI. Load addresses come from the ELF; the entry point is
+# RISCV_RAM_REGION_BEGIN of the BSP (cached DDR).
+
+set-name: 'polarfire_simple RTEMS led_test'
+
+hart-entry-points: {u54_1: '0x1000000000'}
+
+payloads:
+  led_test.elf: {owner-hart: u54_1, priv-mode: prv_m, skip-opensbi: true, payload-name: 'led_test'}

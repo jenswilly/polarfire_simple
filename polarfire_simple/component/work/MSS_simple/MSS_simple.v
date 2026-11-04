@@ -16,6 +16,7 @@ module MSS_simple(
        FIC_0_AXI4_M_RLAST,
        FIC_0_AXI4_M_RVALID,
        MMUART_0_RXD_F2M,
+       QSPI_DATA_F2M,
        MSS_RESET_N_F2M,
        FIC_0_DLL_LOCK_M2F,
        FIC_0_AXI4_M_AWID,
@@ -46,9 +47,31 @@ module MSS_simple(
        FIC_0_AXI4_M_RREADY,
        MMUART_0_TXD_M2F,
        MMUART_0_TXD_OE_M2F,
+       QSPI_SEL_M2F,
+       QSPI_SEL_OE_M2F,
+       QSPI_CLK_M2F,
+       QSPI_CLK_OE_M2F,
+       QSPI_DATA_M2F,
+       QSPI_DATA_OE_M2F,
        PLL_CPU_LOCK_M2F,
        PLL_DDR_LOCK_M2F,
        MSS_RESET_N_M2F,
+       MMUART_1_RXD,
+       MMUART_1_TXD,
+       MMUART_4_RXD,
+       MMUART_4_TXD,
+       SD_CLK,
+       SD_CMD,
+       SD_DATA0,
+       SD_DATA1,
+       SD_DATA2,
+       SD_DATA3,
+       SD_CD,
+       SD_VOLT_SEL,
+       SD_VOLT_EN,
+       SD_VOLT_CMD_DIR,
+       SD_VOLT_DIR_0,
+       SD_VOLT_DIR_1_3,
        REFCLK,
        REFCLK_N,
        BA,
@@ -82,6 +105,7 @@ input  [1:0] FIC_0_AXI4_M_RRESP;
 input  FIC_0_AXI4_M_RLAST;
 input  FIC_0_AXI4_M_RVALID;
 input  MMUART_0_RXD_F2M;
+input  [3:0] QSPI_DATA_F2M;
 input  MSS_RESET_N_F2M;
 output FIC_0_DLL_LOCK_M2F;
 output [7:0] FIC_0_AXI4_M_AWID;
@@ -112,9 +136,31 @@ output FIC_0_AXI4_M_ARVALID;
 output FIC_0_AXI4_M_RREADY;
 output MMUART_0_TXD_M2F;
 output MMUART_0_TXD_OE_M2F;
+output QSPI_SEL_M2F;
+output QSPI_SEL_OE_M2F;
+output QSPI_CLK_M2F;
+output QSPI_CLK_OE_M2F;
+output [3:0] QSPI_DATA_M2F;
+output [3:0] QSPI_DATA_OE_M2F;
 output PLL_CPU_LOCK_M2F;
 output PLL_DDR_LOCK_M2F;
 output MSS_RESET_N_M2F;
+input  MMUART_1_RXD;
+output MMUART_1_TXD;
+input  MMUART_4_RXD;
+output MMUART_4_TXD;
+output SD_CLK;
+inout  SD_CMD;
+inout  SD_DATA0;
+inout  SD_DATA1;
+inout  SD_DATA2;
+inout  SD_DATA3;
+input  SD_CD;
+output SD_VOLT_SEL;
+output SD_VOLT_EN;
+output SD_VOLT_CMD_DIR;
+output SD_VOLT_DIR_0;
+output SD_VOLT_DIR_1_3;
 input  REFCLK;
 input  REFCLK_N;
 output [1:0] BA;
@@ -135,47 +181,63 @@ output CAS_N;
 output ACT_N;
 output BG0;
 
-    wire GND_net, VCC_net, Y_REFCLK_IOINST_net, D_DDR_BA1_IOINST_net, 
-        D_DDR_BA0_IOINST_net, D_DDR_DQ15_OUT_IOINST_net, 
-        E_DDR_DQ15_OUT_IOINST_net, Y_DDR_DQ15_OUT_IOINST_net, 
-        D_DDR_DQ14_OUT_IOINST_net, E_DDR_DQ14_OUT_IOINST_net, 
-        Y_DDR_DQ14_OUT_IOINST_net, D_DDR_DQ13_OUT_IOINST_net, 
-        E_DDR_DQ13_OUT_IOINST_net, Y_DDR_DQ13_OUT_IOINST_net, 
-        D_DDR_DQ12_OUT_IOINST_net, E_DDR_DQ12_OUT_IOINST_net, 
-        Y_DDR_DQ12_OUT_IOINST_net, D_DDR_DQ11_OUT_IOINST_net, 
-        E_DDR_DQ11_OUT_IOINST_net, Y_DDR_DQ11_OUT_IOINST_net, 
-        D_DDR_DQ10_OUT_IOINST_net, E_DDR_DQ10_OUT_IOINST_net, 
-        Y_DDR_DQ10_OUT_IOINST_net, D_DDR_DQ9_OUT_IOINST_net, 
-        E_DDR_DQ9_OUT_IOINST_net, Y_DDR_DQ9_OUT_IOINST_net, 
-        D_DDR_DQ8_OUT_IOINST_net, E_DDR_DQ8_OUT_IOINST_net, 
-        Y_DDR_DQ8_OUT_IOINST_net, D_DDR_DQ7_OUT_IOINST_net, 
-        E_DDR_DQ7_OUT_IOINST_net, Y_DDR_DQ7_OUT_IOINST_net, 
-        D_DDR_DQ6_OUT_IOINST_net, E_DDR_DQ6_OUT_IOINST_net, 
-        Y_DDR_DQ6_OUT_IOINST_net, D_DDR_DQ5_OUT_IOINST_net, 
-        E_DDR_DQ5_OUT_IOINST_net, Y_DDR_DQ5_OUT_IOINST_net, 
-        D_DDR_DQ4_OUT_IOINST_net, E_DDR_DQ4_OUT_IOINST_net, 
-        Y_DDR_DQ4_OUT_IOINST_net, D_DDR_DQ3_OUT_IOINST_net, 
-        E_DDR_DQ3_OUT_IOINST_net, Y_DDR_DQ3_OUT_IOINST_net, 
-        D_DDR_DQ2_OUT_IOINST_net, E_DDR_DQ2_OUT_IOINST_net, 
-        Y_DDR_DQ2_OUT_IOINST_net, D_DDR_DQ1_OUT_IOINST_net, 
-        E_DDR_DQ1_OUT_IOINST_net, Y_DDR_DQ1_OUT_IOINST_net, 
-        D_DDR_DQ0_OUT_IOINST_net, E_DDR_DQ0_OUT_IOINST_net, 
-        Y_DDR_DQ0_OUT_IOINST_net, D_DDR_DQS1_OUT_IOINST_net, 
-        E_DDR_DQS1_OUT_IOINST_net, Y_DDR_DQS1_OUT_IOINST_net, 
-        D_DDR_DQS0_OUT_IOINST_net, E_DDR_DQS0_OUT_IOINST_net, 
-        Y_DDR_DQS0_OUT_IOINST_net, D_DDR_DM1_OUT_IOINST_net, 
-        D_DDR_DM0_OUT_IOINST_net, D_DDR_A13_IOINST_net, 
-        D_DDR_A12_IOINST_net, D_DDR_A11_IOINST_net, 
-        D_DDR_A10_IOINST_net, D_DDR_A9_IOINST_net, D_DDR_A8_IOINST_net, 
-        D_DDR_A7_IOINST_net, D_DDR_A6_IOINST_net, D_DDR_A5_IOINST_net, 
-        D_DDR_A4_IOINST_net, D_DDR_A3_IOINST_net, D_DDR_A2_IOINST_net, 
-        D_DDR_A1_IOINST_net, D_DDR_A0_IOINST_net, 
-        D_DDR_RAM_RST_N_IOINST_net, D_DDR_CKE0_IOINST_net, 
-        D_DDR_CS0_IOINST_net, D_DDR_ODT0_IOINST_net, 
-        D_DDR_CK0_IOINST_net, D_DDR_A16_IOINST_net, 
-        D_DDR_A14_IOINST_net, D_DDR_A15_IOINST_net, 
-        D_DDR_ACT_N_IOINST_net, D_DDR_BG0_IOINST_net;
+    wire GND_net, VCC_net, Y_MSSIO19_IN_IOINST_net, 
+        D_MSSIO20_OUT_IOINST_net, Y_MSSIO15_IN_IOINST_net, 
+        D_MSSIO16_OUT_IOINST_net, D_MSSIO0_OUT_IOINST_net, 
+        D_MSSIO1_OUT_IOINST_net, E_MSSIO1_OUT_IOINST_net, 
+        Y_MSSIO1_OUT_IOINST_net, D_MSSIO2_OUT_IOINST_net, 
+        E_MSSIO2_OUT_IOINST_net, Y_MSSIO2_OUT_IOINST_net, 
+        D_MSSIO3_OUT_IOINST_net, E_MSSIO3_OUT_IOINST_net, 
+        Y_MSSIO3_OUT_IOINST_net, D_MSSIO4_OUT_IOINST_net, 
+        E_MSSIO4_OUT_IOINST_net, Y_MSSIO4_OUT_IOINST_net, 
+        D_MSSIO5_OUT_IOINST_net, E_MSSIO5_OUT_IOINST_net, 
+        Y_MSSIO5_OUT_IOINST_net, Y_MSSIO6_IN_IOINST_net, 
+        D_MSSIO9_OUT_IOINST_net, D_MSSIO10_OUT_IOINST_net, 
+        D_MSSIO11_OUT_IOINST_net, D_MSSIO12_OUT_IOINST_net, 
+        D_MSSIO13_OUT_IOINST_net, Y_REFCLK_IOINST_net, 
+        D_DDR_BA1_IOINST_net, D_DDR_BA0_IOINST_net, 
+        D_DDR_DQ15_OUT_IOINST_net, E_DDR_DQ15_OUT_IOINST_net, 
+        Y_DDR_DQ15_OUT_IOINST_net, D_DDR_DQ14_OUT_IOINST_net, 
+        E_DDR_DQ14_OUT_IOINST_net, Y_DDR_DQ14_OUT_IOINST_net, 
+        D_DDR_DQ13_OUT_IOINST_net, E_DDR_DQ13_OUT_IOINST_net, 
+        Y_DDR_DQ13_OUT_IOINST_net, D_DDR_DQ12_OUT_IOINST_net, 
+        E_DDR_DQ12_OUT_IOINST_net, Y_DDR_DQ12_OUT_IOINST_net, 
+        D_DDR_DQ11_OUT_IOINST_net, E_DDR_DQ11_OUT_IOINST_net, 
+        Y_DDR_DQ11_OUT_IOINST_net, D_DDR_DQ10_OUT_IOINST_net, 
+        E_DDR_DQ10_OUT_IOINST_net, Y_DDR_DQ10_OUT_IOINST_net, 
+        D_DDR_DQ9_OUT_IOINST_net, E_DDR_DQ9_OUT_IOINST_net, 
+        Y_DDR_DQ9_OUT_IOINST_net, D_DDR_DQ8_OUT_IOINST_net, 
+        E_DDR_DQ8_OUT_IOINST_net, Y_DDR_DQ8_OUT_IOINST_net, 
+        D_DDR_DQ7_OUT_IOINST_net, E_DDR_DQ7_OUT_IOINST_net, 
+        Y_DDR_DQ7_OUT_IOINST_net, D_DDR_DQ6_OUT_IOINST_net, 
+        E_DDR_DQ6_OUT_IOINST_net, Y_DDR_DQ6_OUT_IOINST_net, 
+        D_DDR_DQ5_OUT_IOINST_net, E_DDR_DQ5_OUT_IOINST_net, 
+        Y_DDR_DQ5_OUT_IOINST_net, D_DDR_DQ4_OUT_IOINST_net, 
+        E_DDR_DQ4_OUT_IOINST_net, Y_DDR_DQ4_OUT_IOINST_net, 
+        D_DDR_DQ3_OUT_IOINST_net, E_DDR_DQ3_OUT_IOINST_net, 
+        Y_DDR_DQ3_OUT_IOINST_net, D_DDR_DQ2_OUT_IOINST_net, 
+        E_DDR_DQ2_OUT_IOINST_net, Y_DDR_DQ2_OUT_IOINST_net, 
+        D_DDR_DQ1_OUT_IOINST_net, E_DDR_DQ1_OUT_IOINST_net, 
+        Y_DDR_DQ1_OUT_IOINST_net, D_DDR_DQ0_OUT_IOINST_net, 
+        E_DDR_DQ0_OUT_IOINST_net, Y_DDR_DQ0_OUT_IOINST_net, 
+        D_DDR_DQS1_OUT_IOINST_net, E_DDR_DQS1_OUT_IOINST_net, 
+        Y_DDR_DQS1_OUT_IOINST_net, D_DDR_DQS0_OUT_IOINST_net, 
+        E_DDR_DQS0_OUT_IOINST_net, Y_DDR_DQS0_OUT_IOINST_net, 
+        D_DDR_DM1_OUT_IOINST_net, D_DDR_DM0_OUT_IOINST_net, 
+        D_DDR_A13_IOINST_net, D_DDR_A12_IOINST_net, 
+        D_DDR_A11_IOINST_net, D_DDR_A10_IOINST_net, 
+        D_DDR_A9_IOINST_net, D_DDR_A8_IOINST_net, D_DDR_A7_IOINST_net, 
+        D_DDR_A6_IOINST_net, D_DDR_A5_IOINST_net, D_DDR_A4_IOINST_net, 
+        D_DDR_A3_IOINST_net, D_DDR_A2_IOINST_net, D_DDR_A1_IOINST_net, 
+        D_DDR_A0_IOINST_net, D_DDR_RAM_RST_N_IOINST_net, 
+        D_DDR_CKE0_IOINST_net, D_DDR_CS0_IOINST_net, 
+        D_DDR_ODT0_IOINST_net, D_DDR_CK0_IOINST_net, 
+        D_DDR_A16_IOINST_net, D_DDR_A14_IOINST_net, 
+        D_DDR_A15_IOINST_net, D_DDR_ACT_N_IOINST_net, 
+        D_DDR_BG0_IOINST_net;
     
+    OUTBUF MSSIO9_OUT_IOINST (.D(D_MSSIO9_OUT_IOINST_net), .PAD(
+        SD_VOLT_SEL));
     OUTBUF DDR_A15_IOINST (.D(D_DDR_A15_IOINST_net), .PAD(CAS_N));
     OUTBUF DDR_CKE0_IOINST (.D(D_DDR_CKE0_IOINST_net), .PAD(CKE0));
     OUTBUF DDR_CS0_IOINST (.D(D_DDR_CS0_IOINST_net), .PAD(CS0_N));
@@ -183,16 +245,25 @@ output BG0;
     BIBUF DDR_DQ2_OUT_IOINST (.D(D_DDR_DQ2_OUT_IOINST_net), .E(
         E_DDR_DQ2_OUT_IOINST_net), .Y(Y_DDR_DQ2_OUT_IOINST_net), .PAD(
         DQ[2]));
+    OUTBUF MSSIO12_OUT_IOINST (.D(D_MSSIO12_OUT_IOINST_net), .PAD(
+        SD_VOLT_DIR_0));
+    INBUF MSSIO6_IN_IOINST (.PAD(SD_CD), .Y(Y_MSSIO6_IN_IOINST_net));
     OUTBUF DDR_A4_IOINST (.D(D_DDR_A4_IOINST_net), .PAD(A[4]));
+    OUTBUF MSSIO20_OUT_IOINST (.D(D_MSSIO20_OUT_IOINST_net), .PAD(
+        MMUART_1_TXD));
     BIBUF DDR_DQ3_OUT_IOINST (.D(D_DDR_DQ3_OUT_IOINST_net), .E(
         E_DDR_DQ3_OUT_IOINST_net), .Y(Y_DDR_DQ3_OUT_IOINST_net), .PAD(
         DQ[3]));
     OUTBUF DDR_DM0_OUT_IOINST (.D(D_DDR_DM0_OUT_IOINST_net), .PAD(
         DM[0]));
+    OUTBUF MSSIO0_OUT_IOINST (.D(D_MSSIO0_OUT_IOINST_net), .PAD(SD_CLK)
+        );
     OUTBUF DDR_A5_IOINST (.D(D_DDR_A5_IOINST_net), .PAD(A[5]));
     OUTBUF DDR_DM1_OUT_IOINST (.D(D_DDR_DM1_OUT_IOINST_net), .PAD(
         DM[1]));
     OUTBUF DDR_A2_IOINST (.D(D_DDR_A2_IOINST_net), .PAD(A[2]));
+    OUTBUF MSSIO16_OUT_IOINST (.D(D_MSSIO16_OUT_IOINST_net), .PAD(
+        MMUART_4_TXD));
     BIBUF DDR_DQ4_OUT_IOINST (.D(D_DDR_DQ4_OUT_IOINST_net), .E(
         E_DDR_DQ4_OUT_IOINST_net), .Y(Y_DDR_DQ4_OUT_IOINST_net), .PAD(
         DQ[4]));
@@ -201,14 +272,27 @@ output BG0;
     BIBUF DDR_DQ9_OUT_IOINST (.D(D_DDR_DQ9_OUT_IOINST_net), .E(
         E_DDR_DQ9_OUT_IOINST_net), .Y(Y_DDR_DQ9_OUT_IOINST_net), .PAD(
         DQ[9]));
+    OUTBUF MSSIO13_OUT_IOINST (.D(D_MSSIO13_OUT_IOINST_net), .PAD(
+        SD_VOLT_DIR_1_3));
     OUTBUF DDR_A1_IOINST (.D(D_DDR_A1_IOINST_net), .PAD(A[1]));
     OUTBUF DDR_RAM_RST_N_IOINST (.D(D_DDR_RAM_RST_N_IOINST_net), .PAD(
         RESET_N));
+    BIBUF MSSIO5_OUT_IOINST (.D(D_MSSIO5_OUT_IOINST_net), .E(
+        E_MSSIO5_OUT_IOINST_net), .Y(Y_MSSIO5_OUT_IOINST_net), .PAD(
+        SD_DATA3));
     OUTBUF DDR_ACT_N_IOINST (.D(D_DDR_ACT_N_IOINST_net), .PAD(ACT_N));
     OUTBUF DDR_A10_IOINST (.D(D_DDR_A10_IOINST_net), .PAD(A[10]));
+    INBUF MSSIO15_IN_IOINST (.PAD(MMUART_4_RXD), .Y(
+        Y_MSSIO15_IN_IOINST_net));
     OUTBUF DDR_A6_IOINST (.D(D_DDR_A6_IOINST_net), .PAD(A[6]));
+    BIBUF MSSIO4_OUT_IOINST (.D(D_MSSIO4_OUT_IOINST_net), .E(
+        E_MSSIO4_OUT_IOINST_net), .Y(Y_MSSIO4_OUT_IOINST_net), .PAD(
+        SD_DATA2));
     OUTBUF_DIFF DDR_CK0_IOINST (.D(D_DDR_CK0_IOINST_net), .PADP(CK0), 
         .PADN(CK0_N));
+    BIBUF MSSIO2_OUT_IOINST (.D(D_MSSIO2_OUT_IOINST_net), .E(
+        E_MSSIO2_OUT_IOINST_net), .Y(Y_MSSIO2_OUT_IOINST_net), .PAD(
+        SD_DATA0));
     BIBUF_DIFF DDR_DQS0_OUT_IOINST (.Y(Y_DDR_DQS0_OUT_IOINST_net), .D(
         D_DDR_DQS0_OUT_IOINST_net), .E(E_DDR_DQS0_OUT_IOINST_net), 
         .PADP(DQS[0]), .PADN(DQS_N[0]));
@@ -218,6 +302,8 @@ output BG0;
     BIBUF DDR_DQ10_OUT_IOINST (.D(D_DDR_DQ10_OUT_IOINST_net), .E(
         E_DDR_DQ10_OUT_IOINST_net), .Y(Y_DDR_DQ10_OUT_IOINST_net), 
         .PAD(DQ[10]));
+    OUTBUF MSSIO10_OUT_IOINST (.D(D_MSSIO10_OUT_IOINST_net), .PAD(
+        SD_VOLT_EN));
     BIBUF DDR_DQ13_OUT_IOINST (.D(D_DDR_DQ13_OUT_IOINST_net), .E(
         E_DDR_DQ13_OUT_IOINST_net), .Y(Y_DDR_DQ13_OUT_IOINST_net), 
         .PAD(DQ[13]));
@@ -236,6 +322,8 @@ output BG0;
     BIBUF DDR_DQ15_OUT_IOINST (.D(D_DDR_DQ15_OUT_IOINST_net), .E(
         E_DDR_DQ15_OUT_IOINST_net), .Y(Y_DDR_DQ15_OUT_IOINST_net), 
         .PAD(DQ[15]));
+    INBUF MSSIO19_IN_IOINST (.PAD(MMUART_1_RXD), .Y(
+        Y_MSSIO19_IN_IOINST_net));
     OUTBUF DDR_A8_IOINST (.D(D_DDR_A8_IOINST_net), .PAD(A[8]));
     BIBUF DDR_DQ7_OUT_IOINST (.D(D_DDR_DQ7_OUT_IOINST_net), .E(
         E_DDR_DQ7_OUT_IOINST_net), .Y(Y_DDR_DQ7_OUT_IOINST_net), .PAD(
@@ -248,6 +336,9 @@ output BG0;
         E_DDR_DQ5_OUT_IOINST_net), .Y(Y_DDR_DQ5_OUT_IOINST_net), .PAD(
         DQ[5]));
     OUTBUF DDR_A3_IOINST (.D(D_DDR_A3_IOINST_net), .PAD(A[3]));
+    BIBUF MSSIO1_OUT_IOINST (.D(D_MSSIO1_OUT_IOINST_net), .E(
+        E_MSSIO1_OUT_IOINST_net), .Y(Y_MSSIO1_OUT_IOINST_net), .PAD(
+        SD_CMD));
     MSS #( .MSS_CLK_DIV(1), .MSS_AHB_APB_CLK_DIV(4), .MSS_AXI_CLK_DIV(2)
         , .MSS_CLK_FREQ(600), .MSS_DDR_CLK_FREQ(800), .PROGRAM_NAME("pfsoc_mss")
         , .CORE_NAME("pfsoc_mss%2026.1"), .DIE("MPFS095T"), .PKG("FCSG325")
@@ -266,23 +357,23 @@ output BG0;
         , .MSSIO_IOMUX0_CR_SPI0_FABRIC(1'h0), .MSSIO_IOMUX0_CR_SPI1_FABRIC(1'h0)
         , .MSSIO_IOMUX0_CR_I2C0_FABRIC(1'h0), .MSSIO_IOMUX0_CR_I2C1_FABRIC(1'h0)
         , .MSSIO_IOMUX0_CR_CAN0_FABRIC(1'h0), .MSSIO_IOMUX0_CR_CAN1_FABRIC(1'h0)
-        , .MSSIO_IOMUX0_CR_QSPI_FABRIC(1'h0), .MSSIO_IOMUX0_CR_MMUART0_FABRIC(1'h1)
+        , .MSSIO_IOMUX0_CR_QSPI_FABRIC(1'h1), .MSSIO_IOMUX0_CR_MMUART0_FABRIC(1'h1)
         , .MSSIO_IOMUX0_CR_MMUART1_FABRIC(1'h0), .MSSIO_IOMUX0_CR_MMUART2_FABRIC(1'h0)
         , .MSSIO_IOMUX0_CR_MMUART3_FABRIC(1'h0), .MSSIO_IOMUX0_CR_MMUART4_FABRIC(1'h0)
         , .MSSIO_IOMUX0_CR_MDIO0_FABRIC(1'h0), .MSSIO_IOMUX0_CR_MDIO1_FABRIC(1'h0)
-        , .MSSIO_IOMUX1_CR_PAD0(4'hF), .MSSIO_IOMUX1_CR_PAD1(4'hF), .MSSIO_IOMUX1_CR_PAD2(4'hF)
-        , .MSSIO_IOMUX1_CR_PAD3(4'hF), .MSSIO_IOMUX1_CR_PAD4(4'hF), .MSSIO_IOMUX1_CR_PAD5(4'hF)
-        , .MSSIO_IOMUX1_CR_PAD6(4'hF), .MSSIO_IOMUX1_CR_PAD7(4'hF), .MSSIO_IOMUX2_CR_PAD8(4'hF)
-        , .MSSIO_IOMUX2_CR_PAD9(4'hF), .MSSIO_IOMUX2_CR_PAD10(4'hF), .MSSIO_IOMUX2_CR_PAD11(4'hF)
-        , .MSSIO_IOMUX2_CR_PAD12(4'hF), .MSSIO_IOMUX2_CR_PAD13(4'hF), .MSSIO_IOMUX3_CR_PAD14(4'hF)
-        , .MSSIO_IOMUX3_CR_PAD15(4'hF), .MSSIO_IOMUX3_CR_PAD16(4'hF), .MSSIO_IOMUX3_CR_PAD17(4'hF)
-        , .MSSIO_IOMUX3_CR_PAD18(4'hF), .MSSIO_IOMUX3_CR_PAD19(4'hF), .MSSIO_IOMUX3_CR_PAD20(4'hF)
+        , .MSSIO_IOMUX1_CR_PAD0(4'h0), .MSSIO_IOMUX1_CR_PAD1(4'h0), .MSSIO_IOMUX1_CR_PAD2(4'h0)
+        , .MSSIO_IOMUX1_CR_PAD3(4'h0), .MSSIO_IOMUX1_CR_PAD4(4'h0), .MSSIO_IOMUX1_CR_PAD5(4'h0)
+        , .MSSIO_IOMUX1_CR_PAD6(4'h0), .MSSIO_IOMUX1_CR_PAD7(4'hF), .MSSIO_IOMUX2_CR_PAD8(4'hF)
+        , .MSSIO_IOMUX2_CR_PAD9(4'h0), .MSSIO_IOMUX2_CR_PAD10(4'h0), .MSSIO_IOMUX2_CR_PAD11(4'h0)
+        , .MSSIO_IOMUX2_CR_PAD12(4'h0), .MSSIO_IOMUX2_CR_PAD13(4'h0), .MSSIO_IOMUX3_CR_PAD14(4'hF)
+        , .MSSIO_IOMUX3_CR_PAD15(4'h5), .MSSIO_IOMUX3_CR_PAD16(4'h5), .MSSIO_IOMUX3_CR_PAD17(4'hF)
+        , .MSSIO_IOMUX3_CR_PAD18(4'hF), .MSSIO_IOMUX3_CR_PAD19(4'h5), .MSSIO_IOMUX3_CR_PAD20(4'h5)
         , .MSSIO_IOMUX3_CR_PAD21(4'hF), .MSSIO_IOMUX4_CR_PAD22(4'hF), .MSSIO_IOMUX4_CR_PAD23(4'hF)
         , .MSSIO_IOMUX4_CR_PAD24(4'hF), .MSSIO_IOMUX4_CR_PAD25(4'hF), .MSSIO_IOMUX4_CR_PAD26(4'hF)
         , .MSSIO_IOMUX4_CR_PAD27(4'hF), .MSSIO_IOMUX4_CR_PAD28(4'hF), .MSSIO_IOMUX4_CR_PAD29(4'hF)
         , .MSSIO_IOMUX5_CR_PAD30(4'hF), .MSSIO_IOMUX5_CR_PAD31(4'hF), .MSSIO_IOMUX5_CR_PAD32(4'hF)
         , .MSSIO_IOMUX5_CR_PAD33(4'hF), .MSSIO_IOMUX5_CR_PAD34(4'hF), .MSSIO_IOMUX5_CR_PAD35(4'hF)
-        , .MSSIO_IOMUX5_CR_PAD36(4'hF), .MSSIO_IOMUX5_CR_PAD37(4'hF), .MSSIO_IOMUX6_CR_VLT_SEL(1'h0)
+        , .MSSIO_IOMUX5_CR_PAD36(4'hF), .MSSIO_IOMUX5_CR_PAD37(4'hF), .MSSIO_IOMUX6_CR_VLT_SEL(1'h1)
         , .MSSIO_IOMUX6_CR_VLT_EN(1'h0), .MSSIO_IOMUX6_CR_VLT_CMD_DIR(1'h0)
         , .MSSIO_IOMUX6_CR_VLT_DIR_0(1'h0), .MSSIO_IOMUX6_CR_VLT_DIR_1_3(1'h0)
         , .MSSIO_IOMUX6_CR_SD_LED(1'h0), .MSSIO_IOMUX6_CR_SD_VOLT_0(1'h0)
@@ -321,13 +412,13 @@ output BG0;
         , .SGMII_SGMII_MODE_REG_REFCLK_EN_INS_HYST_P(1'h0), .SGMII_SGMII_MODE_REG_REFCLK_EN_INS_HYST_N(1'h0)
         , .CLK_SGMII_CFM_CLK_XCVR_EN_INS_HYST_P(1'h0), .CLK_SGMII_CFM_CLK_XCVR_EN_INS_HYST_N(1'h0)
         , .SGMII_CLK_CNTL_REG_REFCLK_CLKBUF_EN_PULLUP(1'h0), .CLK_SGMII_CFM_CLK_XCVR_CLKBUF_EN_PULLUP(1'h0)
-        , .MSSIO_MSSIO_BANK4_IO_CFG_0_1_CR_IO_CFG_0(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_0_1_CR_IO_CFG_1(16'h0928)
-        , .MSSIO_MSSIO_BANK4_IO_CFG_2_3_CR_IO_CFG_2(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_2_3_CR_IO_CFG_3(16'h0928)
-        , .MSSIO_MSSIO_BANK4_IO_CFG_4_5_CR_IO_CFG_4(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_4_5_CR_IO_CFG_5(16'h0928)
+        , .MSSIO_MSSIO_BANK4_IO_CFG_0_1_CR_IO_CFG_0(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_0_1_CR_IO_CFG_1(16'h0930)
+        , .MSSIO_MSSIO_BANK4_IO_CFG_2_3_CR_IO_CFG_2(16'h0930), .MSSIO_MSSIO_BANK4_IO_CFG_2_3_CR_IO_CFG_3(16'h0930)
+        , .MSSIO_MSSIO_BANK4_IO_CFG_4_5_CR_IO_CFG_4(16'h0930), .MSSIO_MSSIO_BANK4_IO_CFG_4_5_CR_IO_CFG_5(16'h0930)
         , .MSSIO_MSSIO_BANK4_IO_CFG_6_7_CR_IO_CFG_6(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_6_7_CR_IO_CFG_7(16'h0928)
-        , .MSSIO_MSSIO_BANK4_IO_CFG_8_9_CR_IO_CFG_8(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_8_9_CR_IO_CFG_9(16'h0928)
-        , .MSSIO_MSSIO_BANK4_IO_CFG_10_11_CR_IO_CFG_10(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_10_11_CR_IO_CFG_11(16'h0928)
-        , .MSSIO_MSSIO_BANK4_IO_CFG_12_13_CR_IO_CFG_12(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_12_13_CR_IO_CFG_13(16'h0928)
+        , .MSSIO_MSSIO_BANK4_IO_CFG_8_9_CR_IO_CFG_8(16'h0928), .MSSIO_MSSIO_BANK4_IO_CFG_8_9_CR_IO_CFG_9(16'h0930)
+        , .MSSIO_MSSIO_BANK4_IO_CFG_10_11_CR_IO_CFG_10(16'h0930), .MSSIO_MSSIO_BANK4_IO_CFG_10_11_CR_IO_CFG_11(16'h0930)
+        , .MSSIO_MSSIO_BANK4_IO_CFG_12_13_CR_IO_CFG_12(16'h0930), .MSSIO_MSSIO_BANK4_IO_CFG_12_13_CR_IO_CFG_13(16'h0930)
         , .MSSIO_MSSIO_BANK2_IO_CFG_0_1_CR_IO_CFG_0(16'h0829), .MSSIO_MSSIO_BANK2_IO_CFG_0_1_CR_IO_CFG_1(16'h0829)
         , .MSSIO_MSSIO_BANK2_IO_CFG_2_3_CR_IO_CFG_2(16'h0829), .MSSIO_MSSIO_BANK2_IO_CFG_2_3_CR_IO_CFG_3(16'h0829)
         , .MSSIO_MSSIO_BANK2_IO_CFG_4_5_CR_IO_CFG_4(16'h0829), .MSSIO_MSSIO_BANK2_IO_CFG_4_5_CR_IO_CFG_5(16'h0829)
@@ -737,42 +828,45 @@ output BG0;
         ), .MMUART_1_ESWM_M2F(), .MMUART_1_CLK_M2F(), 
         .MMUART_1_CLK_OE_M2F(), .MMUART_2_TXD_M2F(), .MMUART_3_TXD_M2F(
         ), .MMUART_4_TXD_M2F(), .CAN_0_TX_EBL_M2F(), .CAN_0_TXBUS_M2F()
-        , .CAN_1_TX_EBL_M2F(), .CAN_1_TXBUS_M2F(), .QSPI_SEL_M2F(), 
-        .QSPI_SEL_OE_M2F(), .QSPI_CLK_M2F(), .QSPI_CLK_OE_M2F(), 
-        .QSPI_DATA_M2F({nc505, nc506, nc507, nc508}), 
-        .QSPI_DATA_OE_M2F({nc509, nc510, nc511, nc512}), 
-        .SPI_0_SS1_M2F(), .SPI_0_SS1_OE_M2F(), .SPI_1_SS1_M2F(), 
-        .SPI_1_SS1_OE_M2F(), .SPI_0_DO_M2F(), .SPI_0_DO_OE_M2F(), 
-        .SPI_0_CLK_M2F(), .SPI_0_CLK_OE_M2F(), .SPI_1_DO_M2F(), 
-        .SPI_1_DO_OE_M2F(), .SPI_1_CLK_M2F(), .SPI_1_CLK_OE_M2F(), 
-        .I2C_0_SCL_OE_M2F(), .I2C_0_SDA_OE_M2F(), .I2C_1_SCL_OE_M2F(), 
-        .I2C_1_SDA_OE_M2F(), .I2C_0_SMBALERT_NO_M2F(), 
-        .I2C_0_SMBSUS_NO_M2F(), .I2C_1_SMBALERT_NO_M2F(), 
-        .I2C_1_SMBSUS_NO_M2F(), .GPIO_2_M2F({nc513, nc514, nc515, 
-        nc516, nc517, nc518, nc519, nc520, nc521, nc522, nc523, nc524, 
-        nc525, nc526, nc527, nc528, nc529, nc530, nc531, nc532, nc533, 
-        nc534, nc535, nc536, nc537, nc538, nc539, nc540, nc541, nc542, 
-        nc543, nc544}), .GPIO_2_OE_M2F({nc545, nc546, nc547, nc548, 
-        nc549, nc550, nc551, nc552, nc553, nc554, nc555, nc556, nc557, 
-        nc558, nc559, nc560, nc561, nc562, nc563, nc564, nc565, nc566, 
-        nc567, nc568, nc569, nc570, nc571, nc572, nc573, nc574, nc575, 
-        nc576}), .MAC_0_MDO_M2F(), .MAC_0_MDO_OE_M2F(), .MAC_0_MDC_M2F(
-        ), .MAC_1_MDO_M2F(), .MAC_1_MDO_OE_M2F(), .MAC_1_MDC_M2F(), 
-        .JTAG_TDO_M2F(), .JTAG_TDO_OE_M2F(), .MSS_INT_M2F({nc577, 
-        nc578, nc579, nc580, nc581, nc582, nc583, nc584, nc585, nc586, 
-        nc587, nc588, nc589, nc590, nc591, nc592}), .SPARE_M2F({nc593, 
-        nc594, nc595, nc596, nc597, nc598, nc599, nc600, nc601, nc602, 
-        nc603, nc604, nc605, nc606, nc607, nc608, nc609, nc610, nc611, 
-        nc612, nc613, nc614, nc615, nc616, nc617, nc618, nc619, nc620, 
-        nc621, nc622, nc623, nc624, nc625, nc626, nc627, nc628, nc629, 
-        nc630}), .PLL_CPU_LOCK_M2F(PLL_CPU_LOCK_M2F), 
-        .PLL_DDR_LOCK_M2F(PLL_DDR_LOCK_M2F), .PLL_SGMII_LOCK_M2F(), 
-        .MSS_STATUS_M2F({nc631, nc632, nc633, nc634, nc635, nc636, 
-        nc637, nc638, nc639, nc640, nc641, nc642, nc643, nc644, nc645, 
-        nc646, nc647}), .BOOT_FAIL_ERROR_M2F(), .MSS_RESET_N_M2F(
-        MSS_RESET_N_M2F), .SPARE_2_M2F({nc648, nc649, nc650, nc651, 
-        nc652}), .SPARE_3_M2F(), .SPARE_4_M2F({nc653, nc654, nc655}), 
-        .SPARE_5_M2F({nc656, nc657, nc658, nc659, nc660, nc661, nc662})
+        , .CAN_1_TX_EBL_M2F(), .CAN_1_TXBUS_M2F(), .QSPI_SEL_M2F(
+        QSPI_SEL_M2F), .QSPI_SEL_OE_M2F(QSPI_SEL_OE_M2F), 
+        .QSPI_CLK_M2F(QSPI_CLK_M2F), .QSPI_CLK_OE_M2F(QSPI_CLK_OE_M2F), 
+        .QSPI_DATA_M2F({QSPI_DATA_M2F[3], QSPI_DATA_M2F[2], 
+        QSPI_DATA_M2F[1], QSPI_DATA_M2F[0]}), .QSPI_DATA_OE_M2F({
+        QSPI_DATA_OE_M2F[3], QSPI_DATA_OE_M2F[2], QSPI_DATA_OE_M2F[1], 
+        QSPI_DATA_OE_M2F[0]}), .SPI_0_SS1_M2F(), .SPI_0_SS1_OE_M2F(), 
+        .SPI_1_SS1_M2F(), .SPI_1_SS1_OE_M2F(), .SPI_0_DO_M2F(), 
+        .SPI_0_DO_OE_M2F(), .SPI_0_CLK_M2F(), .SPI_0_CLK_OE_M2F(), 
+        .SPI_1_DO_M2F(), .SPI_1_DO_OE_M2F(), .SPI_1_CLK_M2F(), 
+        .SPI_1_CLK_OE_M2F(), .I2C_0_SCL_OE_M2F(), .I2C_0_SDA_OE_M2F(), 
+        .I2C_1_SCL_OE_M2F(), .I2C_1_SDA_OE_M2F(), 
+        .I2C_0_SMBALERT_NO_M2F(), .I2C_0_SMBSUS_NO_M2F(), 
+        .I2C_1_SMBALERT_NO_M2F(), .I2C_1_SMBSUS_NO_M2F(), .GPIO_2_M2F({
+        nc505, nc506, nc507, nc508, nc509, nc510, nc511, nc512, nc513, 
+        nc514, nc515, nc516, nc517, nc518, nc519, nc520, nc521, nc522, 
+        nc523, nc524, nc525, nc526, nc527, nc528, nc529, nc530, nc531, 
+        nc532, nc533, nc534, nc535, nc536}), .GPIO_2_OE_M2F({nc537, 
+        nc538, nc539, nc540, nc541, nc542, nc543, nc544, nc545, nc546, 
+        nc547, nc548, nc549, nc550, nc551, nc552, nc553, nc554, nc555, 
+        nc556, nc557, nc558, nc559, nc560, nc561, nc562, nc563, nc564, 
+        nc565, nc566, nc567, nc568}), .MAC_0_MDO_M2F(), 
+        .MAC_0_MDO_OE_M2F(), .MAC_0_MDC_M2F(), .MAC_1_MDO_M2F(), 
+        .MAC_1_MDO_OE_M2F(), .MAC_1_MDC_M2F(), .JTAG_TDO_M2F(), 
+        .JTAG_TDO_OE_M2F(), .MSS_INT_M2F({nc569, nc570, nc571, nc572, 
+        nc573, nc574, nc575, nc576, nc577, nc578, nc579, nc580, nc581, 
+        nc582, nc583, nc584}), .SPARE_M2F({nc585, nc586, nc587, nc588, 
+        nc589, nc590, nc591, nc592, nc593, nc594, nc595, nc596, nc597, 
+        nc598, nc599, nc600, nc601, nc602, nc603, nc604, nc605, nc606, 
+        nc607, nc608, nc609, nc610, nc611, nc612, nc613, nc614, nc615, 
+        nc616, nc617, nc618, nc619, nc620, nc621, nc622}), 
+        .PLL_CPU_LOCK_M2F(PLL_CPU_LOCK_M2F), .PLL_DDR_LOCK_M2F(
+        PLL_DDR_LOCK_M2F), .PLL_SGMII_LOCK_M2F(), .MSS_STATUS_M2F({
+        nc623, nc624, nc625, nc626, nc627, nc628, nc629, nc630, nc631, 
+        nc632, nc633, nc634, nc635, nc636, nc637, nc638, nc639}), 
+        .BOOT_FAIL_ERROR_M2F(), .MSS_RESET_N_M2F(MSS_RESET_N_M2F), 
+        .SPARE_2_M2F({nc640, nc641, nc642, nc643, nc644}), 
+        .SPARE_3_M2F(), .SPARE_4_M2F({nc645, nc646, nc647}), 
+        .SPARE_5_M2F({nc648, nc649, nc650, nc651, nc652, nc653, nc654})
         , .WDOG_0_INTERRUPT_M2F(), .WDOG_1_INTERRUPT_M2F(), 
         .WDOG_2_INTERRUPT_M2F(), .WDOG_3_INTERRUPT_M2F(), 
         .WDOG_4_INTERRUPT_M2F(), .MPU_VIOLATION_FROM_FIC_0_M2F(), 
@@ -787,56 +881,56 @@ output BG0;
         , .SCB_CPU_RESET_OCCURRED_M2F(), .DEBUGGER_RESET_OCCURRED_M2F()
         , .FABRIC_RESET_OCCURRED_M2F(), .WDOG_RESET_OCCURRED_M2F(), 
         .GPIO_RESET_OCCURRED_M2F(), .SCB_BUS_RESET_OCCURRED_M2F(), 
-        .CPU_SOFT_RESET_OCCURRED_M2F(), .CPU_CLK_DIVIDER_M2F({nc663, 
-        nc664}), .AXI_CLK_DIVIDER_M2F({nc665, nc666}), 
-        .AHB_APB_CLK_DIVIDER_M2F({nc667, nc668}), 
-        .USOC_CONTROL_DATA_M2F({nc669, nc670, nc671, nc672, nc673, 
-        nc674, nc675, nc676}), .MAC_0_GMII_MII_TXD_M2F({nc677, nc678, 
-        nc679, nc680, nc681, nc682, nc683, nc684}), 
+        .CPU_SOFT_RESET_OCCURRED_M2F(), .CPU_CLK_DIVIDER_M2F({nc655, 
+        nc656}), .AXI_CLK_DIVIDER_M2F({nc657, nc658}), 
+        .AHB_APB_CLK_DIVIDER_M2F({nc659, nc660}), 
+        .USOC_CONTROL_DATA_M2F({nc661, nc662, nc663, nc664, nc665, 
+        nc666, nc667, nc668}), .MAC_0_GMII_MII_TXD_M2F({nc669, nc670, 
+        nc671, nc672, nc673, nc674, nc675, nc676}), 
         .MAC_0_GMII_MII_TX_EN_M2F(), .MAC_0_GMII_MII_TX_ER_M2F(), 
         .MAC_0_LOCAL_LOOPBACK_M2F(), .MAC_0_LOOPBACK_M2F(), 
-        .MAC_0_HALF_DUPLEX_M2F(), .MAC_0_SPEED_MODE_M2F({nc685, nc686, 
-        nc687, nc688}), .MAC_1_GMII_MII_TXD_M2F({nc689, nc690, nc691, 
-        nc692, nc693, nc694, nc695, nc696}), .MAC_1_GMII_MII_TX_EN_M2F(
+        .MAC_0_HALF_DUPLEX_M2F(), .MAC_0_SPEED_MODE_M2F({nc677, nc678, 
+        nc679, nc680}), .MAC_1_GMII_MII_TXD_M2F({nc681, nc682, nc683, 
+        nc684, nc685, nc686, nc687, nc688}), .MAC_1_GMII_MII_TX_EN_M2F(
         ), .MAC_1_GMII_MII_TX_ER_M2F(), .MAC_1_LOCAL_LOOPBACK_M2F(), 
         .MAC_1_LOOPBACK_M2F(), .MAC_1_HALF_DUPLEX_M2F(), 
-        .MAC_1_SPEED_MODE_M2F({nc697, nc698, nc699, nc700}), 
-        .MAC_0_FILTER_DATA_M2F({nc701, nc702, nc703, nc704, nc705, 
-        nc706, nc707, nc708, nc709, nc710, nc711, nc712, nc713, nc714, 
-        nc715, nc716, nc717, nc718, nc719, nc720, nc721, nc722, nc723, 
-        nc724, nc725, nc726, nc727, nc728, nc729, nc730, nc731, nc732, 
-        nc733, nc734, nc735, nc736, nc737, nc738, nc739, nc740, nc741, 
-        nc742, nc743, nc744, nc745, nc746, nc747, nc748, nc749, nc750, 
-        nc751, nc752, nc753, nc754, nc755, nc756, nc757, nc758, nc759, 
-        nc760, nc761, nc762, nc763, nc764, nc765, nc766, nc767, nc768, 
-        nc769, nc770, nc771, nc772, nc773, nc774, nc775, nc776, nc777, 
-        nc778, nc779, nc780, nc781, nc782, nc783, nc784, nc785, nc786, 
-        nc787, nc788, nc789, nc790, nc791, nc792, nc793, nc794, nc795, 
-        nc796, nc797, nc798, nc799, nc800, nc801, nc802, nc803, nc804, 
-        nc805, nc806, nc807, nc808, nc809, nc810, nc811, nc812, nc813, 
-        nc814, nc815, nc816, nc817, nc818, nc819, nc820, nc821, nc822, 
-        nc823, nc824, nc825, nc826, nc827, nc828}), 
+        .MAC_1_SPEED_MODE_M2F({nc689, nc690, nc691, nc692}), 
+        .MAC_0_FILTER_DATA_M2F({nc693, nc694, nc695, nc696, nc697, 
+        nc698, nc699, nc700, nc701, nc702, nc703, nc704, nc705, nc706, 
+        nc707, nc708, nc709, nc710, nc711, nc712, nc713, nc714, nc715, 
+        nc716, nc717, nc718, nc719, nc720, nc721, nc722, nc723, nc724, 
+        nc725, nc726, nc727, nc728, nc729, nc730, nc731, nc732, nc733, 
+        nc734, nc735, nc736, nc737, nc738, nc739, nc740, nc741, nc742, 
+        nc743, nc744, nc745, nc746, nc747, nc748, nc749, nc750, nc751, 
+        nc752, nc753, nc754, nc755, nc756, nc757, nc758, nc759, nc760, 
+        nc761, nc762, nc763, nc764, nc765, nc766, nc767, nc768, nc769, 
+        nc770, nc771, nc772, nc773, nc774, nc775, nc776, nc777, nc778, 
+        nc779, nc780, nc781, nc782, nc783, nc784, nc785, nc786, nc787, 
+        nc788, nc789, nc790, nc791, nc792, nc793, nc794, nc795, nc796, 
+        nc797, nc798, nc799, nc800, nc801, nc802, nc803, nc804, nc805, 
+        nc806, nc807, nc808, nc809, nc810, nc811, nc812, nc813, nc814, 
+        nc815, nc816, nc817, nc818, nc819, nc820}), 
         .MAC_0_FILTER_SA_STB_M2F(), .MAC_0_FILTER_DA_STB_M2F(), 
         .MAC_0_FILTER_TYPE_STB_M2F(), .MAC_0_FILTER_VLAN_TAG1_STB_M2F()
         , .MAC_0_FILTER_VLAN_TAG2_STB_M2F(), 
         .MAC_0_FILTER_IP_SA_STB_M2F(), .MAC_0_FILTER_IP_DA_STB_M2F(), 
         .MAC_0_FILTER_SP_STB_M2F(), .MAC_0_FILTER_DP_STB_M2F(), 
         .MAC_0_FILTER_IPV6_M2F(), .MAC_0_WOL_M2F(), 
-        .MAC_1_FILTER_DATA_M2F({nc829, nc830, nc831, nc832, nc833, 
-        nc834, nc835, nc836, nc837, nc838, nc839, nc840, nc841, nc842, 
-        nc843, nc844, nc845, nc846, nc847, nc848, nc849, nc850, nc851, 
-        nc852, nc853, nc854, nc855, nc856, nc857, nc858, nc859, nc860, 
-        nc861, nc862, nc863, nc864, nc865, nc866, nc867, nc868, nc869, 
-        nc870, nc871, nc872, nc873, nc874, nc875, nc876, nc877, nc878, 
-        nc879, nc880, nc881, nc882, nc883, nc884, nc885, nc886, nc887, 
-        nc888, nc889, nc890, nc891, nc892, nc893, nc894, nc895, nc896, 
-        nc897, nc898, nc899, nc900, nc901, nc902, nc903, nc904, nc905, 
-        nc906, nc907, nc908, nc909, nc910, nc911, nc912, nc913, nc914, 
-        nc915, nc916, nc917, nc918, nc919, nc920, nc921, nc922, nc923, 
-        nc924, nc925, nc926, nc927, nc928, nc929, nc930, nc931, nc932, 
-        nc933, nc934, nc935, nc936, nc937, nc938, nc939, nc940, nc941, 
-        nc942, nc943, nc944, nc945, nc946, nc947, nc948, nc949, nc950, 
-        nc951, nc952, nc953, nc954, nc955, nc956}), 
+        .MAC_1_FILTER_DATA_M2F({nc821, nc822, nc823, nc824, nc825, 
+        nc826, nc827, nc828, nc829, nc830, nc831, nc832, nc833, nc834, 
+        nc835, nc836, nc837, nc838, nc839, nc840, nc841, nc842, nc843, 
+        nc844, nc845, nc846, nc847, nc848, nc849, nc850, nc851, nc852, 
+        nc853, nc854, nc855, nc856, nc857, nc858, nc859, nc860, nc861, 
+        nc862, nc863, nc864, nc865, nc866, nc867, nc868, nc869, nc870, 
+        nc871, nc872, nc873, nc874, nc875, nc876, nc877, nc878, nc879, 
+        nc880, nc881, nc882, nc883, nc884, nc885, nc886, nc887, nc888, 
+        nc889, nc890, nc891, nc892, nc893, nc894, nc895, nc896, nc897, 
+        nc898, nc899, nc900, nc901, nc902, nc903, nc904, nc905, nc906, 
+        nc907, nc908, nc909, nc910, nc911, nc912, nc913, nc914, nc915, 
+        nc916, nc917, nc918, nc919, nc920, nc921, nc922, nc923, nc924, 
+        nc925, nc926, nc927, nc928, nc929, nc930, nc931, nc932, nc933, 
+        nc934, nc935, nc936, nc937, nc938, nc939, nc940, nc941, nc942, 
+        nc943, nc944, nc945, nc946, nc947, nc948}), 
         .MAC_1_FILTER_SA_STB_M2F(), .MAC_1_FILTER_DA_STB_M2F(), 
         .MAC_1_FILTER_TYPE_STB_M2F(), .MAC_1_FILTER_VLAN_TAG1_STB_M2F()
         , .MAC_1_FILTER_VLAN_TAG2_STB_M2F(), 
@@ -848,66 +942,65 @@ output BG0;
         .MAC_0_TSU_PDELAY_RESP_TX_M2F(), .MAC_0_TSU_SOF_RX_M2F(), 
         .MAC_0_TSU_SYNC_FRAME_RX_M2F(), .MAC_0_TSU_DELAY_REQ_RX_M2F(), 
         .MAC_0_TSU_PDELAY_REQ_RX_M2F(), .MAC_0_TSU_PDELAY_RESP_RX_M2F()
-        , .MAC_0_TSU_TIMER_CNT_M2F({nc957, nc958, nc959, nc960, nc961, 
-        nc962, nc963, nc964, nc965, nc966, nc967, nc968, nc969, nc970, 
-        nc971, nc972, nc973, nc974, nc975, nc976, nc977, nc978, nc979, 
-        nc980, nc981, nc982, nc983, nc984, nc985, nc986, nc987, nc988, 
-        nc989, nc990, nc991, nc992, nc993, nc994, nc995, nc996, nc997, 
-        nc998, nc999, nc1000, nc1001, nc1002, nc1003, nc1004, nc1005, 
-        nc1006, nc1007, nc1008, nc1009, nc1010, nc1011, nc1012, nc1013, 
-        nc1014, nc1015, nc1016, nc1017, nc1018, nc1019, nc1020, nc1021, 
-        nc1022, nc1023, nc1024, nc1025, nc1026, nc1027, nc1028, nc1029, 
-        nc1030, nc1031, nc1032, nc1033, nc1034, nc1035, nc1036, nc1037, 
-        nc1038, nc1039, nc1040, nc1041, nc1042, nc1043, nc1044, nc1045, 
-        nc1046, nc1047, nc1048, nc1049, nc1050}), 
-        .MAC_0_TSU_TIMER_CMP_VAL_M2F(), .MAC_1_TSU_SOF_TX_M2F(), 
-        .MAC_1_TSU_SYNC_FRAME_TX_M2F(), .MAC_1_TSU_DELAY_REQ_TX_M2F(), 
-        .MAC_1_TSU_PDELAY_REQ_TX_M2F(), .MAC_1_TSU_PDELAY_RESP_TX_M2F()
-        , .MAC_1_TSU_SOF_RX_M2F(), .MAC_1_TSU_SYNC_FRAME_RX_M2F(), 
-        .MAC_1_TSU_DELAY_REQ_RX_M2F(), .MAC_1_TSU_PDELAY_REQ_RX_M2F(), 
-        .MAC_1_TSU_PDELAY_RESP_RX_M2F(), .MAC_1_TSU_TIMER_CNT_M2F({
-        nc1051, nc1052, nc1053, nc1054, nc1055, nc1056, nc1057, nc1058, 
-        nc1059, nc1060, nc1061, nc1062, nc1063, nc1064, nc1065, nc1066, 
-        nc1067, nc1068, nc1069, nc1070, nc1071, nc1072, nc1073, nc1074, 
-        nc1075, nc1076, nc1077, nc1078, nc1079, nc1080, nc1081, nc1082, 
-        nc1083, nc1084, nc1085, nc1086, nc1087, nc1088, nc1089, nc1090, 
-        nc1091, nc1092, nc1093, nc1094, nc1095, nc1096, nc1097, nc1098, 
-        nc1099, nc1100, nc1101, nc1102, nc1103, nc1104, nc1105, nc1106, 
-        nc1107, nc1108, nc1109, nc1110, nc1111, nc1112, nc1113, nc1114, 
-        nc1115, nc1116, nc1117, nc1118, nc1119, nc1120, nc1121, nc1122, 
-        nc1123, nc1124, nc1125, nc1126, nc1127, nc1128, nc1129, nc1130, 
-        nc1131, nc1132, nc1133, nc1134, nc1135, nc1136, nc1137, nc1138, 
-        nc1139, nc1140, nc1141, nc1142, nc1143, nc1144}), 
-        .MAC_1_TSU_TIMER_CMP_VAL_M2F(), .CRYPTO_DLL_LOCK_M2F(), 
-        .CRYPTO_AHB_M_HADDR({nc1145, nc1146, nc1147, nc1148, nc1149, 
-        nc1150, nc1151, nc1152, nc1153, nc1154, nc1155, nc1156, nc1157, 
-        nc1158, nc1159, nc1160, nc1161, nc1162, nc1163, nc1164, nc1165, 
-        nc1166, nc1167, nc1168, nc1169, nc1170, nc1171, nc1172, nc1173, 
-        nc1174, nc1175, nc1176}), .CRYPTO_AHB_M_HWDATA({nc1177, nc1178, 
-        nc1179, nc1180, nc1181, nc1182, nc1183, nc1184, nc1185, nc1186, 
-        nc1187, nc1188, nc1189, nc1190, nc1191, nc1192, nc1193, nc1194, 
-        nc1195, nc1196, nc1197, nc1198, nc1199, nc1200, nc1201, nc1202, 
-        nc1203, nc1204, nc1205, nc1206, nc1207, nc1208}), 
-        .CRYPTO_AHB_M_HSIZE({nc1209, nc1210}), .CRYPTO_AHB_M_HTRANS({
-        nc1211, nc1212}), .CRYPTO_AHB_M_HWRITE(), 
-        .CRYPTO_AHB_M_HMASTLOCK(), .CRYPTO_AHB_S_HREADYOUT(), 
-        .CRYPTO_AHB_S_HRESP(), .CRYPTO_AHB_S_HRDATA({nc1213, nc1214, 
+        , .MAC_0_TSU_TIMER_CNT_M2F({nc949, nc950, nc951, nc952, nc953, 
+        nc954, nc955, nc956, nc957, nc958, nc959, nc960, nc961, nc962, 
+        nc963, nc964, nc965, nc966, nc967, nc968, nc969, nc970, nc971, 
+        nc972, nc973, nc974, nc975, nc976, nc977, nc978, nc979, nc980, 
+        nc981, nc982, nc983, nc984, nc985, nc986, nc987, nc988, nc989, 
+        nc990, nc991, nc992, nc993, nc994, nc995, nc996, nc997, nc998, 
+        nc999, nc1000, nc1001, nc1002, nc1003, nc1004, nc1005, nc1006, 
+        nc1007, nc1008, nc1009, nc1010, nc1011, nc1012, nc1013, nc1014, 
+        nc1015, nc1016, nc1017, nc1018, nc1019, nc1020, nc1021, nc1022, 
+        nc1023, nc1024, nc1025, nc1026, nc1027, nc1028, nc1029, nc1030, 
+        nc1031, nc1032, nc1033, nc1034, nc1035, nc1036, nc1037, nc1038, 
+        nc1039, nc1040, nc1041, nc1042}), .MAC_0_TSU_TIMER_CMP_VAL_M2F(
+        ), .MAC_1_TSU_SOF_TX_M2F(), .MAC_1_TSU_SYNC_FRAME_TX_M2F(), 
+        .MAC_1_TSU_DELAY_REQ_TX_M2F(), .MAC_1_TSU_PDELAY_REQ_TX_M2F(), 
+        .MAC_1_TSU_PDELAY_RESP_TX_M2F(), .MAC_1_TSU_SOF_RX_M2F(), 
+        .MAC_1_TSU_SYNC_FRAME_RX_M2F(), .MAC_1_TSU_DELAY_REQ_RX_M2F(), 
+        .MAC_1_TSU_PDELAY_REQ_RX_M2F(), .MAC_1_TSU_PDELAY_RESP_RX_M2F()
+        , .MAC_1_TSU_TIMER_CNT_M2F({nc1043, nc1044, nc1045, nc1046, 
+        nc1047, nc1048, nc1049, nc1050, nc1051, nc1052, nc1053, nc1054, 
+        nc1055, nc1056, nc1057, nc1058, nc1059, nc1060, nc1061, nc1062, 
+        nc1063, nc1064, nc1065, nc1066, nc1067, nc1068, nc1069, nc1070, 
+        nc1071, nc1072, nc1073, nc1074, nc1075, nc1076, nc1077, nc1078, 
+        nc1079, nc1080, nc1081, nc1082, nc1083, nc1084, nc1085, nc1086, 
+        nc1087, nc1088, nc1089, nc1090, nc1091, nc1092, nc1093, nc1094, 
+        nc1095, nc1096, nc1097, nc1098, nc1099, nc1100, nc1101, nc1102, 
+        nc1103, nc1104, nc1105, nc1106, nc1107, nc1108, nc1109, nc1110, 
+        nc1111, nc1112, nc1113, nc1114, nc1115, nc1116, nc1117, nc1118, 
+        nc1119, nc1120, nc1121, nc1122, nc1123, nc1124, nc1125, nc1126, 
+        nc1127, nc1128, nc1129, nc1130, nc1131, nc1132, nc1133, nc1134, 
+        nc1135, nc1136}), .MAC_1_TSU_TIMER_CMP_VAL_M2F(), 
+        .CRYPTO_DLL_LOCK_M2F(), .CRYPTO_AHB_M_HADDR({nc1137, nc1138, 
+        nc1139, nc1140, nc1141, nc1142, nc1143, nc1144, nc1145, nc1146, 
+        nc1147, nc1148, nc1149, nc1150, nc1151, nc1152, nc1153, nc1154, 
+        nc1155, nc1156, nc1157, nc1158, nc1159, nc1160, nc1161, nc1162, 
+        nc1163, nc1164, nc1165, nc1166, nc1167, nc1168}), 
+        .CRYPTO_AHB_M_HWDATA({nc1169, nc1170, nc1171, nc1172, nc1173, 
+        nc1174, nc1175, nc1176, nc1177, nc1178, nc1179, nc1180, nc1181, 
+        nc1182, nc1183, nc1184, nc1185, nc1186, nc1187, nc1188, nc1189, 
+        nc1190, nc1191, nc1192, nc1193, nc1194, nc1195, nc1196, nc1197, 
+        nc1198, nc1199, nc1200}), .CRYPTO_AHB_M_HSIZE({nc1201, nc1202})
+        , .CRYPTO_AHB_M_HTRANS({nc1203, nc1204}), .CRYPTO_AHB_M_HWRITE(
+        ), .CRYPTO_AHB_M_HMASTLOCK(), .CRYPTO_AHB_S_HREADYOUT(), 
+        .CRYPTO_AHB_S_HRESP(), .CRYPTO_AHB_S_HRDATA({nc1205, nc1206, 
+        nc1207, nc1208, nc1209, nc1210, nc1211, nc1212, nc1213, nc1214, 
         nc1215, nc1216, nc1217, nc1218, nc1219, nc1220, nc1221, nc1222, 
         nc1223, nc1224, nc1225, nc1226, nc1227, nc1228, nc1229, nc1230, 
-        nc1231, nc1232, nc1233, nc1234, nc1235, nc1236, nc1237, nc1238, 
-        nc1239, nc1240, nc1241, nc1242, nc1243, nc1244}), 
+        nc1231, nc1232, nc1233, nc1234, nc1235, nc1236}), 
         .CRYPTO_BUSY_M2F(), .CRYPTO_COMPLETE_M2F(), .CRYPTO_ALARM_M2F()
         , .CRYPTO_BUSERROR_M2F(), .CRYPTO_MSS_REQUEST_M2F(), 
         .CRYPTO_MSS_RELEASE_M2F(), .CRYPTO_OWNER_M2F(), 
-        .CRYPTO_MSS_OWNER_M2F(), .CRYPTO_XWADDR_M2F({nc1245, nc1246, 
-        nc1247, nc1248, nc1249, nc1250, nc1251, nc1252, nc1253, nc1254})
-        , .CRYPTO_XINACCEPT_M2F(), .CRYPTO_XRDATA_M2F({nc1255, nc1256, 
+        .CRYPTO_MSS_OWNER_M2F(), .CRYPTO_XWADDR_M2F({nc1237, nc1238, 
+        nc1239, nc1240, nc1241, nc1242, nc1243, nc1244, nc1245, nc1246})
+        , .CRYPTO_XINACCEPT_M2F(), .CRYPTO_XRDATA_M2F({nc1247, nc1248, 
+        nc1249, nc1250, nc1251, nc1252, nc1253, nc1254, nc1255, nc1256, 
         nc1257, nc1258, nc1259, nc1260, nc1261, nc1262, nc1263, nc1264, 
         nc1265, nc1266, nc1267, nc1268, nc1269, nc1270, nc1271, nc1272, 
-        nc1273, nc1274, nc1275, nc1276, nc1277, nc1278, nc1279, nc1280, 
-        nc1281, nc1282, nc1283, nc1284, nc1285, nc1286}), 
-        .CRYPTO_XRADDR_M2F({nc1287, nc1288, nc1289, nc1290, nc1291, 
-        nc1292, nc1293, nc1294, nc1295, nc1296}), 
+        nc1273, nc1274, nc1275, nc1276, nc1277, nc1278}), 
+        .CRYPTO_XRADDR_M2F({nc1279, nc1280, nc1281, nc1282, nc1283, 
+        nc1284, nc1285, nc1286, nc1287, nc1288}), 
         .CRYPTO_XVALIDOUT_M2F(), .CRYPTO_MESH_ERROR_M2F(), .FIC_0_ACLK(
         FIC_0_ACLK), .FIC_0_AXI4_M_AWREADY(FIC_0_AXI4_M_AWREADY), 
         .FIC_0_AXI4_M_WREADY(FIC_0_AXI4_M_WREADY), .FIC_0_AXI4_M_BID({
@@ -1116,45 +1209,45 @@ output BG0;
         .MMUART_2_RXD_F2M(GND_net), .MMUART_3_RXD_F2M(GND_net), 
         .MMUART_4_RXD_F2M(GND_net), .CAN_0_RXBUS_F2M(GND_net), 
         .CAN_1_RXBUS_F2M(GND_net), .CAN_CLK_F2M(VCC_net), 
-        .QSPI_DATA_F2M({GND_net, GND_net, GND_net, GND_net}), 
-        .SPI_0_SS_F2M(GND_net), .SPI_0_DI_F2M(GND_net), .SPI_0_CLK_F2M(
-        GND_net), .SPI_1_SS_F2M(GND_net), .SPI_1_DI_F2M(GND_net), 
-        .SPI_1_CLK_F2M(GND_net), .I2C_0_SCL_F2M(GND_net), 
-        .I2C_1_SCL_F2M(GND_net), .I2C_0_SDA_F2M(GND_net), 
-        .I2C_1_SDA_F2M(GND_net), .I2C_0_BCLK_F2M(GND_net), 
-        .I2C_0_SMBALERT_NI_F2M(GND_net), .I2C_0_SMBSUS_NI_F2M(GND_net), 
-        .I2C_1_BCLK_F2M(GND_net), .I2C_1_SMBALERT_NI_F2M(GND_net), 
-        .I2C_1_SMBSUS_NI_F2M(GND_net), .GPIO_2_F2M({GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net}), .MAC_0_MDI_F2M(GND_net), .MAC_1_MDI_F2M(
-        GND_net), .JTAG_TMS_F2M(GND_net), .JTAG_TCK_F2M(GND_net), 
-        .JTAG_TDI_F2M(GND_net), .JTAG_TRSTB_F2M(GND_net), .MSS_INT_F2M({
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net}), .SPARE_1_F2M({GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        .QSPI_DATA_F2M({QSPI_DATA_F2M[3], QSPI_DATA_F2M[2], 
+        QSPI_DATA_F2M[1], QSPI_DATA_F2M[0]}), .SPI_0_SS_F2M(GND_net), 
+        .SPI_0_DI_F2M(GND_net), .SPI_0_CLK_F2M(GND_net), .SPI_1_SS_F2M(
+        GND_net), .SPI_1_DI_F2M(GND_net), .SPI_1_CLK_F2M(GND_net), 
+        .I2C_0_SCL_F2M(GND_net), .I2C_1_SCL_F2M(GND_net), 
+        .I2C_0_SDA_F2M(GND_net), .I2C_1_SDA_F2M(GND_net), 
+        .I2C_0_BCLK_F2M(GND_net), .I2C_0_SMBALERT_NI_F2M(GND_net), 
+        .I2C_0_SMBSUS_NI_F2M(GND_net), .I2C_1_BCLK_F2M(GND_net), 
+        .I2C_1_SMBALERT_NI_F2M(GND_net), .I2C_1_SMBSUS_NI_F2M(GND_net), 
+        .GPIO_2_F2M({GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net}), 
-        .SPARE_2_F2M({GND_net, GND_net, GND_net, GND_net, GND_net, 
+        .MAC_0_MDI_F2M(GND_net), .MAC_1_MDI_F2M(GND_net), 
+        .JTAG_TMS_F2M(GND_net), .JTAG_TCK_F2M(GND_net), .JTAG_TDI_F2M(
+        GND_net), .JTAG_TRSTB_F2M(GND_net), .MSS_INT_F2M({GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
-        GND_net, GND_net, GND_net, GND_net, GND_net}), 
-        .BOOT_FAIL_CLEAR_F2M(GND_net), .MSS_RESET_N_F2M(
-        MSS_RESET_N_F2M), .GPIO_RESET_N_F2M(GND_net), 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net})
+        , .SPARE_1_F2M({GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net}), .SPARE_2_F2M({
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
+        GND_net, GND_net, GND_net}), .BOOT_FAIL_CLEAR_F2M(GND_net), 
+        .MSS_RESET_N_F2M(MSS_RESET_N_F2M), .GPIO_RESET_N_F2M(GND_net), 
         .USOC_TRACE_CLOCK_F2M(GND_net), .USOC_TRACE_VALID_F2M(GND_net), 
         .USOC_TRACE_DATA_F2M({GND_net, GND_net, GND_net, GND_net, 
         GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, GND_net, 
@@ -1229,25 +1322,35 @@ output BG0;
         .MSSIO23_OUT(), .MSSIO23_OE(), .MSSIO22_IN(GND_net), 
         .MSSIO22_OUT(), .MSSIO22_OE(), .MSSIO21_IN(GND_net), 
         .MSSIO21_OUT(), .MSSIO21_OE(), .MSSIO20_IN(GND_net), 
-        .MSSIO20_OUT(), .MSSIO20_OE(), .MSSIO19_IN(GND_net), 
-        .MSSIO19_OUT(), .MSSIO19_OE(), .MSSIO18_IN(GND_net), 
-        .MSSIO18_OUT(), .MSSIO18_OE(), .MSSIO17_IN(GND_net), 
-        .MSSIO17_OUT(), .MSSIO17_OE(), .MSSIO16_IN(GND_net), 
-        .MSSIO16_OUT(), .MSSIO16_OE(), .MSSIO15_IN(GND_net), 
-        .MSSIO15_OUT(), .MSSIO15_OE(), .MSSIO14_IN(GND_net), 
-        .MSSIO14_OUT(), .MSSIO14_OE(), .MSSIO13_IN(GND_net), 
-        .MSSIO13_OUT(), .MSSIO13_OE(), .MSSIO12_IN(GND_net), 
-        .MSSIO12_OUT(), .MSSIO12_OE(), .MSSIO11_IN(GND_net), 
-        .MSSIO11_OUT(), .MSSIO11_OE(), .MSSIO10_IN(GND_net), 
-        .MSSIO10_OUT(), .MSSIO10_OE(), .MSSIO9_IN(GND_net), 
-        .MSSIO9_OUT(), .MSSIO9_OE(), .MSSIO8_IN(GND_net), .MSSIO8_OUT()
-        , .MSSIO8_OE(), .MSSIO7_IN(GND_net), .MSSIO7_OUT(), .MSSIO7_OE(
-        ), .MSSIO6_IN(GND_net), .MSSIO6_OUT(), .MSSIO6_OE(), 
-        .MSSIO5_IN(GND_net), .MSSIO5_OUT(), .MSSIO5_OE(), .MSSIO4_IN(
-        GND_net), .MSSIO4_OUT(), .MSSIO4_OE(), .MSSIO3_IN(GND_net), 
-        .MSSIO3_OUT(), .MSSIO3_OE(), .MSSIO2_IN(GND_net), .MSSIO2_OUT()
-        , .MSSIO2_OE(), .MSSIO1_IN(GND_net), .MSSIO1_OUT(), .MSSIO1_OE(
-        ), .MSSIO0_IN(GND_net), .MSSIO0_OUT(), .MSSIO0_OE(), .REFCLK(
+        .MSSIO20_OUT(D_MSSIO20_OUT_IOINST_net), .MSSIO20_OE(), 
+        .MSSIO19_IN(Y_MSSIO19_IN_IOINST_net), .MSSIO19_OUT(), 
+        .MSSIO19_OE(), .MSSIO18_IN(GND_net), .MSSIO18_OUT(), 
+        .MSSIO18_OE(), .MSSIO17_IN(GND_net), .MSSIO17_OUT(), 
+        .MSSIO17_OE(), .MSSIO16_IN(GND_net), .MSSIO16_OUT(
+        D_MSSIO16_OUT_IOINST_net), .MSSIO16_OE(), .MSSIO15_IN(
+        Y_MSSIO15_IN_IOINST_net), .MSSIO15_OUT(), .MSSIO15_OE(), 
+        .MSSIO14_IN(GND_net), .MSSIO14_OUT(), .MSSIO14_OE(), 
+        .MSSIO13_IN(GND_net), .MSSIO13_OUT(D_MSSIO13_OUT_IOINST_net), 
+        .MSSIO13_OE(), .MSSIO12_IN(GND_net), .MSSIO12_OUT(
+        D_MSSIO12_OUT_IOINST_net), .MSSIO12_OE(), .MSSIO11_IN(GND_net), 
+        .MSSIO11_OUT(D_MSSIO11_OUT_IOINST_net), .MSSIO11_OE(), 
+        .MSSIO10_IN(GND_net), .MSSIO10_OUT(D_MSSIO10_OUT_IOINST_net), 
+        .MSSIO10_OE(), .MSSIO9_IN(GND_net), .MSSIO9_OUT(
+        D_MSSIO9_OUT_IOINST_net), .MSSIO9_OE(), .MSSIO8_IN(GND_net), 
+        .MSSIO8_OUT(), .MSSIO8_OE(), .MSSIO7_IN(GND_net), .MSSIO7_OUT()
+        , .MSSIO7_OE(), .MSSIO6_IN(Y_MSSIO6_IN_IOINST_net), 
+        .MSSIO6_OUT(), .MSSIO6_OE(), .MSSIO5_IN(
+        Y_MSSIO5_OUT_IOINST_net), .MSSIO5_OUT(D_MSSIO5_OUT_IOINST_net), 
+        .MSSIO5_OE(E_MSSIO5_OUT_IOINST_net), .MSSIO4_IN(
+        Y_MSSIO4_OUT_IOINST_net), .MSSIO4_OUT(D_MSSIO4_OUT_IOINST_net), 
+        .MSSIO4_OE(E_MSSIO4_OUT_IOINST_net), .MSSIO3_IN(
+        Y_MSSIO3_OUT_IOINST_net), .MSSIO3_OUT(D_MSSIO3_OUT_IOINST_net), 
+        .MSSIO3_OE(E_MSSIO3_OUT_IOINST_net), .MSSIO2_IN(
+        Y_MSSIO2_OUT_IOINST_net), .MSSIO2_OUT(D_MSSIO2_OUT_IOINST_net), 
+        .MSSIO2_OE(E_MSSIO2_OUT_IOINST_net), .MSSIO1_IN(
+        Y_MSSIO1_OUT_IOINST_net), .MSSIO1_OUT(D_MSSIO1_OUT_IOINST_net), 
+        .MSSIO1_OE(E_MSSIO1_OUT_IOINST_net), .MSSIO0_IN(GND_net), 
+        .MSSIO0_OUT(D_MSSIO0_OUT_IOINST_net), .MSSIO0_OE(), .REFCLK(
         Y_REFCLK_IOINST_net), .SGMII_RX1(GND_net), .SGMII_RX0(GND_net), 
         .SGMII_TX1(), .SGMII_TX0(), .DDR_DQS4_IN(GND_net), 
         .DDR_DQS4_OUT(), .DDR_DQS4_OE(), .DDR_DQS3_IN(GND_net), 
@@ -1352,6 +1455,9 @@ output BG0;
     BIBUF DDR_DQ8_OUT_IOINST (.D(D_DDR_DQ8_OUT_IOINST_net), .E(
         E_DDR_DQ8_OUT_IOINST_net), .Y(Y_DDR_DQ8_OUT_IOINST_net), .PAD(
         DQ[8]));
+    BIBUF MSSIO3_OUT_IOINST (.D(D_MSSIO3_OUT_IOINST_net), .E(
+        E_MSSIO3_OUT_IOINST_net), .Y(Y_MSSIO3_OUT_IOINST_net), .PAD(
+        SD_DATA1));
     OUTBUF DDR_BA0_IOINST (.D(D_DDR_BA0_IOINST_net), .PAD(BA[0]));
     BIBUF DDR_DQ0_OUT_IOINST (.D(D_DDR_DQ0_OUT_IOINST_net), .E(
         E_DDR_DQ0_OUT_IOINST_net), .Y(Y_DDR_DQ0_OUT_IOINST_net), .PAD(
@@ -1362,6 +1468,8 @@ output BG0;
     BIBUF DDR_DQ1_OUT_IOINST (.D(D_DDR_DQ1_OUT_IOINST_net), .E(
         E_DDR_DQ1_OUT_IOINST_net), .Y(Y_DDR_DQ1_OUT_IOINST_net), .PAD(
         DQ[1]));
+    OUTBUF MSSIO11_OUT_IOINST (.D(D_MSSIO11_OUT_IOINST_net), .PAD(
+        SD_VOLT_CMD_DIR));
     OUTBUF DDR_BG0_IOINST (.D(D_DDR_BG0_IOINST_net), .PAD(BG0));
     OUTBUF DDR_BA1_IOINST (.D(D_DDR_BA1_IOINST_net), .PAD(BA[1]));
     BIBUF DDR_DQ12_OUT_IOINST (.D(D_DDR_DQ12_OUT_IOINST_net), .E(

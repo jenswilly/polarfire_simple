@@ -1,0 +1,44 @@
+{
+    "name": "RTEMS 6.2",
+    "dockerFile": "Dockerfile",
+    "remoteUser": "ubuntu",
+    "workspaceFolder": "/workspace",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cmake-tools",
+                "ms-python.python",
+                "xaver.clang-format"
+            ],
+            "settings": {
+                "C_Cpp.clang_format_style": "file",
+                "editor.defaultFormatter": "xaver.clang-format",
+                "editor.formatOnSave": true,
+                "python.defaultInterpreterPath": "/opt/rtems/venv/bin/python",
+                "python.terminal.activateEnvironment": true
+            }
+        }
+    },
+    // Host installs of SoftConsole (OpenOCD, mpfsBootmodeProgrammer) and Libero
+    // (fpgenprog), read-only at the same paths as on the host, because
+    // scripts and Libero files contain these absolute paths. Only tools that
+    // need no license are used from here; the license server stays on the host.
+    "mounts": [
+        "source=${localEnv:HOME}/Microchip/SoftConsole-v2022.2-RISC-V-747,target=${localEnv:HOME}/Microchip/SoftConsole-v2022.2-RISC-V-747,type=bind,readonly",
+        "source=/usr/local/microchip,target=/usr/local/microchip,type=bind,readonly"
+    ],
+    "containerEnv": {
+        "SC_INSTALL_DIR": "${localEnv:HOME}/Microchip/SoftConsole-v2022.2-RISC-V-747",
+        "FPGENPROG": "/usr/local/microchip/Libero_SoC_2026.1/Libero_SoC/Designer/bin64/fpgenprog"
+    },
+    "runArgs": [
+        "--network=host",
+        "--privileged",
+        "--device=/dev/bus/usb",
+        "-v",
+        "/dev:/dev"
+    ],
+    "postCreateCommand": "bash .devcontainer/scripts/post_configuration.sh"
+}

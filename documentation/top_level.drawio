@@ -1,6 +1,6 @@
 <mxfile host="drawio" version="24.7.17">
   <diagram id="top_level" name="TOP">
-    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1380" pageHeight="980" math="0" shadow="0">
+    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1380" pageHeight="1160" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -34,7 +34,7 @@
         <mxCell id="p_uart_tx" value="UART0_TX&lt;br&gt;Y21" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="40" y="260" width="130" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="mss" value="&lt;b&gt;MSS_simple&lt;/b&gt;&lt;br&gt;E51 runs led_test&lt;br&gt;MMUART_0 via fabric&lt;br&gt;FIC_0 AXI4 initiator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+        <mxCell id="mss" value="&lt;b&gt;MSS_simple&lt;/b&gt;&lt;br&gt;E51: HSS (eNVM)&lt;br&gt;U54_1: RTEMS led_test&lt;br&gt;MMUART_0, QSPI via fabric&lt;br&gt;MMUART_1/4, SD on MSSIO&lt;br&gt;FIC_0 AXI4 initiator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
           <mxGeometry x="230" y="180" width="160" height="140" as="geometry" />
         </mxCell>
         <mxCell id="axi_ic" value="&lt;b&gt;AXI_IC&lt;/b&gt;&lt;br&gt;CoreAXI4Interconnect v3&lt;br&gt;AXI4 64 b → AXI4-Lite 64 b&lt;br&gt;0x6000_0000–0x6000_0FFF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
@@ -181,25 +181,29 @@
 
         <!-- Legend and notes -->
         <mxCell id="leg_pin" value="FPGA pin" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="40" y="930" width="90" height="30" as="geometry" />
+          <mxGeometry x="40" y="1110" width="90" height="30" as="geometry" />
         </mxCell>
         <mxCell id="leg_vhdl" value="our VHDL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="140" y="930" width="90" height="30" as="geometry" />
+          <mxGeometry x="140" y="1110" width="90" height="30" as="geometry" />
         </mxCell>
         <mxCell id="leg_ip" value="Libero core / macro" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="240" y="930" width="120" height="30" as="geometry" />
+          <mxGeometry x="240" y="1110" width="120" height="30" as="geometry" />
         </mxCell>
         <mxCell id="leg_mss" value="MSS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="370" y="930" width="60" height="30" as="geometry" />
+          <mxGeometry x="370" y="1110" width="60" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="note" value="Tied low: LED7 (U15) and RPi_GPIO20 (B14, pin 38). RPi pins are in Bank1 (3.3 V); GPIO = BCM number, pin = physical header pin. MSS DDR4 pins are not drawn." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="450" y="920" width="900" height="50" as="geometry" />
+        <mxCell id="note" value="Tied low: LED7 (U15) and RPi_GPIO20 (B14, pin 38). RPi pins are in Bank1 (3.3 V); GPIO = BCM number, pin = physical header pin. MSS DDR4 pins and the MSSIO pads (MMUART_1 = HSS console, MMUART_4, SD card) are not drawn." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="450" y="1100" width="900" height="50" as="geometry" />
         </mxCell>
 <mxCell id="qspi" value="&lt;b&gt;qspi_board_0&lt;/b&gt; (HDL+)&lt;br&gt;qspi_mram_ctrl + qspi_bist&lt;br&gt;W25Q128JV, SCLK 50 MHz,&lt;br&gt;calibration on (see qspi_controller.drawio)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="700" y="790" width="260" height="90" as="geometry" /></mxCell>
 <mxCell id="p_qspi" value="SCLK G18 pin 11, CS# F21 pin 13&lt;br&gt;IO0 F20 15, IO1 E21 16&lt;br&gt;IO2 F19 18, IO3 A19 22" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1060" y="780" width="290" height="60" as="geometry" /></mxCell>
 <mxCell id="p_led56" value="LED5 AA18 (pass)&lt;br&gt;LED6 V16 (fail)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1190" y="860" width="160" height="40" as="geometry" /></mxCell>
 <mxCell id="e_qspi_pins" value="QSPI (IO inout)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.3;" edge="1" parent="1" source="qspi" target="p_qspi"><mxGeometry relative="1" as="geometry" /></mxCell>
 <mxCell id="e_qspi_led" value="bist_pass/fail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.8;" edge="1" parent="1" source="qspi" target="p_led56"><mxGeometry relative="1" as="geometry" /></mxCell>
+<mxCell id="qspi_pads" value="&lt;b&gt;mss_qspi_pads_0&lt;/b&gt;&lt;br&gt;tristate pads, follow the MSS OEs&lt;br&gt;(HSS QSPI boot; reads 25 MHz)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1"><mxGeometry x="450" y="960" width="200" height="70" as="geometry" /></mxCell>
+<mxCell id="p_mbus" value="mikroBUS: Flash 6 Click (W25Q128JV)&lt;br&gt;SCLK E17, CS# C16 (pull-up)&lt;br&gt;IO0 E11, IO1 A18, IO2 D13 (PWM), IO3 G17 (INT)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;size=0.1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1"><mxGeometry x="1020" y="960" width="330" height="70" as="geometry" /></mxCell>
+<mxCell id="e_mss_qspi" value="QSPI_*_M2F, *_OE_M2F,&lt;br&gt;QSPI_DATA_F2M" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="mss" target="qspi_pads"><mxGeometry relative="1" as="geometry" /></mxCell>
+<mxCell id="e_qspipads_pins" value="MBUS_QSPI_* (IO inout)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;fontSize=10;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="qspi_pads" target="p_mbus"><mxGeometry relative="1" as="geometry" /></mxCell>
 </root>
     </mxGraphModel>
   </diagram>

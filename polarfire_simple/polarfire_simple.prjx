@@ -54,8 +54,8 @@ ENDLIST
 LIST FileManager
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/io.pdc,io_pdc"
 STATE="utd"
-TIME="1793207922"
-SIZE="3040"
+TIME="1793783280"
+SIZE="4166"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc,ndc"
@@ -66,7 +66,7 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc,sdc"
 STATE="utd"
-TIME="1793207466"
+TIME="1793605686"
 SIZE="4471"
 IS_READONLY="TRUE"
 ENDFILE
@@ -87,7 +87,7 @@ SIZE="4913"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd,hdl"
 STATE="utd"
-TIME="1793188232"
+TIME="1793605686"
 SIZE="4515"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_fifo.vhd,hdl"
@@ -97,13 +97,18 @@ SIZE="2643"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd,hdl"
 STATE="utd"
-TIME="1793190417"
+TIME="1793605686"
 SIZE="2915"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd,hdl"
 STATE="utd"
 TIME="1793098850"
 SIZE="2527"
+ENDFILE
+VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/mss_qspi_pads.vhd,hdl"
+STATE="utd"
+TIME="1793780551"
+SIZE="2249"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd,hdl"
 STATE="utd"
@@ -117,7 +122,7 @@ SIZE="15554"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd,hdl"
 STATE="utd"
-TIME="1793202999"
+TIME="1793605686"
 SIZE="6031"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_init.vhd,hdl"
@@ -132,7 +137,7 @@ SIZE="12871"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd,hdl"
 STATE="utd"
-TIME="1793196773"
+TIME="1793605686"
 SIZE="17909"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_pkg.vhd,hdl"
@@ -152,7 +157,7 @@ SIZE="12939"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/qspi_xact.vhd,hdl"
 STATE="utd"
-TIME="1793202950"
+TIME="1793605686"
 SIZE="22925"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd,hdl"
@@ -162,7 +167,7 @@ SIZE="3872"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd,hdl"
 STATE="utd"
-TIME="1793191705"
+TIME="1793605686"
 SIZE="2554"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/util_pkg.vhd,hdl"
@@ -1262,19 +1267,19 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/MSS_simple/MSS_NOBYP_BYP_BYP_BYP_BYP_syn_comps.v,hdl"
 STATE="utd"
-TIME="1791361572"
+TIME="1793780809"
 SIZE="223290"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/MSS_simple/MSS_simple.cxf,actgen_cxf"
 STATE="utd"
-TIME="1791361572"
-SIZE="23446"
+TIME="1793780809"
+SIZE="31794"
 ENDFILE
 VALUE "<project>/component/work/MSS_simple/MSS_simple.sdc,sdc"
 STATE="utd"
-TIME="1791361572"
+TIME="1793780809"
 SIZE="81"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 BEGIN_USE_CONSTRAINT
@@ -1286,8 +1291,8 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/MSS_simple/MSS_simple.v,hdl"
 STATE="utd"
-TIME="1791361572"
-SIZE="89984"
+TIME="1793780809"
+SIZE="94269"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 IS_READONLY="TRUE"
 ENDFILE
@@ -1318,24 +1323,24 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1793207933"
-SIZE="12185"
+TIME="1793783072"
+SIZE="18743"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1793207933"
-SIZE="43428"
+TIME="1793783072"
+SIZE="50964"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 STATE="utd"
-TIME="1793207943"
+TIME="1793605720"
 SIZE="1063"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_FIC0_compile_bfm.tcl,sim"
 STATE="utd"
-TIME="1791361572"
+TIME="1793780809"
 SIZE="806"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
@@ -1347,7 +1352,7 @@ PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_FIC1_compile_bfm.tcl,sim"
 STATE="utd"
-TIME="1791361572"
+TIME="1793780809"
 SIZE="806"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
@@ -1359,7 +1364,7 @@ PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_FIC3_compile_bfm.tcl,sim"
 STATE="utd"
-TIME="1791361572"
+TIME="1793780809"
 SIZE="768"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
@@ -1371,7 +1376,7 @@ PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_PROCESSOR_compile_bfm.tcl,sim"
 STATE="utd"
-TIME="1791361572"
+TIME="1793780809"
 SIZE="826"
 PARENT="<project>/component/work/MSS_simple/MSS_simple.cxf"
 ENDFILE
@@ -1386,29 +1391,24 @@ STATE="utd"
 TIME="1793007769"
 SIZE="1169"
 ENDFILE
-VALUE "<project>/simulation/tb_pulse_stretch_presynth_simulation.log,log"
-STATE="utd"
-TIME="1793007777"
-SIZE="5837"
-ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
-TIME="1793207984"
+TIME="1793783332"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
 STATE="utd"
-TIME="1793207983"
-SIZE="2456281"
+TIME="1793783331"
+SIZE="2465325"
 ENDFILE
 VALUE "<project>/synthesis/TOP_syn.prj,prj"
 STATE="utd"
-TIME="1793207984"
-SIZE="26451"
+TIME="1793783332"
+SIZE="26539"
 ENDFILE
 VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
 STATE="utd"
-TIME="1793207983"
+TIME="1793783331"
 SIZE="1137"
 ENDFILE
 ENDLIST
@@ -1981,9 +1981,12 @@ ENDLIST
 ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
-HDL;/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd;0
+Reports;Reports;0
+ReportsCurrentItem;Run Programming Action:TOP_PROGRAM.log
 SmartDesign;TOP;0
-ACTIVEVIEW;/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd
+StartPage;StartPage;0
+Timing Report Explorer;Timing Report Explorer;0
+ACTIVEVIEW;Reports
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
@@ -2551,6 +2554,8 @@ SUBBLOCK "INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR::work","component/work/
 ENDLIST
 LIST "INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR_0/INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR.v","FALSE","FALSE"
 ENDLIST
+LIST "mss_qspi_pads::work","/home/jenswilly/Projs/polarfire_simple/hdl/mss_qspi_pads.vhd","FALSE","FALSE"
+ENDLIST
 LIST "MSS_simple::work","component/work/MSS_simple/MSS_simple.v","TRUE","FALSE"
 SUBBLOCK "MSS::work","component/work/MSS_simple/MSS_NOBYP_BYP_BYP_BYP_BYP_syn_comps.v","FALSE","FALSE"
 ENDLIST
@@ -2598,6 +2603,7 @@ SUBBLOCK "block_arbiter::work","/home/jenswilly/Projs/polarfire_simple/hdl/block
 SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
 SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+SUBBLOCK "mss_qspi_pads::work","/home/jenswilly/Projs/polarfire_simple/hdl/mss_qspi_pads.vhd","FALSE","FALSE"
 SUBBLOCK "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
 SUBBLOCK "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
 SUBBLOCK "spi_tx_path::work","/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd","FALSE","FALSE"
@@ -2807,10 +2813,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/FIFO.v","FALSE","FALSE"
@@ -2887,10 +2893,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
@@ -2911,10 +2917,10 @@ ENDLIST
 LIST "caxi4interconnect_CDC_FIFO::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_FIFO.v","FALSE","FALSE"
 SUBBLOCK "caxi4c_async_1deep_fwft_fifo::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4SFIFO/caxi4c_async_1deep_fwft_fifo.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
-SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_rdCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_rdCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_wrCtrl::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_wrCtrl.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
+SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 SUBBLOCK "caxi4interconnect_CDC_grayCodeCounter::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/CDC_grayCodeCounter.v","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RAM_BLOCK::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RAM_BLOCK.v","FALSE","FALSE"
@@ -3743,8 +3749,8 @@ LIST FPTabList
 ENDLIST
 LIST TimingTabList
 VALUE "constraint/TOP_derived_constraints.sdc"
-VALUE "component/work/MSS_simple/MSS_simple.sdc"
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/timing.sdc"
+VALUE "component/work/MSS_simple/MSS_simple.sdc"
 ENDLIST
 LIST FDCTabList
 VALUE "/home/jenswilly/Projs/polarfire_simple/constraints/qspi_ioreg.ndc"

@@ -1,3 +1,5 @@
+build/
+
 # ---- Libero project (polarfire_simple/) : keep config, drop build output ----
 # Synthesis, place & route, bitstreams and programming files (all regenerable)
 polarfire_simple/synthesis/
@@ -56,3 +58,11 @@ softconsole/*/.settings/
 
 # ---- Misc ----
 .DS_Store
+
+# ---- RTEMS ----
+# Generated from rtems/dts/mpfs-discovery-kit.dts by rtems/dts/build_dtb.sh
+rtems/dts/mpfs-discovery-kit-dtb.h
+# HSS build output (hss/build_hss.sh, hss/make_envm_hex.sh)
+hss/build/
+# RTEMS application build output
+rtems/led_test/build/

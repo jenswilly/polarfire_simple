@@ -1,0 +1,4 @@
+{
+    "cmake.sourceDirectory": "/workspace/rtems/led_test",
+    "cmake.useCMakePresets": "always"
+}

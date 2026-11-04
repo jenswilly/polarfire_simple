@@ -145,10 +145,10 @@ read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_w
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/hdl/spi_tx_path.vhd}
 read_vhdl -mode vhdl_2008 {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/TOP/TOP.vhd}
 set_top_level {TOP}
-read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/AXI_IC/AXI_IC_0/AXI_IC.sdc}
-read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.sdc}
 read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_COREFIFO.sdc}
 read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/MSS_simple/MSS_simple.sdc}
+read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/AXI_IC/AXI_IC_0/AXI_IC.sdc}
+read_sdc -component {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/component/work/PF_CCC_C0/PF_CCC_C0_0/PF_CCC_C0_PF_CCC_C0_0_PF_CCC.sdc}
 derive_constraints
 write_sdc {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/constraint/TOP_derived_constraints.sdc}
 write_ndc {/home/jenswilly/Projs/polarfire_simple/polarfire_simple/constraint/TOP_derived_constraints.ndc}
