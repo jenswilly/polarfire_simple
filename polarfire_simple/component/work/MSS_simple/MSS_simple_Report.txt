@@ -7,7 +7,7 @@ Design Information
 | Die                   | MPFS095T                  |
 | Package               | FCSG325                   |
 | Version               | 2026.1                    |
-| Date                  | Fri Oct 30 11:59:52 2026
+| Date                  | Wed Nov  4 09:21:17 2026
  |
 +-----------------------+---------------------------+
 
@@ -44,7 +44,7 @@ Peripherals
 | SD/SDIO                | MSSIO_B4 |
 | Gigabit Ethernet MAC_0 | UNUSED   |
 | Gigabit Ethernet MAC_1 | UNUSED   |
-| QSPI                   | UNUSED   |
+| QSPI                   | FABRIC   |
 | SPI_0                  | UNUSED   |
 | SPI_1                  | UNUSED   |
 | MMUART_0               | FABRIC   |
@@ -156,6 +156,7 @@ List of Ports
 | FIC_0_AXI4_M_RLAST        | INPUT     |
 | FIC_0_AXI4_M_RVALID       | INPUT     |
 | MMUART_0_RXD_F2M          | INPUT     |
+| QSPI_DATA_F2M[3:0]        | INPUT     |
 | MSS_RESET_N_F2M           | INPUT     |
 | FIC_0_DLL_LOCK_M2F        | OUTPUT    |
 | FIC_0_AXI4_M_AWID[7:0]    | OUTPUT    |
@@ -186,6 +187,12 @@ List of Ports
 | FIC_0_AXI4_M_RREADY       | OUTPUT    |
 | MMUART_0_TXD_M2F          | OUTPUT    |
 | MMUART_0_TXD_OE_M2F       | OUTPUT    |
+| QSPI_SEL_M2F              | OUTPUT    |
+| QSPI_SEL_OE_M2F           | OUTPUT    |
+| QSPI_CLK_M2F              | OUTPUT    |
+| QSPI_CLK_OE_M2F           | OUTPUT    |
+| QSPI_DATA_M2F[3:0]        | OUTPUT    |
+| QSPI_DATA_OE_M2F[3:0]     | OUTPUT    |
 | PLL_CPU_LOCK_M2F          | OUTPUT    |
 | PLL_DDR_LOCK_M2F          | OUTPUT    |
 | MSS_RESET_N_M2F           | OUTPUT    |

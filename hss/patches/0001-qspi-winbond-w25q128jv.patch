@@ -1,0 +1,162 @@
+diff --git a/boards/mpfs-disco-kit/Makefile b/boards/mpfs-disco-kit/Makefile
+index 06ab118..ccce497 100644
+--- a/boards/mpfs-disco-kit/Makefile
++++ b/boards/mpfs-disco-kit/Makefile
+@@ -83,6 +83,17 @@ EXTRA_SRCS-$(CONFIG_SERVICE_QSPI) += \
+ $(BINDIR)/baremetal/drivers/winbond_w25n01gv/winbond_w25n01gv.o: CFLAGS=$(CFLAGS_GCCEXT)
+ endif
+ 
++ifdef CONFIG_SERVICE_QSPI_WINBOND_W25Q128JV
++INCLUDES += \
++	-Ibaremetal/drivers/winbond_w25q128jv \
++	-Iservices/wdog \
++
++EXTRA_SRCS-$(CONFIG_SERVICE_QSPI) += \
++	baremetal/drivers/winbond_w25q128jv/winbond_w25q128jv.c
++
++$(BINDIR)/baremetal/drivers/winbond_w25q128jv/winbond_w25q128jv.o: CFLAGS=$(CFLAGS_GCCEXT)
++endif
++
+ ifdef CONFIG_SERVICE_QSPI_MICRON_MQ25T
+ INCLUDES += \
+ 	-Ibaremetal/drivers/micron_mt25q \
+diff --git a/services/qspi/Kconfig b/services/qspi/Kconfig
+index e75399d..77fe89a 100644
+--- a/services/qspi/Kconfig
++++ b/services/qspi/Kconfig
+@@ -22,6 +22,13 @@ config SERVICE_QSPI_WINBOND_W25N01GV
+ 
+ 		If you don't know what to do here, say Y.
+ 
++config SERVICE_QSPI_WINBOND_W25Q128JV
++	bool "Winbond W25Q128JV"
++	depends on SERVICE_QSPI
++	help
++		This feature enables support for Winbond W25Q128JV SPI NOR flash
++		(16 MB, 64 KB erase blocks).
++
+ config SERVICE_QSPI_MICRON_MQ25T
+ 	bool "Micron MQ25T"
+ 	depends on SERVICE_QSPI
+diff --git a/services/qspi/qspi_api.c b/services/qspi/qspi_api.c
+index 7213ea0..c46a9f1 100644
+--- a/services/qspi/qspi_api.c
++++ b/services/qspi/qspi_api.c
+@@ -34,6 +34,9 @@
+ #if IS_ENABLED(CONFIG_SERVICE_QSPI_MICRON_MQ25T)
+ #  include "micron_mt25q.h"
+ #endif
++#if IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25Q128JV)
++#  include "winbond_w25q128jv.h"
++#endif
+ #if IS_ENABLED(CONFIG_SERVICE_WDOG)
+ #  include "wdog_service.h"
+ #endif
+@@ -62,6 +65,10 @@ struct FlashDescriptor
+ } qspiFlashes[] = {
+     { 0xEFAA21u, 2048u, 64u, 1024u, SPI_NAND, "Winbond W25N01GV" }, // EFh => Winbond, AA21h => W25N01GV
+     { 0x20BA19u, 256u, 256u, 512u, SPI_NOR, "Micron N25Q256A" }, // 20h => Micron, BA91h => N25Q256A, and using sector as block
++    // EFh => Winbond, 4018h => W25Q128JV. "Page" = 512 B (the minimum block-device sector, so
++    // the pageSize < 512 adjustment below isn't used; the driver splits writes into 256 B device
++    // pages), 128 pages = one 64 KB erase block, 256 blocks = 16 MB
++    { 0xEF4018u, 512u, 128u, 256u, SPI_NOR, "Winbond W25Q128JV" },
+ };
+ 
+ static uint32_t pageSize, blockSize, dieSize, eraseSize, pageCount, blockCount;
+@@ -268,7 +275,7 @@ static void copyCacheToFlashBlocks_(size_t byteOffset, size_t byteCount)
+         if (pLogicalBlockDesc[physicalBlockOffset].inCache) {
+             if (pLogicalBlockDesc[physicalBlockOffset].dirtyCache) {
+                 const size_t physicalBlockByteOffset = physicalBlockOffset * blockSize;
+-#if IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25N01GV)
++#if IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25N01GV) || IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25Q128JV)
+                 status = Flash_erase_block(physicalBlockOffset);
+ #else
+                 status = flashEraseSector(physicalBlockOffset);
+@@ -384,6 +391,15 @@ bool HSS_QSPIInit(void)
+             pageCount = qspiFlashes[qspiIndex].pagesPerBlock * blockCount;
+             dieSize = blockSize * blockCount;
+ 
++            // NOR has no bad blocks, so the mapping is the identity. Drop the map (the
++            // NULL checks fall back to identity): it lives at the start of DDR, where the
++            // YMODEM loader receives the image, and a payload overwriting it corrupted the
++            // address translation ("Corruption in logical to physical block mapping") and,
++            // through the rebuild, the first bytes of the image before it was programmed.
++            if (spi_type == SPI_NOR) {
++                pLogicalToPhysicalMap = NULL;
++            }
++
+             // mHSS_DEBUG_PRINTF(LOG_NORMAL, "blockCount (after bad blocks): %u\n", blockCount);
+ 
+             mHSS_DEBUG_PRINTF(LOG_NORMAL, "Initialized Flash\n");
+@@ -449,7 +465,7 @@ void HSS_QSPI_FlushWriteBuffer(void)
+ 
+ void HSS_QSPI_FlashChipErase(void)
+ {
+-#if IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25N01GV)
++#if IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25N01GV) || IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25Q128JV)
+     for (uint32_t blockIndex = 0u; blockIndex < blockCount; blockIndex++) {
+         HSS_ShowProgress(blockCount, blockCount - blockIndex);
+         Flash_erase_block(blockIndex);
+diff --git a/services/ymodem/hss_ymodem_loader.c b/services/ymodem/hss_ymodem_loader.c
+index 40f8393..4fcf6e6 100644
+--- a/services/ymodem/hss_ymodem_loader.c
++++ b/services/ymodem/hss_ymodem_loader.c
+@@ -57,6 +57,9 @@
+ #  if IS_ENABLED(CONFIG_SERVICE_QSPI_MICRON_MQ25T)
+ #    include "micron_mt25q.h"
+ #  endif
++#  if IS_ENABLED(CONFIG_SERVICE_QSPI_WINBOND_W25Q128JV)
++#    include "winbond_w25q128jv.h"
++#  endif
+ #endif
+ 
+ #if IS_ENABLED(CONFIG_SERVICE_MMC)
+@@ -86,14 +89,14 @@ static bool hss_loader_mmc_program(uint8_t *pBuffer, size_t wrAddr, size_t recei
+ #if IS_ENABLED(CONFIG_SERVICE_QSPI)
+ static bool hss_loader_qspi_init(void)
+ {
++    // Remember the result: the original returned false on every call after the first, so
++    // "QSPI Erase" (1) followed by "QSPI Write" (4) reported FAILED
+     static bool initialized = false;
+-    bool result = false;
+ 
+     if (!initialized) {
+-        result = HSS_QSPIInit();
+-        initialized = true;
++        initialized = HSS_QSPIInit();
+     }
+-    return result;
++    return initialized;
+ }
+ 
+ static bool hss_loader_qspi_program(uint8_t *pBuffer, size_t wrAddr, size_t receivedCount)
+@@ -222,6 +225,12 @@ void hss_loader_ymodem_loop(void)
+                 break;
+ #endif
+             case '3':
++#if IS_ENABLED(CONFIG_SERVICE_QSPI)
++                // Initialize QSPI first: HSS_QSPIInit() clears its tables at the start of
++                // DDR, which is also the receive buffer, so it must not run after the
++                // receive (as it would in "4. QSPI Write" without a preceding erase)
++                (void)hss_loader_qspi_init();
++#endif
+                 mHSS_PUTS("\nAttempting to receive .bin file using YMODEM (CTRL-C to cancel)"
+                     "\n");
+                 receivedCount = ymodem_receive(pBuffer, g_rx_size);
+diff --git a/services/ymodem/ymodem_protocol.c b/services/ymodem/ymodem_protocol.c
+index a5c63a8..39bf1eb 100644
+--- a/services/ymodem/ymodem_protocol.c
++++ b/services/ymodem/ymodem_protocol.c
+@@ -93,7 +93,11 @@ static int16_t getchar_with_timeout_(int32_t timeout_sec)
+ 
+ static void putchar_(uint8_t tx_byte)
+ {
+-    MSS_UART_polled_tx(g_my_uart, &tx_byte, 1);
++    // Send on the UART uart_getchar() receives on (the HSS console). g_my_uart is
++    // hard-wired to MMUART0, but the Discovery Kit's HSS console is MMUART1
++    // (pUartDeviceList[1]), so C/ACK/NAK went to the wrong port.
++    (void)g_my_uart;
++    MSS_UART_polled_tx(HSS_UART_GetInstance(HSS_HART_E51), &tx_byte, 1);
+ }
+ 
+ ///////////////////////////////////////////////////////////////////////////////////////////////////

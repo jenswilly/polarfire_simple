@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Fri Oct 30 12:02:20 2026
+-- Created by SmartDesign Wed Nov  4 10:04:31 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -45,6 +45,8 @@ entity TOP is
         LED5            : out   std_logic;
         LED6            : out   std_logic;
         LED7            : out   std_logic;
+        MBUS_QSPI_CS_N  : out   std_logic;
+        MBUS_QSPI_SCLK  : out   std_logic;
         MMUART_1_TXD    : out   std_logic;
         MMUART_4_TXD    : out   std_logic;
         ODT0            : out   std_logic;
@@ -68,6 +70,7 @@ entity TOP is
         DQ              : inout std_logic_vector(15 downto 0);
         DQS             : inout std_logic_vector(1 downto 0);
         DQS_N           : inout std_logic_vector(1 downto 0);
+        MBUS_QSPI_IO    : inout std_logic_vector(3 downto 0);
         QSPI_IO         : inout std_logic_vector(3 downto 0);
         SD_CMD          : inout std_logic;
         SD_DATA0        : inout std_logic;
@@ -235,6 +238,25 @@ component INIT_MONITOR
         XCVR_INIT_DONE             : out std_logic
         );
 end component;
+-- mss_qspi_pads
+component mss_qspi_pads
+    -- Port list
+    port(
+        -- Inputs
+        mss_qspi_clk     : in    std_logic;
+        mss_qspi_clk_oe  : in    std_logic;
+        mss_qspi_data_o  : in    std_logic_vector(3 downto 0);
+        mss_qspi_data_oe : in    std_logic_vector(3 downto 0);
+        mss_qspi_sel     : in    std_logic;
+        mss_qspi_sel_oe  : in    std_logic;
+        -- Outputs
+        mss_qspi_data_i  : out   std_logic_vector(3 downto 0);
+        qspi_cs_n        : out   std_logic;
+        qspi_sclk        : out   std_logic;
+        -- Inouts
+        qspi_io          : inout std_logic_vector(3 downto 0)
+        );
+end component;
 -- MSS_simple
 component MSS_simple
     -- Port list
@@ -256,6 +278,7 @@ component MSS_simple
         MMUART_1_RXD         : in    std_logic;
         MMUART_4_RXD         : in    std_logic;
         MSS_RESET_N_F2M      : in    std_logic;
+        QSPI_DATA_F2M        : in    std_logic_vector(3 downto 0);
         REFCLK               : in    std_logic;
         REFCLK_N             : in    std_logic;
         SD_CD                : in    std_logic;
@@ -305,6 +328,12 @@ component MSS_simple
         ODT0                 : out   std_logic;
         PLL_CPU_LOCK_M2F     : out   std_logic;
         PLL_DDR_LOCK_M2F     : out   std_logic;
+        QSPI_CLK_M2F         : out   std_logic;
+        QSPI_CLK_OE_M2F      : out   std_logic;
+        QSPI_DATA_M2F        : out   std_logic_vector(3 downto 0);
+        QSPI_DATA_OE_M2F     : out   std_logic_vector(3 downto 0);
+        QSPI_SEL_M2F         : out   std_logic;
+        QSPI_SEL_OE_M2F      : out   std_logic;
         RAS_N                : out   std_logic;
         RESET_N              : out   std_logic;
         SD_CLK               : out   std_logic;
@@ -422,8 +451,11 @@ signal LED3_net_0                                : std_logic;
 signal LED4_net_0                                : std_logic;
 signal LED5_net_0                                : std_logic;
 signal LED6_net_0                                : std_logic;
+signal MBUS_QSPI_CS_N_net_0                      : std_logic;
+signal MBUS_QSPI_SCLK_net_0                      : std_logic;
 signal MMUART_1_TXD_net_0                        : std_logic;
 signal MMUART_4_TXD_net_0                        : std_logic;
+signal mss_qspi_pads_0_mss_qspi_data_i           : std_logic_vector(3 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR  : std_logic_vector(37 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST : std_logic_vector(1 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE : std_logic_vector(3 downto 0);
@@ -465,6 +497,12 @@ signal MSS_simple_0_FIC_0_AXI4_INITIATOR_WSTRB   : std_logic_vector(7 downto 0);
 signal MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID  : std_logic;
 signal MSS_simple_0_FIC_0_DLL_LOCK_M2F           : std_logic;
 signal MSS_simple_0_MSS_RESET_N_M2F              : std_logic;
+signal MSS_simple_0_QSPI_CLK_M2F                 : std_logic;
+signal MSS_simple_0_QSPI_CLK_OE_M2F              : std_logic;
+signal MSS_simple_0_QSPI_DATA_M2F                : std_logic_vector(3 downto 0);
+signal MSS_simple_0_QSPI_DATA_OE_M2F             : std_logic_vector(3 downto 0);
+signal MSS_simple_0_QSPI_SEL_M2F                 : std_logic;
+signal MSS_simple_0_QSPI_SEL_OE_M2F              : std_logic;
 signal ODT0_net_0                                : std_logic;
 signal OR2_1_Y                                   : std_logic;
 signal PF_CCC_C0_0_OUT0_FABCLK_0                 : std_logic;
@@ -515,9 +553,6 @@ signal RPi_GPIO20_net_1                          : std_logic;
 signal RPi_GPIO26_net_1                          : std_logic;
 signal QSPI_SCLK_net_1                           : std_logic;
 signal QSPI_CS_N_net_1                           : std_logic;
-signal BA_net_1                                  : std_logic_vector(1 downto 0);
-signal DM_net_1                                  : std_logic_vector(1 downto 0);
-signal A_net_1                                   : std_logic_vector(13 downto 0);
 signal MMUART_1_TXD_net_1                        : std_logic;
 signal MMUART_4_TXD_net_1                        : std_logic;
 signal SD_CLK_net_1                              : std_logic;
@@ -526,6 +561,11 @@ signal SD_VOLT_EN_net_1                          : std_logic;
 signal SD_VOLT_CMD_DIR_net_1                     : std_logic;
 signal SD_VOLT_DIR_0_net_1                       : std_logic;
 signal SD_VOLT_DIR_1_3_net_1                     : std_logic;
+signal BA_net_1                                  : std_logic_vector(1 downto 0);
+signal DM_net_1                                  : std_logic_vector(1 downto 0);
+signal A_net_1                                   : std_logic_vector(13 downto 0);
+signal MBUS_QSPI_SCLK_net_1                      : std_logic;
+signal MBUS_QSPI_CS_N_net_1                      : std_logic;
 signal s_data_net_0                              : std_logic_vector(159 downto 0);
 signal s_valid_net_0                             : std_logic_vector(1 downto 0);
 signal s_ready_net_0                             : std_logic_vector(1 downto 0);
@@ -602,12 +642,6 @@ begin
  QSPI_SCLK             <= QSPI_SCLK_net_1;
  QSPI_CS_N_net_1       <= QSPI_CS_N_net_0;
  QSPI_CS_N             <= QSPI_CS_N_net_1;
- BA_net_1              <= BA_net_0;
- BA(1 downto 0)        <= BA_net_1;
- DM_net_1              <= DM_net_0;
- DM(1 downto 0)        <= DM_net_1;
- A_net_1               <= A_net_0;
- A(13 downto 0)        <= A_net_1;
  MMUART_1_TXD_net_1    <= MMUART_1_TXD_net_0;
  MMUART_1_TXD          <= MMUART_1_TXD_net_1;
  MMUART_4_TXD_net_1    <= MMUART_4_TXD_net_0;
@@ -624,6 +658,16 @@ begin
  SD_VOLT_DIR_0         <= SD_VOLT_DIR_0_net_1;
  SD_VOLT_DIR_1_3_net_1 <= SD_VOLT_DIR_1_3_net_0;
  SD_VOLT_DIR_1_3       <= SD_VOLT_DIR_1_3_net_1;
+ BA_net_1              <= BA_net_0;
+ BA(1 downto 0)        <= BA_net_1;
+ DM_net_1              <= DM_net_0;
+ DM(1 downto 0)        <= DM_net_1;
+ A_net_1               <= A_net_0;
+ A(13 downto 0)        <= A_net_1;
+ MBUS_QSPI_SCLK_net_1  <= MBUS_QSPI_SCLK_net_0;
+ MBUS_QSPI_SCLK        <= MBUS_QSPI_SCLK_net_1;
+ MBUS_QSPI_CS_N_net_1  <= MBUS_QSPI_CS_N_net_0;
+ MBUS_QSPI_CS_N        <= MBUS_QSPI_CS_N_net_1;
 ----------------------------------------------------------------------
 -- Slices assignments
 ----------------------------------------------------------------------
@@ -824,6 +868,23 @@ INIT_MONITOR_0 : INIT_MONITOR
         SRAM_INIT_FROM_SPI_DONE    => OPEN,
         AUTOCALIB_DONE             => OPEN 
         );
+-- mss_qspi_pads_0
+mss_qspi_pads_0 : mss_qspi_pads
+    port map( 
+        -- Inputs
+        mss_qspi_clk     => MSS_simple_0_QSPI_CLK_M2F,
+        mss_qspi_clk_oe  => MSS_simple_0_QSPI_CLK_OE_M2F,
+        mss_qspi_sel     => MSS_simple_0_QSPI_SEL_M2F,
+        mss_qspi_sel_oe  => MSS_simple_0_QSPI_SEL_OE_M2F,
+        mss_qspi_data_o  => MSS_simple_0_QSPI_DATA_M2F,
+        mss_qspi_data_oe => MSS_simple_0_QSPI_DATA_OE_M2F,
+        -- Outputs
+        mss_qspi_data_i  => mss_qspi_pads_0_mss_qspi_data_i,
+        qspi_sclk        => MBUS_QSPI_SCLK_net_0,
+        qspi_cs_n        => MBUS_QSPI_CS_N_net_0,
+        -- Inouts
+        qspi_io          => MBUS_QSPI_IO 
+        );
 -- MSS_simple_0
 MSS_simple_0 : MSS_simple
     port map( 
@@ -841,6 +902,7 @@ MSS_simple_0 : MSS_simple
         FIC_0_AXI4_M_RLAST   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RLAST,
         FIC_0_AXI4_M_RVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_RVALID,
         MMUART_0_RXD_F2M     => UART0_RX,
+        QSPI_DATA_F2M        => mss_qspi_pads_0_mss_qspi_data_i,
         MSS_RESET_N_F2M      => VCC_net,
         MMUART_1_RXD         => MMUART_1_RXD,
         MMUART_4_RXD         => MMUART_4_RXD,
@@ -877,6 +939,12 @@ MSS_simple_0 : MSS_simple
         FIC_0_AXI4_M_RREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_RREADY,
         MMUART_0_TXD_M2F     => UART0_TX_net_0,
         MMUART_0_TXD_OE_M2F  => OPEN,
+        QSPI_SEL_M2F         => MSS_simple_0_QSPI_SEL_M2F,
+        QSPI_SEL_OE_M2F      => MSS_simple_0_QSPI_SEL_OE_M2F,
+        QSPI_CLK_M2F         => MSS_simple_0_QSPI_CLK_M2F,
+        QSPI_CLK_OE_M2F      => MSS_simple_0_QSPI_CLK_OE_M2F,
+        QSPI_DATA_M2F        => MSS_simple_0_QSPI_DATA_M2F,
+        QSPI_DATA_OE_M2F     => MSS_simple_0_QSPI_DATA_OE_M2F,
         PLL_CPU_LOCK_M2F     => OPEN,
         PLL_DDR_LOCK_M2F     => OPEN,
         MSS_RESET_N_M2F      => MSS_simple_0_MSS_RESET_N_M2F,

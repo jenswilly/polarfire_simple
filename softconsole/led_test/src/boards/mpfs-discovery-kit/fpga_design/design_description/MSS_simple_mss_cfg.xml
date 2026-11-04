@@ -4,7 +4,7 @@
       <design_name>MSS_simple</design_name>
       <mpfs_part_no>MPFS095T</mpfs_part_no>
       <mpfs_package>FCSG325</mpfs_package>
-      <creation_date_time>10-30-2026_11:59:52</creation_date_time>
+      <creation_date_time>11-04-2026_09:21:17</creation_date_time>
       <xml_format_version>0.6.8</xml_format_version>
     </design_information>
     <mss_memory_map>
@@ -1239,7 +1239,7 @@
             <field Type="RW" name="I2C1_FABRIC" offset="3" width="1">0x0</field>
             <field Type="RW" name="CAN0_FABRIC" offset="4" width="1">0x0</field>
             <field Type="RW" name="CAN1_FABRIC" offset="5" width="1">0x0</field>
-            <field Type="RW" name="QSPI_FABRIC" offset="6" width="1">0x0</field>
+            <field Type="RW" name="QSPI_FABRIC" offset="6" width="1">0x1</field>
             <field Type="RW" name="MMUART0_FABRIC" offset="7" width="1">0x1</field>
             <field Type="RW" name="MMUART1_FABRIC" offset="8" width="1">0x0</field>
             <field Type="RW" name="MMUART2_FABRIC" offset="9" width="1">0x0</field>
@@ -4305,7 +4305,7 @@
             <field Type="RW" name="USB" offset="2" width="1">0x0</field>
             <field Type="RW" name="MAC0" offset="3" width="1">0x0</field>
             <field Type="RW" name="MAC1" offset="4" width="1">0x0</field>
-            <field Type="RW" name="QSPI" offset="5" width="1">0x0</field>
+            <field Type="RW" name="QSPI" offset="5" width="1">0x1</field>
             <field Type="RW" name="SPI0" offset="6" width="1">0x0</field>
             <field Type="RW" name="SPI1" offset="7" width="1">0x0</field>
             <field Type="RW" name="MMUART0" offset="8" width="1">0x1</field>

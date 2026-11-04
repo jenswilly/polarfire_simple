@@ -26,13 +26,19 @@ Outputs:
 | QSPI IO3 | `qspi_board`, pull-ups | A19, RPi header pin 22 (GPIO25), blue wire |
 | QSPI VCC | 3.3 V | RPi header pin 17, red wire |
 | QSPI GND | GND | RPi header pin 9, brown wire |
+| Boot flash SCLK | MSS QSPI via `mss_qspi_pads` | E17, mikroBUS SCK |
+| Boot flash CS# | MSS QSPI via `mss_qspi_pads`, pull-up | C16, mikroBUS CS |
+| Boot flash IO0/IO1 | MSS QSPI via `mss_qspi_pads` | E11 (MOSI), A18 (MISO) |
+| Boot flash IO2/IO3 | MSS QSPI via `mss_qspi_pads` | D13 (PWM), G17 (INT) |
 
 
 The RPi header pins are in Bank1 (3.3 V). The QSPI breakout (W25Q128JV) gets 3.3 V from header pin 17 and GND from pin 9. GPIO numbers are BCM numbers; the pin numbers are the physical header pins.
 
+The boot flash is a MikroE Flash 6 Click (W25Q128JV) in the mikroBUS socket (also Bank1). It holds the RTEMS boot image for the HSS (see "Boot from QSPI flash"). It is separate from the RPi-header breakout, which `qspi_board` tests.
+
 ## Design overview
 
-Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric, including `qspi_board` and the MSS FIC_0, runs on one clock: the 200 MHz `PF_CCC_C0` output OUT0, with `FABRIC_RESET_N` from `CORERESET_0`. The MSS FIC_0 AXI4 initiator reaches `axi_sys_ctrl` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_sys_ctrl`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI.
+Block diagram of `TOP`: `documentation/top_level.drawio` (open it with draw.io or the VS Code Draw.io extension). Everything in the fabric, including `qspi_board` and the MSS FIC_0, runs on one clock: the 200 MHz `PF_CCC_C0` output OUT0, with `FABRIC_RESET_N` from `CORERESET_0`. The MSS FIC_0 AXI4 initiator reaches `axi_sys_ctrl` through CoreAXI4Interconnect (AXI4 64 b → AXI4-Lite 32 b). SWITCH2 is debounced to LED4, and its press pulse is OR'd with `axi_sys_ctrl`'s `DEBUG_PULSE`; that pulse drives both the 1 ms `pulse_stretch` → DEBUG and two `test_block_producer`s → `block_arbiter` → `spi_tx_path` → SPI. The MSS QSPI controller is routed through the fabric: `mss_qspi_pads` (tristate buffers that follow the MSS output enables, no clock) connects it to the mikroBUS pins of the boot flash.
 
 ### SPI TX path
 `spi_tx_path` takes 80-bit blocks (valid/ready) and sends each one as one SPI frame: one CS_N assertion, 10 bytes, most significant byte and bit first (bit 79 is the first bit on MOSI). Mode 0 (CPOL 0, CPHA 0), `CLK_DIV = 5` so SCLK = 200 MHz / 10 = 20 MHz. Inside, `block_fifo` (CoreFIFO `BLOCK_FIFO_CORE`, 80 bit × 512, FWFT) buffers up to 512 blocks, `block_serializer` turns a block into 10 AXI4-Stream bytes, and `axis_spi_wo_master` shifts them out. The serializer holds a whole block, so a frame never pauses mid-way. Block diagram: `documentation/spi_tx_path.drawio`.
@@ -73,6 +79,7 @@ The interconnect decodes `0x6000_0000 – 0x6000_0FFF`, which is in the FIC0 low
 - DDR4, x16, 1 GB, 800 MHz (DDR4-1600), CL12. Timings are copied from Microchip's Discovery Kit reference design.
 - L2 cache split: LIM 4 ways, scratchpad 4 ways. The scratchpad is needed by the HSS.
 - MMUART_0 is routed to the fabric (FTDI channel D). FIC_0 AXI4 initiator is enabled.
+- QSPI and QSPI clock are routed to the fabric (`QSPI = FABRIC`, `QSPI_CLK = FABRIC`), DATA 3:2 = Unused. The configurator requires Unused in fabric mode; all four data lines still reach the fabric (`QSPI_DATA_M2F/_OE_M2F/_F2M[3:0]`).
 - For the HSS (as in Microchip's reference design): MMUART_1 and MMUART_4 on MSSIO_B2 (FTDI channels B and C), SD card on MSSIO_B4 (`SD_PORTS_DISABLE`, `SD_VOLT_SEL_IS_INVERTED` = true, SDR104). Their pads are top-level ports of TOP.
 - All other peripherals and FICs are off.
 
@@ -110,7 +117,8 @@ hdl/                Hand-written VHDL, linked into Libero:
                       qspi_mram_ctrl.vhd   QSPI controller top: init + read + write + arbiter + qspi_xact/qspi_phy
                       qspi_bist.vhd        Built-in self-test for qspi_mram_ctrl: write once, read/compare (once or looped), pass/fail
                       qspi_board.vhd       qspi_mram_ctrl + qspi_bist + tristate pads, single die (HDL+ core in TOP)
-documentation/      Board and memory datasheet PDFs (Git LFS) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
+                      mss_qspi_pads.vhd    Tristate pads for the MSS QSPI (fabric mode) -> mikroBUS boot flash
+documentation/      Board and memory datasheet PDFs (Git LFS; incl. the Flash 6 Click schematic) and draw.io diagrams: top_level.drawio (TOP), spi_tx_path.drawio (SPI TX path),
                       qspi_controller.drawio (QSPI controller); device_facts.md (QSPI memory facts with datasheet references); timing_budget.md (QSPI I/O timing budget behind timing.sdc); bringup.md (QSPI hardware bring-up log)
 constraints/io.pdc  Pin and bank constraints (linked into Libero)
 constraints/qspi_ioreg.ndc  I/O register combining (set_ioff) for the QSPI pins (linked into Libero)
@@ -121,12 +129,14 @@ sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSi
 polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
-hss/                HSS (Hart Software Services) build: build_hss.sh (devcontainer), make_envm_hex.sh, config_overrides
+hss/                HSS (Hart Software Services) build: build_hss.sh (devcontainer), make_envm_hex.sh, config_overrides,
+                    drivers/ (W25Q128JV QSPI driver) and patches/ (applied to the HSS source by build_hss.sh)
 rtems/              RTEMS 6.2: config.ini (BSP options), dts/ (Discovery Kit device tree), rtems-cmake (submodule),
-                    led_test/ (RTEMS version of the LED test, CMake), write_sd.sh (boot image -> microSD)
+                    led_test/ (RTEMS version of the LED test, CMake), write_sd.sh (boot image -> microSD),
+                    write_qspi.sh (boot image -> QSPI flash via the HSS YMODEM utility)
 .devcontainer/      RTEMS toolchain, BSP build, HSS source and xPack GCC
 tools/              Libero license-server start/stop scripts (see tools/README.md), syn_check.sh (batch Synplify check),
-                    and the udev rule for the board's UARTs
+                    the udev rule for the board's UARTs, openocd_mpfs.sh (GDB server), mss_reset.sh (MSS reset over JTAG)
 ```
 
 ## Building
@@ -255,7 +265,7 @@ After a software change, rebuild, then edit the eNVM client and select the hex a
 For development, keep using `Discovery-Kit-LIM-Debug` with `led_test hw all-harts debug`. The JTAG reset and halt overrides the eNVM program until the next power cycle.
 
 ## RTEMS on U54_1 (HSS boot)
-The HSS runs on the E51 from eNVM. It sets up clocks and DDR, loads the RTEMS image from the microSD card into DDR and starts it on U54_1 in machine mode (no OpenSBI). This replaces `led_test` in eNVM.
+The HSS runs on the E51 from eNVM. It sets up clocks and DDR, loads the RTEMS image from the QSPI boot flash or the microSD card into DDR and starts it on U54_1 in machine mode (no OpenSBI). This replaces `led_test` in eNVM.
 
 UARTs (udev rule in `tools/`): HSS console on `/dev/pfsoc-uart1` (MMUART1), RTEMS console on `/dev/pfsoc-uart0` (MMUART0), all 115200 8N1.
 
@@ -270,7 +280,19 @@ UARTs (udev rule in `tools/`): HSS console on `/dev/pfsoc-uart1` (MMUART1), RTEM
    This builds `led_test.elf` and the HSS boot image `payload.bin` (`rtems/led_test/hss-payload.yaml`) in `rtems/led_test/build/`. The preset (`rtems/led_test/CMakePresets.json`) sets Ninja, the build directory, `RTEMS_PREFIX` and `RTEMS_BSP`. In VS Code, CMake Tools uses the same preset (`.vscode/settings.json`): select configure preset `mpfs`, then Build.
 4. **SD card** (host): `sudo rtems/write_sd.sh /dev/sdX`. It erases the card, creates a GPT with one EF02 partition (the type the HSS looks for) and writes `payload.bin` into it. The image must be smaller than 4 MiB (the HSS staging area at `0x10_3FC0_0000`).
 
+5. **Or QSPI flash** (host): see "Boot from QSPI flash" below.
+
 The HSS zeroes all NOBITS sections of the ELF before it starts it, including the 256 MB RTEMS `.work` area. That costs a moment at every boot but is harmless.
+
+### Boot from QSPI flash
+
+The HSS tries the QSPI flash first and falls back to the SD card if it finds no flash or no valid image (an erased flash reads magic `ffffffff`).
+
+- **Path:** MSS QSPI controller → fabric (`mss_qspi_pads`) → mikroBUS → Flash 6 Click (W25Q128JV, 16 MB). The HSS has no driver for this chip, so `hss/drivers/winbond_w25q128jv/` adds one (same `Flash_*` API as its Micron driver). `hss/patches/0001-qspi-winbond-w25q128jv.patch` selects it (Kconfig, Makefile, flash table) and fixes three bugs in the HSS YMODEM loader (see CLAUDE.md). `build_hss.sh` copies the driver and applies the patch. `config_overrides` turns on `CONFIG_SERVICE_QSPI`.
+- **Driver:** commands, program and erase run at 5 MHz SCLK. Reads use Fast Read Quad Output (6Bh, 1-1-4) at 25 MHz. At the first init, the driver reads 1 KB at 5 MHz as a reference and compares it with the 25 MHz read for each MSS sample point (posedge/active/negedge). On the board all three match, so posedge is used. If none matches, or the flash is erased, reads stay at 5 MHz. The HSS only checks the image header CRC, so this check is the only protection against bad fast reads.
+- **Writing the image** (host): `rtems/write_qspi.sh [payload.bin]`. Close any terminal on `/dev/pfsoc-uart1` first, and JTAG must be free. The script resets the MSS over JTAG (`tools/mss_reset.sh`) and catches the HSS's 1 s "Press a key to enter CLI" window. It then runs TinyCLI `YMODEM`: erase (about 40 s), receive (`sb -k`, about 11 KB/s at 115200 baud), write, quit. Finally it sends `BOOT` and shows the boot log. `RESET=0` makes it wait for a manual reset instead.
+- **Timing (96 KB `led_test`):** the HSS's "Copying 95936 bytes" takes about 13 ms (44 ms with 5 MHz reads).
+- **Reset without power cycle:** `tools/mss_reset.sh` writes `0xDEAD` to SYSREG `MSS_RESET_CR` (`0x2000_2018`) over JTAG. This is the same full MSS reset as the HSS reboot; the fabric is not reprogrammed and the FTDI UARTs stay up. The board has no reset button.
 
 ### Debugging RTEMS over JTAG
 
@@ -298,6 +320,7 @@ OpenOCD has no RTEMS thread support, so GDB sees only the thread that is running
 - [x] QSPI controller + BIST integrated into `TOP`, with timing constraints: synthesis, place and route and timing pass.
 - [x] QSPI hardware bring-up on the W25Q128JV breakout: BIST passes at 50 MHz SCLK, calibration window {2}, timing met (`documentation/bringup.md`). This was with the old 100 MHz `clk_ctrl`.
 - [x] RTEMS on U54_1: the HSS (eNVM) boots `led_test` from the SD card. HSS console on MMUART1, LED test output on MMUART0, LED2/LED3 count.
+- [x] RTEMS boot from QSPI flash (Flash 6 Click on mikroBUS, MSS QSPI through the fabric): works without the SD card. Reads at 25 MHz, 1-1-4.
 - [ ] Single 200 MHz fabric clock (OUT0 for everything, OUT1 and `CORERESET_1` removed): HDL, testbenches, `timing.sdc` and Libero changes done; `axi_sys_ctrl` widened to a 64-bit bus (no interconnect DownConverter). Verify Timing passes with full constraint coverage (`timing_budget.md`); the BIST passes on the breakout (calibration window {3, 4, 5}, delay 4). Still to do on the board: SPI TX at 20 MHz, DEBUG pulse 1 ms, AXI register access from software.
 - [ ] QSPI on the AS308G208 dual-die PCB: on hold, see "Remaining work" under QSPI controller and BIST.
 - [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).

@@ -50,6 +50,31 @@ set_io -port_name {QSPI_IO[2]} -pin_name F19 -fixed true -io_std LVCMOS33 -RES_P
 set_io -port_name {QSPI_IO[3]} -pin_name A19 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION INOUT -OUT_DRIVE 4
 
 
+# ----------------------------------------------------------------------
+# MSS QSPI (routed through the fabric, mss_qspi_pads) on mikroBUS J5/J6:
+# Flash 6 Click (W25Q128JV), HSS QSPI boot. documentation/device_facts.md section 2.7.
+# Weak pull-up on CS# (the click board has none; the MSS releases CS# until the QSPI is set up).
+# IO2/IO3 have 4.7k pull-ups on the click board.
+
+# J5 SCK
+set_io -port_name MBUS_QSPI_SCLK -pin_name E17 -fixed true -io_std LVCMOS33 -DIRECTION OUTPUT -OUT_DRIVE 4
+
+# J5 CS
+set_io -port_name MBUS_QSPI_CS_N -pin_name C16 -fixed true -io_std LVCMOS33 -RES_PULL Up -DIRECTION OUTPUT
+
+# J5 MOSI: IO0
+set_io -port_name {MBUS_QSPI_IO[0]} -pin_name E11 -fixed true -io_std LVCMOS33 -DIRECTION INOUT -OUT_DRIVE 4
+
+# J5 MISO: IO1
+set_io -port_name {MBUS_QSPI_IO[1]} -pin_name A18 -fixed true -io_std LVCMOS33 -DIRECTION INOUT -OUT_DRIVE 4
+
+# J6 PWM: IO2 (/WP)
+set_io -port_name {MBUS_QSPI_IO[2]} -pin_name D13 -fixed true -io_std LVCMOS33 -DIRECTION INOUT -OUT_DRIVE 4
+
+# J6 INT: IO3 (/HOLD)
+set_io -port_name {MBUS_QSPI_IO[3]} -pin_name G17 -fixed true -io_std LVCMOS33 -DIRECTION INOUT -OUT_DRIVE 4
+
+
 # ---------------------
 # Other RPi header pins
 

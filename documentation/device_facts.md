@@ -4,6 +4,7 @@ Extracted from the datasheets before the controller was designed. Every value ha
 
 Sources:
 - **[W]** `W25Q128JV_QSPI_Flash.pdf`, Winbond W25Q128JV, Revision F (2018-03-27). Page numbers are the printed page numbers (PDF page − 1).
+- **[F6]** `Flash_6_Click_Schematic.pdf`, MikroE Flash 6 Click schematic v100 (2020), one page.
 - **[A]** `Avalanche_AS308G208_Dual_QSPI.pdf`, Avalanche ASxxxx208 family, Revision J.1 (2025-11-13). Printed page = PDF page.
 
 Conventions used below: `x-y-z` = number of IO lines for command-address-data. "Clocks" are SCLK cycles. All data is MSB first. In quad phases the first clock carries bits 7:4 of a byte on IO3:IO0, the second clock bits 3:0 ([W] p.23 notes 8–10; [A] Fig. 19 p.45), for both address and data.
@@ -106,6 +107,25 @@ EBh details ([W] p.23 note 11, p.33):
 - Program only into erased (FFh) locations. Up to 256 bytes per command. If the data passes the end of the 256-byte page, the address wraps to the page start. Split writes at page boundaries. [W] p.23 note 3, p.36
 - For program/erase, CS# must go high exactly on a byte boundary, or the command is ignored. [W] p.21, p.36, p.38
 - **BUSY polling is required** after erase, program and non-volatile SR writes (05h, bit 0). [W] p.13 §7.1.1
+- Larger erases: 64 KB Block Erase **D8h** + 3 address bytes, tBE2 150 ms typ / 2000 ms max. Chip Erase **C7h or 60h**, tCE 40 s typ / 200 s max. Both need WREN and BUSY polling. [W] p.22, p.40 §8.2.17, p.41 §8.2.18, p.65
+
+### 2.7 Flash 6 Click (mikroBUS, for HSS QSPI boot)
+- Part: **W25Q128JVPIQ** (U1). P = WSON-8 6×5 mm, I = industrial, Q = QE fixed at 1 and /HOLD disabled. [F6]; [W] p.74–75 §11, §11.1
+  - So it behaves like the breakout's W25Q128JVSSIQ: JEDEC ID `EF 40 18`, IO2/IO3 are always data pins. There is no hardware /RESET pin, because the 8-pin package has /HOLD on pin 7. [W] p.11 §6.4
+- Signal mapping on the click board [F6]:
+
+| Flash pin | Signal | mikroBUS pin | FPGA pin (Discovery Kit) |
+|---|---|---|---|
+| 1 /CS | CS | CS | C16 |
+| 6 CLK | SCK | SCK | E17 |
+| 5 DI(IO0) | MOSI | MOSI | E11 |
+| 2 DO(IO1) | MISO | MISO | A18 |
+| 3 /WP(IO2) | IO2 | PWM | D13 |
+| 7 /HOLD(IO3) | IO3 | INT | G17 |
+
+- IO2 and IO3 each have a 4.7 kΩ pull-up to 3.3 V (R2, R3). /CS has **no** pull-up on the board. [F6]
+- The click board takes 3.3 V only. The 5 V pin is not connected. [F6]
+- The FPGA pins are from the Discovery Kit user guide (Table 7-4 "mikroBUS Socket") and schematic (Bank1, so LVCMOS33). They are recorded in CLAUDE.md "Board facts", not here.
 
 ---
 
