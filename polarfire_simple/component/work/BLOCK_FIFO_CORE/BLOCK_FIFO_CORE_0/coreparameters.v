@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------
-// Created by Microsemi SmartDesign Mon Oct 19 13:44:17 2026
+// Created by Microsemi SmartDesign Tue Nov 10 14:23:09 2026
 // Parameters for COREFIFO
 //--------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ parameter PIPE = 1;
 parameter PREFETCH = 0;
 parameter RAM_OPT = 0;
 parameter RDCNT_EN = 0;
-parameter RDEPTH = 512;
+parameter RDEPTH = 64;
 parameter RE_POLARITY = 0;
 parameter READ_DVALID = 0;
 parameter RWIDTH = 80;
@@ -31,7 +31,7 @@ parameter SYNC = 1;
 parameter SYNC_RESET = 1;
 parameter testbench = "User";
 parameter UNDERFLOW_EN = 0;
-parameter WDEPTH = 512;
+parameter WDEPTH = 64;
 parameter WE_POLARITY = 0;
 parameter WRCNT_EN = 0;
 parameter WRITE_ACK = 0;

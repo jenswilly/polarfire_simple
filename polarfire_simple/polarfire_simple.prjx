@@ -87,13 +87,13 @@ SIZE="4913"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/bfic_block_producer.vhd,hdl"
 STATE="utd"
-TIME="1794305284"
-SIZE="6277"
+TIME="1794316553"
+SIZE="6701"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd,hdl"
 STATE="utd"
-TIME="1794228336"
-SIZE="5896"
+TIME="1794316058"
+SIZE="5857"
 ENDFILE
 VALUE "/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd,hdl"
 STATE="utd"
@@ -1338,19 +1338,19 @@ IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.cxf,actgen_cxf"
 STATE="utd"
-TIME="1794228827"
-SIZE="18652"
+TIME="1794307524"
+SIZE="18743"
 ENDFILE
 VALUE "<project>/component/work/TOP/TOP.vhd,hdl"
 STATE="utd"
-TIME="1794228827"
-SIZE="51219"
+TIME="1794307524"
+SIZE="50952"
 PARENT="<project>/component/work/TOP/TOP.cxf"
 IS_READONLY="TRUE"
 ENDFILE
 VALUE "<project>/constraint/TOP_derived_constraints.sdc,sdc"
 STATE="utd"
-TIME="1793791752"
+TIME="1794307690"
 SIZE="1063"
 ENDFILE
 VALUE "<project>/simulation/MSS_simple_PFSOC_MSS_FIC0_compile_bfm.tcl,sim"
@@ -1408,22 +1408,22 @@ SIZE="1169"
 ENDFILE
 VALUE "<project>/synthesis/TOP.so,so"
 STATE="utd"
-TIME="1794231081"
+TIME="1794313741"
 SIZE="230"
 ENDFILE
 VALUE "<project>/synthesis/TOP.vm,syn_vm"
 STATE="ood"
-TIME="1794231080"
-SIZE="2498131"
+TIME="1794313740"
+SIZE="2597085"
 ENDFILE
 VALUE "<project>/synthesis/TOP_syn.prj,prj"
 STATE="utd"
-TIME="1794231081"
-SIZE="26812"
+TIME="1794313741"
+SIZE="26718"
 ENDFILE
 VALUE "<project>/synthesis/TOP_vm.sdc,syn_sdc"
 STATE="utd"
-TIME="1794231080"
+TIME="1794313740"
 SIZE="1137"
 ENDFILE
 ENDLIST
@@ -2314,6 +2314,13 @@ LIST "custom_types_pkg::work","/home/jenswilly/Projs/polarfire_simple/hdl/custom
 ENDLIST
 LIST "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd","FALSE","FALSE"
 ENDLIST
+LIST "bfic_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_block_producer.vhd","FALSE","FALSE"
+SUBBLOCK "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+SUBBLOCK "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+SUBBLOCK "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+SUBBLOCK "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+SUBBLOCK "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+ENDLIST
 LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "BLOCK_FIFO_CORE_BLOCK_FIFO_CORE_0_corefifo_fwft::work","component/work/BLOCK_FIFO_CORE/BLOCK_FIFO_CORE_0/rtl/vlog/core/corefifo_fwft.v","FALSE","FALSE"
@@ -2485,8 +2492,6 @@ LIST "qspi_bist::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_bist.vhd
 ENDLIST
 LIST "qspi_phy::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_phy.vhd","FALSE","FALSE"
 ENDLIST
-LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
-ENDLIST
 LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_AddressController::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4CrossBar/AddressController.v","FALSE","FALSE"
@@ -2569,11 +2574,21 @@ SUBBLOCK "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/CORE
 ENDLIST
 LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
 ENDLIST
-LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
+LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
 ENDLIST
+LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+ENDLIST
 LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
+ENDLIST
+LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+ENDLIST
+LIST "caxi4interconnect_RegSliceFull::work","component/Actel/DirectCore/COREAXI4INTERCONNECT/3.0.130/rtl/vlog/core/Axi4Convertors/RegSliceFull.v","FALSE","FALSE"
+ENDLIST
+LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
+ENDLIST
+LIST "bfic_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_producer.vhd","FALSE","FALSE"
 ENDLIST
 LIST "INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR.v","TRUE","FALSE"
 SUBBLOCK "INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR::work","component/work/INIT_MONITOR/INIT_MONITOR_0/INIT_MONITOR_INIT_MONITOR_0_PFSOC_INIT_MONITOR.v","FALSE","FALSE"
@@ -2618,6 +2633,8 @@ SUBBLOCK "block_fifo::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_fi
 SUBBLOCK "block_serializer::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_serializer.vhd","FALSE","FALSE"
 SUBBLOCK "axis_spi_wo_master::work","/home/jenswilly/Projs/polarfire_simple/hdl/axis_spi_wo_master.vhd","FALSE","FALSE"
 ENDLIST
+LIST "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+ENDLIST
 LIST "TOP::work","component/work/TOP/TOP.vhd","TRUE","FALSE"
 SUBBLOCK "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
 SUBBLOCK "CORERESET::work","component/work/CORERESET/CORERESET.vhd","TRUE","FALSE"
@@ -2628,7 +2645,7 @@ SUBBLOCK "axi_sys_ctrl::work","/home/jenswilly/Projs/polarfire_simple/hdl/axi_sy
 SUBBLOCK "bfic_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "block_arbiter::work","/home/jenswilly/Projs/polarfire_simple/hdl/block_arbiter.vhd","FALSE","FALSE"
 SUBBLOCK "button_debounce::work","/home/jenswilly/Projs/polarfire_simple/hdl/button_debounce.vhd","FALSE","FALSE"
-SUBBLOCK "test_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/test_block_producer.vhd","FALSE","FALSE"
+SUBBLOCK "bfic_block_producer::work","/home/jenswilly/Projs/polarfire_simple/hdl/bfic_block_producer.vhd","FALSE","FALSE"
 SUBBLOCK "mss_qspi_pads::work","/home/jenswilly/Projs/polarfire_simple/hdl/mss_qspi_pads.vhd","FALSE","FALSE"
 SUBBLOCK "pulse_stretch::work","/home/jenswilly/Projs/polarfire_simple/hdl/pulse_stretch.vhd","FALSE","FALSE"
 SUBBLOCK "qspi_board::work","/home/jenswilly/Projs/polarfire_simple/hdl/qspi_board.vhd","FALSE","FALSE"
