@@ -50,7 +50,8 @@ begin
 
     bfic_producer_inst_0: entity work.bfic_producer
     generic map(
-        BFIC_ADDRESS => BFIC_AD3_BIT & "001"
+        BFIC_ADDRESS => BFIC_AD3_BIT & "001",
+        BFIC_ELEMENT_OFFSET => 0
     )
     port map(
         tau_y => (6x"1", 6x"3", 6x"5", 6x"7"),
@@ -68,7 +69,8 @@ begin
 
     bfic_producer_inst_1: entity work.bfic_producer
     generic map(
-        BFIC_ADDRESS => BFIC_AD3_BIT & "010"
+        BFIC_ADDRESS => BFIC_AD3_BIT & "010",
+        BFIC_ELEMENT_OFFSET => 4
     )
     port map(
         tau_y => (6x"1", 6x"3", 6x"5", 6x"7"),
@@ -86,7 +88,8 @@ begin
     
     bfic_producer_inst_2: entity work.bfic_producer
     generic map(
-        BFIC_ADDRESS => BFIC_AD3_BIT & "011"
+        BFIC_ADDRESS => BFIC_AD3_BIT & "011",
+        BFIC_ELEMENT_OFFSET => 8
     )
     port map(
         tau_y => (6x"1", 6x"3", 6x"5", 6x"7"),
@@ -104,7 +107,8 @@ begin
 
     bfic_producer_inst_3: entity work.bfic_producer
     generic map(
-        BFIC_ADDRESS => BFIC_AD3_BIT & "100"
+        BFIC_ADDRESS => BFIC_AD3_BIT & "100",
+        BFIC_ELEMENT_OFFSET => 12
     )
     port map(
         tau_y => (6x"1", 6x"3", 6x"5", 6x"7"),
@@ -122,7 +126,8 @@ begin
 
     bfic_producer_inst_4: entity work.bfic_producer
     generic map(
-        BFIC_ADDRESS => BFIC_AD3_BIT & "101"
+        BFIC_ADDRESS => BFIC_AD3_BIT & "101",
+        BFIC_ELEMENT_OFFSET => 16
     )
     port map(
         tau_y => (6x"1", 6x"3", 6x"5", 6x"7"),

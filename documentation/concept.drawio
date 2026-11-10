@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="Ys9MNqmiTdMTzIQ8i4A7" name="Top">
-        <mxGraphModel grid="1" page="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
+        <mxGraphModel dx="698" dy="438" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
             <root>
                 <mxCell id="mtRlP6FcxhWbJw7U602t-0"/>
                 <mxCell id="mtRlP6FcxhWbJw7U602t-1" parent="mtRlP6FcxhWbJw7U602t-0"/>
@@ -470,7 +470,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="7LpDnvs4L1mVZndboeZh" name="FPGA">
-        <mxGraphModel dx="893" dy="953" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="2336" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
+        <mxGraphModel dx="1656" dy="1663" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="2336" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>

@@ -1,7 +1,7 @@
 -- Self-checking testbench for bfic_block_producer
 --   A consumer with random m_ready accepts blocks and compares each with a reference model of
 --   bfic_producer using the fixed inputs of the five instances (BFIC addresses 1..5). Checks:
---     - each start pulse gives BLOCKS_PER_PRESS blocks per BFIC, BFIC 1 first and 5 last, with
+--     - each start pulse gives BEAMS_PER_BFIC blocks per BFIC, BFIC 1 first and 5 last, with
 --       the beams 0, 1, 2, 3, 0, ... per BFIC, then m_valid goes low;
 --     - m_data/m_valid stay stable while m_ready is low;
 --     - a start pulse during a burst is ignored;
@@ -15,7 +15,7 @@ use ieee.math_real.all;
 
 entity tb_bfic_block_producer is
     generic (
-        BLOCKS_PER_PRESS : positive := 4
+        BEAMS_PER_BFIC : positive := 4
     );
 end entity tb_bfic_block_producer;
 
@@ -29,6 +29,7 @@ architecture sim of tb_bfic_block_producer is
     type nat_array_t is array (0 to N_BFIC - 1) of natural;
     constant DTX   : nat_array_t := (3, 2, 5, 4, 2);    -- delta_tau_x
     constant CTAU  : nat_array_t := (1, 4, 3, 5, 2);    -- calib_tau
+    constant OFFS  : nat_array_t := (0, 4, 8, 12, 16);   -- BFIC_ELEMENT_OFFSET
     constant CATT  : natural := 2;                       -- calib_attenuation
     constant TAPER : natural := 3;                       -- tapering_attenuation
     type tau_y_t is array (0 to 3) of natural;
@@ -43,7 +44,7 @@ architecture sim of tb_bfic_block_producer is
         v(77 downto 74) := std_logic_vector(to_unsigned(k + 1, 4));
         v(73 downto 64) := std_logic_vector(to_unsigned(16#100# + 8 * b, 10));
         for e in 0 to 3 loop
-            d := (TAU_Y(b) + CTAU(k) + e * DTX(k)) mod 64;
+            d := (TAU_Y(b) + CTAU(k) + (OFFS(k) + e) * DTX(k)) mod 64;
             g := (CATT + TAPER) mod 64;
             v(63 - 16 * e downto 56 - 16 * e) := "00" & std_logic_vector(to_unsigned(d, 6));
             v(55 - 16 * e downto 48 - 16 * e) := "00" & std_logic_vector(to_unsigned(g, 6));
@@ -65,7 +66,7 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     dut : entity work.bfic_block_producer
-        generic map (BLOCKS_PER_PRESS => BLOCKS_PER_PRESS)
+        generic map (BEAMS_PER_BFIC => BEAMS_PER_BFIC, BFIC_AD3 => 0)
         port map (clk => clk, reset_n => rstn, start_in => start,
                   m_data => m_data, m_valid => m_valid, m_ready => m_ready);
 
@@ -96,7 +97,7 @@ begin
                       & time'image(now));
             end if;
             if m_valid = '1' and m_ready = '1' then
-                k := got / BLOCKS_PER_PRESS;
+                k := got / BEAMS_PER_BFIC;
                 if k < N_BFIC then
                     check(m_data = blk(k, beam(k)), "block " & integer'image(got) & " (BFIC "
                           & integer'image(k + 1) & ", beam " & integer'image(beam(k))
@@ -131,14 +132,14 @@ begin
         -- Consume until the burst is over and check the block count
         procedure finish(name : string; p_rd : real) is
         begin
-            for i in 1 to 100 * N_BFIC * BLOCKS_PER_PRESS loop
+            for i in 1 to 100 * N_BFIC * BEAMS_PER_BFIC loop
                 step(p_rd);
-                exit when got >= N_BFIC * BLOCKS_PER_PRESS;   -- m_valid has 1-cycle gaps
+                exit when got >= N_BFIC * BEAMS_PER_BFIC;   -- m_valid has 1-cycle gaps
             end loop;
             steps(10, p_rd);
             check(m_valid = '0', name & ": m_valid still high");
-            check(got = N_BFIC * BLOCKS_PER_PRESS, name & ": " & integer'image(got)
-                  & " blocks, expected " & integer'image(N_BFIC * BLOCKS_PER_PRESS));
+            check(got = N_BFIC * BEAMS_PER_BFIC, name & ": " & integer'image(got)
+                  & " blocks, expected " & integer'image(N_BFIC * BEAMS_PER_BFIC));
             got := 0;
         end procedure;
 
@@ -160,14 +161,14 @@ begin
 
         -- Start pulse during a burst: ignored
         press;
-        steps(N_BFIC * BLOCKS_PER_PRESS, 0.5);     -- Somewhere in the middle of the burst
+        steps(N_BFIC * BEAMS_PER_BFIC, 0.5);     -- Somewhere in the middle of the burst
         check(m_valid = '1' or got > 0, "extra press: burst did not start");
         press;                                      -- Ignored
         finish("extra press", 0.5);
 
         -- Reset during a burst (in BFIC 2, so bfic_no and the beams are not at their start)
         press;
-        while got < BLOCKS_PER_PRESS + 1 loop
+        while got < BEAMS_PER_BFIC + 1 loop
             step(0.5);
         end loop;
         m_ready <= '0';
