@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Mon Nov  9 13:53:47 2026
+-- Created by SmartDesign Tue Nov 10 11:45:24 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -173,19 +173,7 @@ end component;
 -- axi_sys_ctrl
 -- using entity instantiation for component axi_sys_ctrl
 -- bfic_block_producer
-component bfic_block_producer
-    -- Port list
-    port(
-        -- Inputs
-        clk      : in  std_logic;
-        m_ready  : in  std_logic;
-        reset_n  : in  std_logic;
-        start_in : in  std_logic;
-        -- Outputs
-        m_data   : out std_logic_vector(79 downto 0);
-        m_valid  : out std_logic
-        );
-end component;
+-- using entity instantiation for component bfic_block_producer
 -- block_arbiter
 -- using entity instantiation for component block_arbiter
 -- button_debounce
@@ -412,8 +400,6 @@ component spi_tx_path
         spi_sclk : out std_logic
         );
 end component;
--- test_block_producer
--- using entity instantiation for component test_block_producer
 ----------------------------------------------------------------------
 -- Signal declarations
 ----------------------------------------------------------------------
@@ -443,6 +429,8 @@ signal axi_sys_ctrl_0_DEBUG_PULSE                : std_logic;
 signal BA_net_0                                  : std_logic_vector(1 downto 0);
 signal bfic_block_producer_0_m_data              : std_logic_vector(79 downto 0);
 signal bfic_block_producer_0_m_valid             : std_logic;
+signal bfic_block_producer_1_m_data              : std_logic_vector(79 downto 0);
+signal bfic_block_producer_1_m_valid             : std_logic;
 signal BG0_net_0                                 : std_logic;
 signal block_arbiter_0_m_data                    : std_logic_vector(79 downto 0);
 signal block_arbiter_0_m_valid                   : std_logic;
@@ -454,7 +442,7 @@ signal CK0_net_0                                 : std_logic;
 signal CK0_N_net_0                               : std_logic;
 signal CKE0_net_0                                : std_logic;
 signal CLKINT_0_Y                                : std_logic;
-signal CORERESET_0_FABRIC_RESET_N_1              : std_logic;
+signal CORERESET_0_FABRIC_RESET_N_0              : std_logic;
 signal CORERESET_0_PLL_POWERDOWN_B               : std_logic;
 signal CS0_N_net_0                               : std_logic;
 signal DEBUG_net_0                               : std_logic;
@@ -538,8 +526,6 @@ signal SD_VOLT_DIR_1_3_net_0                     : std_logic;
 signal SD_VOLT_EN_net_0                          : std_logic;
 signal SD_VOLT_SEL_net_0                         : std_logic;
 signal spi_tx_path_0_s_ready                     : std_logic;
-signal test_block_producer_1_m_data              : std_logic_vector(79 downto 0);
-signal test_block_producer_1_m_valid             : std_logic;
 signal UART0_TX_net_0                            : std_logic;
 signal WE_N_net_0                                : std_logic;
 signal RESET_N_net_1                             : std_logic;
@@ -690,8 +676,8 @@ begin
 ----------------------------------------------------------------------
 -- Concatenation assignments
 ----------------------------------------------------------------------
- s_data_net_0  <= ( test_block_producer_1_m_data & bfic_block_producer_0_m_data );
- s_valid_net_0 <= ( test_block_producer_1_m_valid & bfic_block_producer_0_m_valid );
+ s_data_net_0  <= ( bfic_block_producer_1_m_data & bfic_block_producer_0_m_data );
+ s_valid_net_0 <= ( bfic_block_producer_1_m_valid & bfic_block_producer_0_m_valid );
 ----------------------------------------------------------------------
 -- Component instances
 ----------------------------------------------------------------------
@@ -709,7 +695,7 @@ AXI_IC_0 : AXI_IC
     port map( 
         -- Inputs
         ACLK                 => PF_CCC_C0_0_OUT0_FABCLK_0,
-        ARESETN              => CORERESET_0_FABRIC_RESET_N_1,
+        ARESETN              => CORERESET_0_FABRIC_RESET_N_0,
         INITIATOR0_AWVALID   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWVALID,
         INITIATOR0_WLAST     => MSS_simple_0_FIC_0_AXI4_INITIATOR_WLAST,
         INITIATOR0_WVALID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID,
@@ -783,7 +769,7 @@ axi_sys_ctrl_0 : entity work.axi_sys_ctrl
     port map( 
         -- Inputs
         ACLK        => PF_CCC_C0_0_OUT0_FABCLK_0,
-        ARESETN     => CORERESET_0_FABRIC_RESET_N_1,
+        ARESETN     => CORERESET_0_FABRIC_RESET_N_0,
         AWVALID     => AXI_IC_0_AXI4Lmtarget0_AWVALID,
         WVALID      => AXI_IC_0_AXI4Lmtarget0_WVALID,
         BREADY      => AXI_IC_0_AXI4Lmtarget0_BREADY,
@@ -809,16 +795,36 @@ axi_sys_ctrl_0 : entity work.axi_sys_ctrl
         RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP 
         );
 -- bfic_block_producer_0
-bfic_block_producer_0 : bfic_block_producer
+bfic_block_producer_0 : entity work.bfic_block_producer
+    generic map( 
+        BEAMS_PER_BFIC => ( 4 ),
+        BFIC_AD3       => ( 0 )
+        )
     port map( 
         -- Inputs
         clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n  => CORERESET_0_FABRIC_RESET_N_1,
+        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
         start_in => OR2_1_Y,
         m_ready  => block_arbiter_0_s_ready0to0(0),
         -- Outputs
         m_data   => bfic_block_producer_0_m_data,
         m_valid  => bfic_block_producer_0_m_valid 
+        );
+-- bfic_block_producer_1
+bfic_block_producer_1 : entity work.bfic_block_producer
+    generic map( 
+        BEAMS_PER_BFIC => ( 4 ),
+        BFIC_AD3       => ( 1 )
+        )
+    port map( 
+        -- Inputs
+        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
+        start_in => OR2_1_Y,
+        m_ready  => block_arbiter_0_s_ready1to1(1),
+        -- Outputs
+        m_data   => bfic_block_producer_1_m_data,
+        m_valid  => bfic_block_producer_1_m_valid 
         );
 -- block_arbiter_0
 block_arbiter_0 : entity work.block_arbiter
@@ -829,7 +835,7 @@ block_arbiter_0 : entity work.block_arbiter
     port map( 
         -- Inputs
         clk     => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n => CORERESET_0_FABRIC_RESET_N_1,
+        reset_n => CORERESET_0_FABRIC_RESET_N_0,
         m_ready => spi_tx_path_0_s_ready,
         s_data  => s_data_net_0,
         s_valid => s_valid_net_0,
@@ -843,7 +849,7 @@ button_debounce_0 : button_debounce
     port map( 
         -- Inputs
         clk         => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n     => CORERESET_0_FABRIC_RESET_N_1,
+        reset_n     => CORERESET_0_FABRIC_RESET_N_0,
         btn_in      => SWITCH2,
         -- Outputs
         pressed_out => LED4_net_0,
@@ -872,7 +878,7 @@ CORERESET_0 : CORERESET
         FPGA_POR_N         => INIT_MONITOR_0_FABRIC_POR_N,
         -- Outputs
         PLL_POWERDOWN_B    => CORERESET_0_PLL_POWERDOWN_B,
-        FABRIC_RESET_N     => CORERESET_0_FABRIC_RESET_N_1 
+        FABRIC_RESET_N     => CORERESET_0_FABRIC_RESET_N_0 
         );
 -- INIT_MONITOR_0
 INIT_MONITOR_0 : INIT_MONITOR
@@ -1033,7 +1039,7 @@ pulse_stretch_0 : entity work.pulse_stretch
     port map( 
         -- Inputs
         clk       => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n   => CORERESET_0_FABRIC_RESET_N_1,
+        reset_n   => CORERESET_0_FABRIC_RESET_N_0,
         pulse_in  => OR2_1_Y,
         -- Outputs
         pulse_out => DEBUG_net_0 
@@ -1052,7 +1058,7 @@ qspi_board_0 : entity work.qspi_board
     port map( 
         -- Inputs
         clk       => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n   => CORERESET_0_FABRIC_RESET_N_1,
+        reset_n   => CORERESET_0_FABRIC_RESET_N_0,
         -- Outputs
         qspi_sclk => QSPI_SCLK_net_0,
         qspi_cs_n => QSPI_CS_N_net_0,
@@ -1067,7 +1073,7 @@ spi_tx_path_0 : spi_tx_path
     port map( 
         -- Inputs
         clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n  => CORERESET_0_FABRIC_RESET_N_1,
+        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
         s_valid  => block_arbiter_0_m_valid,
         s_data   => block_arbiter_0_m_data,
         -- Outputs
@@ -1076,22 +1082,6 @@ spi_tx_path_0 : spi_tx_path
         spi_mosi => RPi_GPIO16_net_0,
         spi_cs_n => RPi_GPIO26_net_0,
         busy_out => RPi_GPIO20_net_0 
-        );
--- test_block_producer_1
-test_block_producer_1 : entity work.test_block_producer
-    generic map( 
-        BLOCKS_PER_PRESS => ( 1 ),
-        FIRST_BYTE       => ( 170 )
-        )
-    port map( 
-        -- Inputs
-        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n  => CORERESET_0_FABRIC_RESET_N_1,
-        start_in => OR2_1_Y,
-        m_ready  => block_arbiter_0_s_ready1to1(1),
-        -- Outputs
-        m_valid  => test_block_producer_1_m_valid,
-        m_data   => test_block_producer_1_m_data 
         );
 
 end RTL;
