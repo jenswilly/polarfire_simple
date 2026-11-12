@@ -30,7 +30,7 @@ Conventions used below: `x-y-z` = number of IO lines for command-address-data. "
 | WP#/HOLD# on IO2/IO3 in 1-1-1 phases | Drive high | Drive high (WP# has no pull-up and must be driven) |
 | Min CS# high after read / write | 10 ns / 50 ns | 20 ns / 600 ns |
 
-With 8 × 880 host bytes at 50 MHz: W25Q128JV 7040 + 8 × 20 = 7200 clocks = 144 µs, AS308G208 7040 + 8 × 26 = 7248 clocks = 145 µs, plus CS# high time between requests. `tb_qspi_read_ctrl` measures 144.5 µs (W25Q) and 145.5 µs (AS).
+With 8 × 880 bytes on one die (2 data clocks per byte) at 50 MHz: W25Q128JV 14080 + 8 × 20 = 14240 clocks = 284.8 µs, AS308G208 14080 + 8 × 26 = 14288 clocks = 285.8 µs, plus CS# high time between requests. `tb_qspi_read_ctrl` measures 285.1 µs (W25Q) and 286.0 µs (AS). The calibration LUT is no longer read per iteration but preloaded once after init: 126,720 bytes (22 Slice Controllers × 46,080 bits) = 253,440 data clocks ≈ 5.1 ms at 50 MHz, plus the EBh overhead per request.
 
 ---
 
@@ -136,7 +136,7 @@ EBh details ([W] p.23 note 11, p.33):
 - AS308G208 = 8 Gb = 8 × 1 Gb dies, i.e. **4 Gb (512 MB) per CS#**. [A] p.5 Table 2
 - **Addressing:** every command uses a 4-byte (32-bit) address ([A] p.40). Per CS the range is `0000_0000h–1FFF_FFFFh` (29 address bits, A[31:29] = 0). [A] p.21 Table 12, p.22 Fig. 12. The extended address register (A[28:24]) only applies to 3-byte commands (0Bh, 6Bh), which we don't use. [A] p.26–28
 - So the "8 Gb addressing" question is answered: each CS has one linear 4 Gb space, and no die-select bits are needed. The "1 of 4 die" select in the interrupt configuration register is only for the ECC test mode. [A] p.33 Table 26
-- Host addressing in the controller: die byte address = host_addr / 2 < 2^29, so host_addr < 2^30.
+- Addressing in the controller: the fabric uses device 1 only (device 2 is on the MSS), and request addresses are its byte addresses (< 2^29).
 - SPI mode 0 and mode 3 (mode 3 SDR only). SDR: inputs latched on the rising edge, outputs on the falling edge. [A] p.10, p.16 Table 7
 
 ### 3.2 Commands used ([A] p.37–38 Table 34, read from the rendered table)
@@ -192,7 +192,7 @@ EBh details ([W] p.23 note 11, p.33):
 
 ### 3.5 Pins
 - **RESET#** (ball J9): low = reset, outputs High-Z ([A] p.12). Shared by both devices. **The controller needs an output for it.** After RESET#, wait tPU before the first instruction ([A] p.19 Table 10: "VCC Power Up/RESET to First Instruction"). The minimum low pulse width is not specified (Q‑A2).
-- WP1#/WP2# = IO[2]/IO[6] in single-SPI mode. **No internal pull-up, so they must be driven** ([A] p.11). IO[3]/IO[7] "can be tied to Vcc if not used". **The controller drives IO2/IO3 (and IO6/IO7) high in all 1-x-x phases where they're not used.**
+- WP1#/WP2# = IO[2]/IO[6] in single-SPI mode. **No internal pull-up, so they must be driven** ([A] p.11). IO[3]/IO[7] "can be tied to Vcc if not used". **The controller drives IO2/IO3 high in all 1-x-x phases where they're not used** (IO6/IO7 belong to device 2, which is not on the fabric controller).
 - INT1#/INT2#: ECC error outputs. Not used.
 - CS1#/CS2#: a 10 kΩ pull-up to VCCIO is recommended so the device isn't selected at power-up. [A] p.18
 - VCCIO 1.71–3.6 V (3.3 V matches Bank1). [A] p.50
@@ -239,7 +239,7 @@ Written before the HDL. Where the implementation differs (e.g. the AS308G208 reg
 4. **EBh mode byte** = `FFh` for both devices. Latency: W25Q 4 fixed dummy clocks, AS MLATS = 8.
 5. **Writes:** W25Q128JV: 20h sector erase + BUSY polling, then 32h (1-1-4) per page + BUSY polling. AS308G208: D2h (1-4-4) or 02h, then CS# high ≥ 600 ns.
 6. **Min CS# high:** 20 ns after reads (both), 600 ns after writes (AS) / 50 ns (W25Q). Use one generic `CS_HIGH_WR_NS = 600` for both, since writes only happen in tests.
-7. **IO2/IO3 (IO6/IO7) driven high in 1-1-1 phases.**
+7. **IO2/IO3 driven high in 1-1-1 phases.**
 8. **Sampling window (first estimate; see `timing_budget.md`):** data from the device is valid from tCO (AS 9 ns / W25Q 6 ns) + board delay after the falling edge until the next falling edge + tOH (1 ns / 1.5 ns). At 50 MHz (20 ns period), sampling 20 ns after the launch edge (SAMPLE_DLY = 2 at 100 MHz, 4 at 200 MHz) works as long as tCO + round-trip delay + FPGA input setup ≤ 20 ns. For the AS308G208 that leaves about 11 ns, minus the FPGA input setup, for the round-trip delay (SCLK out + data back). `timing_budget.md` does this properly.
 
 ---
@@ -250,7 +250,7 @@ For the user:
 - **Q‑W1** *Answered:* the part is W25Q128JVSSIQ, so the ID is `EF 40 18` and QE is fixed at 1 (see §2.1).
 
 For Winbond (or accept as written):
-- **Q‑W2** AC table footnote 6 "4-bytes address alignment for Quad Read" ([W] p.64): does EBh need a 4-byte-aligned start address to reach the specified timing? Until clarified: **the BIST and tests use die addresses that are multiples of 4** (host addresses multiple of 8). `qspi_read_ctrl` keeps accepting any even host address.
+- **Q‑W2** AC table footnote 6 "4-bytes address alignment for Quad Read" ([W] p.64): does EBh need a 4-byte-aligned start address to reach the specified timing? Until clarified: **the BIST uses addresses that are multiples of 4**. `qspi_read_ctrl` accepts any address; the testbenches also use unaligned ones (the model doesn't model this).
 
 For Avalanche (or accept the stated assumption):
 - **Q‑A1** 9Fh: Table 34 says 0 address bytes, but Fig. 14 (1-0-1, [A] p.42) shows 4 address bytes. Assumption: **0** (the table, and "1-0-1" means no address). Also: does each CS of an AS308G208 report density 1100 (8 Gb, the package) or 1010 (4 Gb, its own size)? Assumption: compare only `E6 21 2` and `01`, and accept 1010 or 1100 as the density nibble.

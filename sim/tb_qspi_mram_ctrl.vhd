@@ -1,17 +1,18 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Full-system testbench for qspi_mram_ctrl: init -> write -> 8 x 880 read
---   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
+--   Two configurations side by side: W25Q128JV; AS308G208 (one port/die).
 --   clk_ctrl 200 MHz, SCLK 50 MHz, 3 ns board delay, preloaded models with short power-up,
 --   reset, erase and program times (and the same short times in the DUT).
 --   The SAMPLE_DLY generic is 6 (30 ns), which does not fit the board delay: everything runs with
 --   sample_dly_ovr = 4 (20 ns), and one read without the override must return wrong data.
 --     1. Init after reset must end with init_done (models: no protocol errors, e.g. 9Fh speed).
---     2. Write 8 blocks of 880 host bytes (W25Q: one block per sector). While the first write is
+--     2. Write 8 blocks of 880 bytes (W25Q: one block per sector). While the first write is
 --        running, a read of an unwritten area is requested: the arbiter must let it wait until
 --        the write is done (otherwise the W25Q would see a read while BUSY).
 --        Then a write is requested while a read is still delivering data: the read must
 --        arrive complete (the owner may only change once qspi_xact is idle).
---     3. Read the 8 blocks back to back and report the time (8 x 880 host bytes, ~145 us).
+--     3. Read the 8 blocks back to back and report the time (8 x 880 bytes, ~286 us), then
+--        an odd-length read at an odd address across the start of block 1.
 --     4. One read with the override off (SAMPLE_DLY = 6): must return wrong data.
 --     5. init_restart: requests during init give rd_req_err / wr_req_err; after init_done a read
 --        works again.
@@ -29,12 +30,11 @@ end entity tb_qspi_mram_ctrl;
 
 architecture sim of tb_qspi_mram_ctrl is
     constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
-    constant NCFG       : positive := 3;
+    constant NCFG       : positive := 2;
     constant SEED1      : positive := 5;
-    constant SEED2      : positive := 9;
     constant NBLK       : positive := 8;
     constant BLK_LEN    : positive := 880;
-    constant BLK_STRIDE : positive := 16#4000#;        -- Host bytes = 2 W25Q sectors per block slot
+    constant BLK_STRIDE : positive := 16#2000#;        -- 2 W25Q sectors per block slot
     constant FREE_AREA  : positive := 16#100000#;       -- Never written
 
     type nat_arr_t is array (0 to NCFG - 1) of natural;
@@ -48,8 +48,7 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     cfg : for g in 0 to NCFG - 1 generate
-        constant DEV  : device_t := device_t'val(boolean'pos(g > 0));
-        constant DIE2 : boolean  := g = 2;
+        constant DEV  : device_t := device_t'val(g);
         constant W25  : boolean  := DEV = DEV_W25Q128JV;
 
         signal init_restart : std_logic := '0';
@@ -64,11 +63,11 @@ begin
         signal wd_tvalid    : std_logic := '0';
         signal wd_tready    : std_logic;
         signal ovr_valid    : std_logic := '1';
-        signal sclk, cs_n   : std_logic_vector(1 downto 0);
-        signal io_o, io_oe  : std_logic_vector(7 downto 0);
-        signal io           : std_logic_vector(7 downto 0);
+        signal sclk, cs_n   : std_logic;
+        signal io_o, io_oe  : std_logic_vector(3 downto 0);
+        signal io           : std_logic_vector(3 downto 0);
         signal mem_reset_n  : std_logic;
-        signal err1, err2   : natural := 0;
+        signal err1         : natural := 0;
         signal rd_errs, wr_errs : natural := 0;
 
         constant LOG_MAX : positive := 16384;
@@ -79,7 +78,7 @@ begin
         signal t_rx     : time := 0 ns;          -- Time of the last received byte
     begin
         dut : entity work.qspi_mram_ctrl
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_CTRL_HZ => 200_000_000,
+            generic map (DEVICE => DEV, CLK_CTRL_HZ => 200_000_000,
                          SCLK_DIV => 2, SAMPLE_DLY => 6, SPACE_W => 16,
                          T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
             port map (
@@ -98,22 +97,15 @@ begin
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io,
                 mem_reset_n => mem_reset_n);
 
-        pads : for i in 0 to 7 generate
+        pads : for i in 0 to 3 generate
             io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
         end generate;
 
         die1 : entity work.qspi_mem_model
             generic map (DEVICE => DEV, DIE => 1, PRELOAD_SEED => SEED1, T_BOARD => 3 ns,
                          T_PU => 20 us, T_RST => 1500 ns, T_PP => 3 us, T_SE => 5 us)
-            port map (sclk => sclk(0), cs_n => cs_n(0), reset_n => mem_reset_n,
-                      io => io(3 downto 0), err_count => err1);
-
-        die2_gen : if DIE2 generate
-            die2 : entity work.qspi_mem_model
-                generic map (DEVICE => DEV, DIE => 2, PRELOAD_SEED => SEED2, T_BOARD => 3 ns, T_PU => 20 us)
-                port map (sclk => sclk(1), cs_n => cs_n(1), reset_n => mem_reset_n,
-                          io => io(7 downto 4), err_count => err2);
-        end generate;
+            port map (sclk => sclk, cs_n => cs_n, reset_n => mem_reset_n,
+                      io => io, err_count => err1);
 
         capture : process (clk)
         begin
@@ -153,39 +145,23 @@ begin
                 return k * BLK_STRIDE;
             end function;
 
-            -- Written host byte i of block k
+            -- Written byte i of block k
             function wbyte(k, i : natural) return std_logic_vector is
             begin
                 return std_logic_vector(to_unsigned((i * 37 + k * 59 + 3) mod 256, 8));
             end function;
 
-            -- Expected read value of host byte a
+            -- Expected read value of byte a
             function expected(a : natural) return std_logic_vector is
-                variable d      : natural := a / 2;
-                variable k      : natural := a / BLK_STRIDE;
-                variable d1, d2 : std_logic_vector(7 downto 0);
-                variable b      : std_logic_vector(7 downto 0);
+                variable k : natural := a / BLK_STRIDE;
             begin
                 if k < NBLK and a - blk_addr(k) < BLK_LEN then
-                    b := wbyte(k, a - blk_addr(k));
-                    if not DIE2 then
-                        b(7 downto 4) := "0000";
-                    end if;
-                    return b;
+                    return wbyte(k, a - blk_addr(k));
                 end if;
-                if W25 and k < NBLK and (a - blk_addr(k)) < 2 * 4096 then
-                    d1 := x"FF";                              -- Rest of the erased sector
-                else
-                    d1 := pattern_byte(d, SEED1);
+                if W25 and k < NBLK and (a - blk_addr(k)) < 4096 then
+                    return x"FF";                             -- Rest of the erased sector
                 end if;
-                d2 := pattern_byte(d, SEED2);
-                if not DIE2 then
-                    d2 := x"00";
-                end if;
-                if a mod 2 = 0 then
-                    return d2(7 downto 4) & d1(7 downto 4);
-                end if;
-                return d2(3 downto 0) & d1(3 downto 0);
+                return pattern_byte(a, SEED1);
             end function;
 
             procedure read_req(addr, len : natural) is
@@ -286,13 +262,12 @@ begin
             for k in 0 to NBLK - 1 loop
                 verify(base + k * BLK_LEN, blk_addr(k), BLK_LEN, "block " & integer'image(k), bad);
             end loop;
-            report "Config " & integer'image(g) & " (" & device_t'image(DEV) & ", "
-                   & integer'image(1 + boolean'pos(DIE2)) & " die(s)): 8 x 880 host bytes read in "
-                   & time'image(t_rx - t0);
-            check(t_rx - t0 <= 150 us, "8 x 880 read took " & time'image(t_rx - t0));
+            report "Config " & integer'image(g) & " (" & device_t'image(DEV)
+                   & "): 8 x 880 bytes read in " & time'image(t_rx - t0);
+            check(t_rx - t0 <= 295 us, "8 x 880 read took " & time'image(t_rx - t0));
             base := rx_n;
-            read_req(blk_addr(1) - 32, 64);                    -- Across the start of block 1
-            verify(base, blk_addr(1) - 32, 64, "block 1 start", bad);
+            read_req(blk_addr(1) - 31, 63);                    -- Across the start of block 1
+            verify(base, blk_addr(1) - 31, 63, "block 1 start", bad);
 
             -- 4. Without the sample delay override (SAMPLE_DLY = 6): wrong data
             wait until rising_edge(clk) and busy = '0';
@@ -325,7 +300,7 @@ begin
 
             wait until rising_edge(clk) and busy = '0';
             wait for 1 us;
-            check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
+            check(err1 = 0, "model protocol errors: " & integer'image(err1));
             tb_errors(g) <= errors;
             finished(g)  <= true;
             wait;

@@ -1,7 +1,8 @@
 -- QSPI memory controller: shared types, device facts and helper functions
 --   Two devices are supported, selected with a DEVICE generic of type device_t:
 --     DEV_W25Q128JV  Winbond W25Q128JVSSIQ, single Quad-SPI NOR flash (prototype)
---     DEV_AS308G208  Avalanche AS308G208, Dual-Quad SPI MRAM, values per CS# (final)
+--     DEV_AS308G208  Avalanche AS308G208, Dual-Quad SPI MRAM, values per CS# (final; the
+--                    fabric uses one port/die, the other die is on the MSS)
 --   Every value comes from documentation/device_facts.md, which has the datasheet references
 --   ([W] = W25Q128JV rev F, [A] = ASxxxx208 rev J.1). Change both together.
 --   Reads use EBh (1-4-4) on both devices: opcode on IO0, address/mode/latency/data on IO[3:0],

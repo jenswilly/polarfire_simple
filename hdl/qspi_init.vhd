@@ -6,18 +6,18 @@
 --     W25Q128JV: wait tPUW -> 66h, 99h -> wait tRST -> 9Fh = EF 40 18 -> SR1: nothing protected,
 --                SR2: CMP = 0 and QE = 1 (fixed on the -IQ part), SR3: WPS = 0 -> EBh read.
 --                The status registers are never written.
---     AS308G208: RESET# low -> wait tPU -> 9Fh (both dies) -> WREN + WRAR CR2 = 08h (latency 8)
+--     AS308G208: RESET# low -> wait tPU -> 9Fh -> WREN + WRAR CR2 = 08h (latency 8)
 --                -> WREN + WRSR SR = 00h (no protection) -> RDAR CR2 = 08h, RDAR CR1 WRENS = 00
 --                (WREN needed before every write), RDSR: no protection -> EBh read.
 --                The registers are always written, because their volatility is not documented
 --                (Q-A3) and RDAR itself depends on CR2.
---   With DIE2_PRESENT every check covers both dies. 9Fh and 05h run at SCLK <= the device's
---   limit for them (40 MHz on the AS308G208); everything else at CLK_HZ / (2 * SCLK_DIV).
---   The final EBh read (8 host bytes from address 0) checks that the quad path completes; its
---   data is not compared.
+--   One die (one CS#). 9Fh and 05h run at SCLK <= the device's limit for them (40 MHz on the
+--   AS308G208); everything else at CLK_HZ / (2 * SCLK_DIV).
+--   The final EBh read (8 bytes from address 0) checks that the quad path completes; its data
+--   is not compared.
 --
 --   init_done: sequence finished without error. init_err: a check failed; err_code says which
---   (ERR_ID: wrong ID on a die, ERR_CFG: register check). Both stay until the next run.
+--   (ERR_ID: wrong ID, ERR_CFG: register check). Both stay until the next run.
 --   step: the current step number (for SmartDebug / status).
 --
 --   Time generics set to 0 use the datasheet values from qspi_pkg.
@@ -31,7 +31,6 @@ use work.qspi_pkg.all;
 entity qspi_init is
     generic (
         DEVICE         : device_t := DEV_W25Q128JV;
-        DIE2_PRESENT   : boolean  := false;
         CLK_HZ         : positive := 200_000_000; -- Input clock frequency
         SCLK_DIV       : positive := 2;           -- Normal SCLK divider
         T_POWERUP_NS   : natural  := 0;           -- W25Q tPUW / AS tPU
@@ -94,7 +93,6 @@ architecture rtl of qspi_init is
     -- Divider for 05h / 9Fh: SCLK <= slow_sclk_hz
     constant SLOW_DIV  : positive := maximum(SCLK_DIV,
                                              (CLK_HZ + 2 * P.slow_sclk_hz - 1) / (2 * P.slow_sclk_hz));
-    constant DIES      : positive := 1 + boolean'pos(DIE2_PRESENT);
 
     constant ERR_NONE  : std_logic_vector(1 downto 0) := "00";
     constant ERR_ID    : std_logic_vector(1 downto 0) := "01";
@@ -160,7 +158,6 @@ architecture rtl of qspi_init is
     signal count    : natural range 0 to 2 ** 26 - 1 := 0;
     signal buf      : buf_t := (others => (others => '0'));
     signal n_rx     : natural range 0 to 8 := 0;
-    signal n_tx     : natural range 0 to 2 := 0;
     signal done_r   : std_logic := '0';
     signal err_r    : std_logic := '0';
     signal code_r   : std_logic_vector(1 downto 0) := ERR_NONE;
@@ -247,41 +244,29 @@ begin
             end case;
         end procedure;
 
-        -- Byte d of the RX buffer for die k (1-line data: die 1, die 2 per byte)
-        impure function rxb(d : natural; k : natural) return std_logic_vector is
-        begin
-            return buf(DIES * d + k);
-        end function;
-
         -- Check the received bytes of step s; true = ok
         impure function check_ok(s : step_t) return boolean is
-            variable ok : boolean := true;
-            variable id : std_logic_vector(31 downto 0);
-            variable b  : std_logic_vector(7 downto 0);
+            variable b : std_logic_vector(7 downto 0);
         begin
-            for k in 0 to DIES - 1 loop
-                b := rxb(0, k);
-                case s is
-                    when S_W_ID | S_A_ID =>
-                        id := rxb(0, k) & rxb(1, k) & rxb(2, k) & rxb(3, k);
-                        ok := ok and id_ok(DEVICE, id);
-                    when S_W_SR1 =>
-                        ok := ok and (b and W25_SR1_PROTECT) = x"00";
-                    when S_W_SR2 =>
-                        ok := ok and b(W25_SR2_CMP) = '0' and b(W25_SR2_QE) = '1';
-                    when S_W_SR3 =>
-                        ok := ok and b(W25_SR3_WPS) = '0';
-                    when S_A_CR2R =>
-                        ok := ok and to_integer(unsigned(b(3 downto 0))) = AS_CR2_MLATS;
-                    when S_A_CR1R =>
-                        ok := ok and b(1 downto 0) = "00";
-                    when S_A_SRR =>
-                        ok := ok and (b and AS_SR_PROTECT) = x"00";
-                    when others =>
-                        null;
-                end case;
-            end loop;
-            return ok;
+            b := buf(0);
+            case s is
+                when S_W_ID | S_A_ID =>
+                    return id_ok(DEVICE, buf(0) & buf(1) & buf(2) & buf(3));
+                when S_W_SR1 =>
+                    return (b and W25_SR1_PROTECT) = x"00";
+                when S_W_SR2 =>
+                    return b(W25_SR2_CMP) = '0' and b(W25_SR2_QE) = '1';
+                when S_W_SR3 =>
+                    return b(W25_SR3_WPS) = '0';
+                when S_A_CR2R =>
+                    return to_integer(unsigned(b(3 downto 0))) = AS_CR2_MLATS;
+                when S_A_CR1R =>
+                    return b(1 downto 0) = "00";
+                when S_A_SRR =>
+                    return (b and AS_SR_PROTECT) = x"00";
+                when others =>
+                    return true;
+            end case;
         end function;
 
         procedure enter(s : step_t) is
@@ -351,7 +336,6 @@ begin
                                             tx_dat_r <= x"00";
                                         end if;
                                         tx_val_r <= '1';
-                                        n_tx     <= DIES;
                                         sub      <= U_TX;
                                     when S_W_RSTEN | S_W_RST | S_A_WREN1 | S_A_WREN2 =>
                                         enter(next_step(cur));
@@ -362,11 +346,8 @@ begin
 
                         when U_TX =>
                             if tx_tready = '1' then
-                                if n_tx = 1 then
-                                    tx_val_r <= '0';
-                                    sub      <= U_NEXT;
-                                end if;
-                                n_tx <= n_tx - 1;
+                                tx_val_r <= '0';
+                                sub      <= U_NEXT;
                             end if;
 
                         when U_NEXT =>

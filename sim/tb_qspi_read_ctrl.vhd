@@ -1,21 +1,21 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Self-checking testbench for qspi_read_ctrl (with qspi_xact and qspi_phy) against preloaded models
---   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
+--   Two configurations side by side: W25Q128JV; AS308G208 (one port/die).
 --   clk_ctrl 200 MHz, SCLK 50 MHz, sample delay 4, 3 ns board delay. init_done is driven by the
 --   testbench (qspi_init is tested in tb_qspi_init); the models need no configuration for EBh.
 --   Downstream is a byte buffer of CAP bytes (rx_space = CAP - fill) with its own consumer.
 --     1. Requests before init_done are dropped with req_err.
---     2. Bad requests: odd address, odd length, length 0, end beyond the device -> req_err, no data.
---     3. Timing: 8 non-contiguous blocks of 880 host bytes, all requested at once, large buffer
---        and a fast consumer. Reports the time from the first request to the last byte, which
---        must be 140.8 us (7040 data clocks) + overhead, at most 150 us.
---     4. Credit starvation: 1000-byte buffer, consumer takes one byte every 16 clk cycles (a
---        quarter of the read rate). Requests must wait for space, counting the bytes of earlier
---        requests still in flight: the buffer must never overflow.
---        Includes a read that ends exactly at the end of the device.
---   Every byte is compared with the preload pattern ({die2_nibble, die1_nibble}, die 2 = 0 with
---   one die), tlast must mark the last byte of each request, the models must report no errors
---   and rx_overflow must never pulse.
+--     2. Bad requests: length 0, end beyond the device, start at the device end -> req_err,
+--        no data.
+--     3. Timing: 8 non-contiguous blocks of 880 bytes, all requested at once, large buffer and a
+--        fast consumer. Reports the time from the first request to the last byte, which must be
+--        281.6 us (14080 data clocks, 2 per byte) + overhead, at most 292 us.
+--     4. Credit starvation: 1000-byte buffer, consumer takes one byte every 16 clk cycles (half
+--        the read rate). Requests must wait for space, counting the bytes of earlier requests
+--        still in flight: the buffer must never overflow. Includes a read with an odd address
+--        and length that ends exactly at the end of the device.
+--   Every byte is compared with the preload pattern, tlast must mark the last byte of each
+--   request, the model must report no errors and rx_overflow must never pulse.
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
 library ieee;
@@ -29,9 +29,8 @@ end entity tb_qspi_read_ctrl;
 
 architecture sim of tb_qspi_read_ctrl is
     constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
-    constant NCFG       : positive := 3;
+    constant NCFG       : positive := 2;
     constant SEED1      : positive := 5;
-    constant SEED2      : positive := 9;
     constant NREQ       : positive := 8;
     constant BLOCK_LEN  : positive := 880;
 
@@ -46,9 +45,8 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     cfg : for g in 0 to NCFG - 1 generate
-        constant DEV   : device_t := device_t'val(boolean'pos(g > 0));
-        constant DIE2  : boolean  := g = 2;
-        constant HSIZE : natural  := 2 * dev_params(DEV).size_bytes;   -- Host address space
+        constant DEV   : device_t := device_t'val(g);
+        constant DSIZE : natural  := dev_params(DEV).size_bytes;
 
         signal init_done   : std_logic := '0';
         signal req_tdata   : std_logic_vector(47 downto 0) := (others => '0');
@@ -72,10 +70,10 @@ begin
         signal m_tdata     : std_logic_vector(7 downto 0);
         signal m_tvalid, m_tlast : std_logic;
 
-        signal sclk, cs_n  : std_logic_vector(1 downto 0);
-        signal io_o, io_oe : std_logic_vector(7 downto 0);
-        signal io          : std_logic_vector(7 downto 0);
-        signal err1, err2  : natural := 0;
+        signal sclk, cs_n  : std_logic;
+        signal io_o, io_oe : std_logic_vector(3 downto 0);
+        signal io          : std_logic_vector(3 downto 0);
+        signal err1        : natural := 0;
 
         -- Downstream buffer: fill level and consumer
         signal cap         : natural := 16384;
@@ -111,7 +109,7 @@ begin
                 m_axis_tlast => m_tlast);
 
         xact : entity work.qspi_xact
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 200_000_000)
+            generic map (DEVICE => DEV, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => cmd_valid, cmd_ready => cmd_ready, cmd_op => cmd_op,
@@ -125,19 +123,13 @@ begin
                 sample_dly => 4, busy => xact_busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
-        pads : for i in 0 to 7 generate
+        pads : for i in 0 to 3 generate
             io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
         end generate;
 
         die1 : entity work.qspi_mem_model
             generic map (DEVICE => DEV, DIE => 1, PRELOAD_SEED => SEED1, T_BOARD => 3 ns, T_PU => 2 us)
-            port map (sclk => sclk(0), cs_n => cs_n(0), io => io(3 downto 0), err_count => err1);
-
-        die2_gen : if DIE2 generate
-            die2 : entity work.qspi_mem_model
-                generic map (DEVICE => DEV, DIE => 2, PRELOAD_SEED => SEED2, T_BOARD => 3 ns, T_PU => 2 us)
-                port map (sclk => sclk(1), cs_n => cs_n(1), io => io(7 downto 4), err_count => err2);
-        end generate;
+            port map (sclk => sclk, cs_n => cs_n, io => io, err_count => err1);
 
         rx_space <= to_unsigned(cap - fill, 16) when fill <= cap else (others => '0');
 
@@ -150,8 +142,6 @@ begin
             variable k       : natural := 0;       -- Byte within the request
             variable errors  : natural := 0;
             variable n_in    : natural := 0;
-            variable a       : natural;
-            variable d1, d2  : std_logic_vector(7 downto 0);
             variable exp     : std_logic_vector(7 downto 0);
         begin
             if rising_edge(clk) then
@@ -164,17 +154,7 @@ begin
                                severity error;
                         errors := errors + 1;
                     else
-                        a  := q_addr(qi) / 2 + k / 2;
-                        d1 := pattern_byte(a, SEED1);
-                        d2 := pattern_byte(a, SEED2);
-                        if not DIE2 then
-                            d2 := x"00";
-                        end if;
-                        if k mod 2 = 0 then
-                            exp := d2(7 downto 4) & d1(7 downto 4);
-                        else
-                            exp := d2(3 downto 0) & d1(3 downto 0);
-                        end if;
+                        exp := pattern_byte(q_addr(qi) + k, SEED1);
                         if m_tdata /= exp or (m_tlast = '1') /= (k = q_len(qi) - 1) then
                             if errors < 10 then
                                 report "CHECK FAILED (config " & integer'image(g) & "): request "
@@ -251,7 +231,7 @@ begin
 
             impure function block_addr(i : natural) return natural is
             begin
-                return i * 16#200000# + i * 16#100#;        -- Non-contiguous, die address % 4 = 0
+                return i * 16#200000# + i * 16#101#;        -- Non-contiguous, odd addresses too
             end function;
         begin
             wait until rstn = '1';
@@ -266,28 +246,26 @@ begin
 
             -- 2. Bad requests
             e0 := err_pulses;
-            request(16#1001#, 16, false);                    -- Odd address
-            request(16#1000#, 15, false);                    -- Odd length
             request(16#1000#, 0, false);                     -- Length 0
-            request(HSIZE - 8, 16, false);                   -- Ends beyond the device
+            request(DSIZE - 8, 16, false);                   -- Ends beyond the device
+            request(DSIZE, 1, false);                        -- Starts at the device end
             wait for 200 ns;
-            check(err_pulses - e0 = 4, "bad requests: 4 req_err pulses expected, got "
+            check(err_pulses - e0 = 3, "bad requests: 3 req_err pulses expected, got "
                   & integer'image(err_pulses - e0));
             check(bytes_in = 0, "no data for bad requests");
 
-            -- 3. 8 x 880 host bytes, all requested at once
+            -- 3. 8 x 880 bytes, all requested at once
             t0 := now;
             for i in 0 to NREQ - 1 loop
                 request(block_addr(i), BLOCK_LEN);
             end loop;
             wait_idle;
             check(bytes_in = NREQ * BLOCK_LEN, "bytes received: " & integer'image(bytes_in));
-            report "Config " & integer'image(g) & " (" & device_t'image(DEV) & ", "
-                   & integer'image(1 + boolean'pos(DIE2)) & " die(s)): " & integer'image(NREQ)
-                   & " x " & integer'image(BLOCK_LEN) & " host bytes in "
+            report "Config " & integer'image(g) & " (" & device_t'image(DEV) & "): "
+                   & integer'image(NREQ) & " x " & integer'image(BLOCK_LEN) & " bytes in "
                    & integer'image((t_last_byte - t0) / 10 ns) & "0 ns";
-            check(t_last_byte - t0 >= 140.8 us and t_last_byte - t0 <= 150 us,
-                  "8 x 880 bytes took " & time'image(t_last_byte - t0) & ", expected 140.8 .. 150 us");
+            check(t_last_byte - t0 >= 281.6 us and t_last_byte - t0 <= 292 us,
+                  "8 x 880 bytes took " & time'image(t_last_byte - t0) & ", expected 281.6 .. 292 us");
 
             -- 4. Credit starvation: small buffer, slow consumer
             if fill /= 0 then
@@ -299,18 +277,18 @@ begin
             for i in 0 to 3 loop
                 request(16#400000# + block_addr(i), BLOCK_LEN);
             end loop;
-            request(HSIZE - 64, 64);                         -- Ends exactly at the device end
+            request(DSIZE - 63, 63);                         -- Ends exactly at the device end
             wait_idle;
-            check(bytes_in - n0 = 4 * BLOCK_LEN + 64, "starved: bytes received: "
+            check(bytes_in - n0 = 4 * BLOCK_LEN + 63, "starved: bytes received: "
                   & integer'image(bytes_in - n0));
             check(overflows = 0, "downstream buffer overflowed " & integer'image(overflows) & " times");
             check(max_fill > 500, "starvation test should fill the buffer (max " & integer'image(max_fill) & ")");
 
             wait for 1 us;
             check(chk_errors = 0, integer'image(chk_errors) & " wrong stream bytes");
-            check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
+            check(err1 = 0, "model protocol errors: " & integer'image(err1));
             check(ovf_count = 0, "rx_overflow pulsed " & integer'image(ovf_count) & " times");
-            check(err_pulses = 5, "unexpected req_err pulses: " & integer'image(err_pulses));
+            check(err_pulses = 4, "unexpected req_err pulses: " & integer'image(err_pulses));
             tb_errors(g) <= errors;
             finished(g)  <= true;
             wait;

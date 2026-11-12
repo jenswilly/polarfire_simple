@@ -1,19 +1,19 @@
 # qspi_board
 
-QSPI memory controller + BIST with board-level tristate pins, single die. Runs the BIST on its own after reset and reports pass/fail (LEDs in TOP).
+QSPI memory controller + BIST with board-level tristate pins, one die (the W25Q128JV, or one port of the AS308G208). Runs the BIST on its own after reset and reports pass/fail (LEDs in TOP).
 Source: `hdl/qspi_board.vhd`. Used as an HDL+ core in TOP; the generics are integers because the HDL+ configurator only handles integers.
 
 ## Generics
 
 | Generic | Type | Default | Description |
 |---|---|---|---|
-| `DEVICE_SEL` | natural 0–1 | 0 | 0: W25Q128JV, 1: AS308G208 (one die). |
+| `DEVICE_SEL` | natural 0–1 | 0 | 0: W25Q128JV, 1: AS308G208 (one port/die). |
 | `CLK_HZ` | positive | 200 000 000 | `clk` frequency. |
 | `SCLK_DIV` | positive 1–8 | 2 | SCLK = `CLK_HZ` / (2·`SCLK_DIV`). |
 | `SAMPLE_DLY` | positive 1–8 | 4 | RX sample delay (clocks) before calibration. |
 | `CALIBRATE` | natural 0–1 | 1 | 1: BIST calibrates the sample delay. |
 | `NBLK` | positive | 8 | BIST blocks. |
-| `BLK_LEN` | positive | 880 | BIST host bytes per block (even). |
+| `BLK_LEN` | positive | 880 | BIST bytes per block. |
 
 ## Ports
 
@@ -26,11 +26,13 @@ Source: `hdl/qspi_board.vhd`. Used as an HDL+ core in TOP; the generics are inte
 | `qspi_io` | inout | 4 | IO3:0 pins (tristate inside). |
 | `bist_pass` | out | 1 | On after the first correct read round, while no failure. |
 | `bist_fail` | out | 1 | Latched on any failure until reset. |
+| `busy_out` | out | 1 | `busy` of `qspi_mram_ctrl` (LED1 in TOP). |
 
 ## Usage notes
 
-- The BIST reads once and stops (`LOOP_ROUNDS` = false); block stride 0x4000, base address 0.
-- With `DEVICE_SEL` = 1, the AS308G208 RESET# must be tied high on the board (not a port here). A dual-die board needs a different wrapper.
+- The BIST reads once and stops (`LOOP_ROUNDS` = false); block stride 0x2000 (2 W25Q sectors), base address 0.
+- Each data byte is two nibbles on IO3:0, high nibble first. The second AS308G208 port/die is connected to the MSS, not to this block.
+- With `DEVICE_SEL` = 1, the AS308G208 RESET# must be tied high on the board (not a port here).
 - The pad registers are in `qspi_phy`; `constraints/qspi_ioreg.ndc` packs them into the I/O cells. Timing: `constraints/timing.sdc`.
 
 ## Sub-components
@@ -46,6 +48,6 @@ Source: `hdl/qspi_board.vhd`. Used as an HDL+ core in TOP; the generics are inte
 
 | Test | Checks |
 |---|---|
-| BIST on the pins | With the model on `qspi_io` (datasheet power-up time, calibration on, 2 blocks of 64 host bytes), `bist_pass` comes on and stays on. |
+| BIST on the pins | With the model on `qspi_io` (datasheet power-up time, calibration on, 2 blocks of 63 bytes), `bist_pass` comes on and stays on. |
 | Protocol | The model reports no protocol errors. |
 | Wiring | Covers the tristate wiring and the generic mapping. |

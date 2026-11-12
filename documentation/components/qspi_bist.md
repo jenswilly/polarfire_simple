@@ -7,11 +7,10 @@ Source: `hdl/qspi_bist.vhd`. Used inside [qspi_board](qspi_board.md).
 
 | Generic | Type | Default | Description |
 |---|---|---|---|
-| `DIE2_PRESENT` | boolean | false | false: only the low nibble of each host byte is written and compared. |
 | `NBLK` | positive | 8 | Number of blocks. |
-| `BLK_LEN` | positive | 880 | Host bytes per block (even). |
-| `BLK_STRIDE` | positive | 16#4000# | Host bytes between block starts (W25Q: 2 sectors). |
-| `BASE_ADDR` | natural | 0 | Host address of block 0 (even). |
+| `BLK_LEN` | positive | 880 | Bytes per block. |
+| `BLK_STRIDE` | positive | 16#2000# | Bytes between block starts (W25Q: 2 sectors). |
+| `BASE_ADDR` | natural | 0 | Device address of block 0. |
 | `CALIBRATE` | boolean | false | Retry init with sample delays 1–8 and pick the delay from a read sweep. |
 | `LOOP_ROUNDS` | boolean | false | Keep reading and comparing until reset; false = one round, then stop. |
 | `SPACE_W` | positive | 16 | Width of `rd_space`. |
@@ -54,7 +53,7 @@ Source: `hdl/qspi_bist.vhd`. Used inside [qspi_board](qspi_board.md).
 
 ## Usage notes
 
-- Pattern: host byte *i* of block *k* = (k·7 + i) mod 256 at `BASE_ADDR + k·BLK_STRIDE`. On the W25Q128JV the sectors are erased first; the pattern is written once per reset only (flash endurance).
+- Pattern: byte *i* of block *k* = (k·7 + i) mod 256 at `BASE_ADDR + k·BLK_STRIDE`. On the W25Q128JV the sectors are erased first; the pattern is written once per reset only (flash endurance).
 - Calibration picks the middle of the first passing run of delays (lower middle for an even width).
 - `pass` and `fail` are both off while init and the first round run.
 - The sample delay override is changed only while the controller is idle. After a failed init the BIST waits for `busy` = 0 and then sets the next delay and restarts init in the same cycle. Before 2026-10-27 it set the delay as soon as `init_err` rose, while the failed init's last transaction could still be running in the PHY.
@@ -62,13 +61,13 @@ Source: `hdl/qspi_bist.vhd`. Used inside [qspi_board](qspi_board.md).
 
 ## Testbench
 
-`sim/tb_qspi_bist.vhd` — `sim/run_tb.sh tb_qspi_bist`. Runs `qspi_bist` + `qspi_mram_ctrl` against the memory models, 4 blocks of 880 host bytes, `clk_ctrl` 200 MHz, SCLK 50 MHz.
+`sim/tb_qspi_bist.vhd` — `sim/run_tb.sh tb_qspi_bist`. Runs `qspi_bist` + `qspi_mram_ctrl` against the memory models, 4 blocks of 880 bytes, `clk_ctrl` 200 MHz, SCLK 50 MHz.
 
 | Test | Checks |
 |---|---|
 | W25Q, no calibration | Pass. |
 | W25Q, calibration | Board delay where delays 2–4 work: window `00001110`, picks 3, pass, one round only. |
-| AS308G208, 2 dies, calibration | `SAMPLE_DLY` = 1 with a board delay where 4 and 5 work: init retried up to 4, window `00011000`, picks 4, pass. |
+| AS308G208, calibration | `SAMPLE_DLY` = 1 with a board delay where 4 and 5 work: init retried up to 4, window `00011000`, picks 4, pass. |
 | AS308G208, writes ignored | Fail. |
 | AS308G208, wrong ID | All init retries fail, fail. |
 | Status rules | `pass` only after a complete round; never `pass` and `fail` together; `fail` stays latched. |

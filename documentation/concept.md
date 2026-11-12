@@ -58,13 +58,16 @@ FPGA fabric will run several main components (and several "interface" and "sub-"
    Loads calibration LUT data from MRAM (using MRAM Controller).  
    Data will be split and set on the individual Slice Controllers. That means that all calibration will be **pre-loaded** at
    startup and stored in RAM on the Slice Controllers (each getting full calibration data for their 10 BFICs).  
+   The LUT is loaded once after MRAM init (and again after LUT updates), not in each 1 ms iteration:
+   46,080 bits (5,760 bytes) per Slice Controller, 22 × 5,760 = 126,720 bytes in total, about 5.1 ms at 50 MHz SCLK
+   (one MRAM port, 4 data lines, 2 SCLK cycles per byte).  
    Note that some kind of error detection/scrubbing will likely be needed since RAM is not SEU-safe.
 4. **Slice Controller**  
    There will be 22 of these - each controlling one "slice" containing 10 BFICs.  
    One Slice Controller instance controls one SPI bus (and one set of GPIO lines).  
    The Slice Controller will handle all SPI and GPIO communication to the BFICs. Initialization/test is triggered by the System Control 
    component and when done/passed, the Slice Controller goes into Operational mode.  
-   Calibration data is stored in RAM on each Slice Controller.  
+   Calibration data is stored in RAM on each Slice Controller (46,080 bits per Slice Controller).  
    Tapering gains are hardcoded as generics on each Slice Controller.  
    Slice Controllers contain several subcomponents. In Operational mode, the controller reads u/v data (possibly already multiplied
    by X/Y element pitch) and frequency from Slice FIFOs, uses temperature and frequency to get calibration data from own

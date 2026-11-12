@@ -1,18 +1,17 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Self-checking testbench for qspi_write: write patterns, read them back with qspi_read_ctrl
---   Three configurations side by side: W25Q128JV; AS308G208 with 1 die; AS308G208 with 2 dies.
+--   Two configurations side by side: W25Q128JV; AS308G208 (one port/die).
 --   qspi_write and qspi_read_ctrl share one qspi_xact; the testbench switches the command port
 --   and the streams between them (owner), as qspi_mram_ctrl does. The models are
 --   preloaded with a pattern. clk_ctrl 200 MHz, SCLK 50 MHz, sample delay 4, 3 ns board delay;
 --   short W25Q busy times (erase 5 us, page program 3 us).
---     1. Requests before init_done and bad requests (odd address/length, length 0, past the end)
---        give req_err and write nothing.
---     2. Write 880 host bytes, read them back. W25Q: the block crosses a sector and three pages
---        (die bytes 0F80h..1137h); the rest of both erased sectors must read FFh.
---     3. A second, overlapping write of 64 host bytes; read back the whole area.
+--     1. Requests before init_done and bad requests (length 0, past the end, starting at the
+--        end) give req_err and write nothing.
+--     2. Write 880 bytes at an odd address, read them back. W25Q: the block crosses a sector and
+--        four pages (0F81h..12F0h); the rest of both erased sectors must read FFh.
+--     3. A second, overlapping write of 63 bytes; read back the whole area.
 --     4. AS: the bytes around the written block must still hold the preload pattern.
---   With one die the upper nibble of each written host byte is ignored and reads back as 0.
---   The models must report no protocol errors (WEL, BUSY, CS# high times, byte boundaries).
+--   The model must report no protocol errors (WEL, BUSY, CS# high times, byte boundaries).
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
 library ieee;
@@ -26,9 +25,8 @@ end entity tb_qspi_write;
 
 architecture sim of tb_qspi_write is
     constant CLK_PERIOD : time := 5 ns;      -- clk_ctrl 200 MHz
-    constant NCFG       : positive := 3;
+    constant NCFG       : positive := 2;
     constant SEED1      : positive := 5;
-    constant SEED2      : positive := 9;
 
     type nat_arr_t is array (0 to NCFG - 1) of natural;
     signal tb_errors : nat_arr_t := (others => 0);
@@ -41,13 +39,12 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     cfg : for g in 0 to NCFG - 1 generate
-        constant DEV   : device_t := device_t'val(boolean'pos(g > 0));
-        constant DIE2  : boolean  := g = 2;
+        constant DEV   : device_t := device_t'val(g);
         constant W25   : boolean  := DEV = DEV_W25Q128JV;
-        constant HSIZE : natural  := 2 * dev_params(DEV).size_bytes;
+        constant DSIZE : natural  := dev_params(DEV).size_bytes;
 
         -- Expected die content: written bytes override the preload (or FFh after an erase)
-        constant SHADOW : natural := 16#3000#;                 -- Shadowed die bytes 0 .. SHADOW-1
+        constant SHADOW : natural := 16#3000#;                 -- Shadowed bytes 0 .. SHADOW-1
         type shadow_t is array (0 to SHADOW - 1) of std_logic_vector(7 downto 0);
 
         signal owner_wr    : boolean := true;                  -- Command port owner
@@ -84,10 +81,10 @@ begin
         signal m_tdata     : std_logic_vector(7 downto 0);
         signal m_tvalid, m_tlast : std_logic;
 
-        signal sclk, cs_n  : std_logic_vector(1 downto 0);
-        signal io_o, io_oe : std_logic_vector(7 downto 0);
-        signal io          : std_logic_vector(7 downto 0);
-        signal err1, err2  : natural := 0;
+        signal sclk, cs_n  : std_logic;
+        signal io_o, io_oe : std_logic_vector(3 downto 0);
+        signal io          : std_logic_vector(3 downto 0);
+        signal err1        : natural := 0;
         signal err_pulses  : natural := 0;
 
         -- Read-back capture
@@ -98,7 +95,7 @@ begin
         signal rx_n      : natural := 0;
     begin
         wr : entity work.qspi_write
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, SCLK_DIV => 2)
+            generic map (DEVICE => DEV, SCLK_DIV => 2)
             port map (
                 clk => clk, reset_n => rstn, init_done => init_done,
                 s_axis_req_tdata => wreq_tdata, s_axis_req_tvalid => wreq_tvalid,
@@ -151,7 +148,7 @@ begin
         x_rx_tready   <= w_rx_tready   when owner_wr else r_rx_tready;
 
         xact : entity work.qspi_xact
-            generic map (DEVICE => DEV, DIE2_PRESENT => DIE2, CLK_HZ => 200_000_000)
+            generic map (DEVICE => DEV, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => x_cmd_valid, cmd_ready => x_cmd_ready, cmd_op => x_cmd_op,
@@ -165,20 +162,14 @@ begin
                 sample_dly => 4, busy => xact_busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
-        pads : for i in 0 to 7 generate
+        pads : for i in 0 to 3 generate
             io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
         end generate;
 
         die1 : entity work.qspi_mem_model
             generic map (DEVICE => DEV, DIE => 1, PRELOAD_SEED => SEED1, T_BOARD => 3 ns,
                          T_PU => 2 us, T_PP => 3 us, T_SE => 5 us)
-            port map (sclk => sclk(0), cs_n => cs_n(0), io => io(3 downto 0), err_count => err1);
-
-        die2_gen : if DIE2 generate
-            die2 : entity work.qspi_mem_model
-                generic map (DEVICE => DEV, DIE => 2, PRELOAD_SEED => SEED2, T_BOARD => 3 ns, T_PU => 2 us)
-                port map (sclk => sclk(1), cs_n => cs_n(1), io => io(7 downto 4), err_count => err2);
-        end generate;
+            port map (sclk => sclk, cs_n => cs_n, io => io, err_count => err1);
 
         capture : process (clk)
         begin
@@ -196,7 +187,7 @@ begin
 
         host : process
             variable errors : natural := 0;
-            variable sh1, sh2 : shadow_t;                       -- Expected die 1 / die 2 bytes
+            variable sh     : shadow_t;                         -- Expected device bytes
             variable t0     : time;
 
             procedure check(cond : boolean; msg : string) is
@@ -207,7 +198,7 @@ begin
                 end if;
             end procedure;
 
-            -- Host byte i of a write: distinct nibbles for both dies
+            -- Byte i of a write
             function wbyte(i, seed : natural) return std_logic_vector is
             begin
                 return std_logic_vector(to_unsigned((i * 37 + seed * 11 + 3) mod 256, 8));
@@ -220,9 +211,9 @@ begin
                 check(w_busy = '0' and r_busy = '0' and xact_busy = '0', "did not become idle");
             end procedure;
 
-            -- Write len host bytes at host address addr (data wbyte(i, seed)) and update the shadow
+            -- Write len bytes at addr (data wbyte(i, seed)) and update the shadow
             procedure write(addr, len, seed : natural; expect_ok : boolean := true) is
-                variable d, s, e : natural;
+                variable s, e    : natural;
                 variable b       : std_logic_vector(7 downto 0);
             begin
                 wait_idle;
@@ -237,10 +228,10 @@ begin
                 end if;
                 -- W25Q: the touched sectors are erased
                 if W25 then
-                    s := (addr / 2) - (addr / 2) mod 4096;
-                    e := (addr / 2 + len / 2 - 1) - (addr / 2 + len / 2 - 1) mod 4096 + 4095;
+                    s := addr - addr mod 4096;
+                    e := (addr + len - 1) - (addr + len - 1) mod 4096 + 4095;
                     for k in s to e loop
-                        sh1(k) := x"FF";
+                        sh(k) := x"FF";
                     end loop;
                 end if;
                 for i in 0 to len - 1 loop
@@ -248,25 +239,17 @@ begin
                     wdat_tdata  <= b;
                     wdat_tvalid <= '1';
                     wait until rising_edge(clk) and wdat_tready = '1';
-                    d := addr / 2 + i / 2;
-                    if i mod 2 = 0 then
-                        sh1(d)(7 downto 4) := b(3 downto 0);
-                        sh2(d)(7 downto 4) := b(7 downto 4);
-                    else
-                        sh1(d)(3 downto 0) := b(3 downto 0);
-                        sh2(d)(3 downto 0) := b(7 downto 4);
-                    end if;
+                    sh(addr + i) := b;
                 end loop;
                 wdat_tvalid <= '0';
                 wait until w_done = '1' for 5 ms;
                 check(w_done = '1', "no wr_done");
             end procedure;
 
-            -- Read len host bytes at host address addr and compare with the shadow
+            -- Read len bytes at addr and compare with the shadow
             procedure read_check(addr, len : natural; msg : string) is
                 variable base : natural;
-                variable d    : natural;
-                variable e1, e2, exp : std_logic_vector(7 downto 0);
+                variable exp  : std_logic_vector(7 downto 0);
                 variable bad  : natural := 0;
             begin
                 wait_idle;
@@ -279,21 +262,11 @@ begin
                 wait until rx_n >= base + len for 1 ms;
                 check(rx_n = base + len, msg & ": " & integer'image(rx_n - base) & " bytes received");
                 for i in 0 to len - 1 loop
-                    d  := addr / 2 + i / 2;
-                    e1 := sh1(d);
-                    e2 := sh2(d);
-                    if not DIE2 then
-                        e2 := x"00";
-                    end if;
-                    if i mod 2 = 0 then
-                        exp := e2(7 downto 4) & e1(7 downto 4);
-                    else
-                        exp := e2(3 downto 0) & e1(3 downto 0);
-                    end if;
+                    exp := sh(addr + i);
                     if rx_log(base + i) /= exp or (rx_lastv(base + i) = '1') /= (i = len - 1) then
                         if bad < 5 then
-                            check(false, msg & ": byte " & integer'image(i) & " (die "
-                                  & to_hstring(to_unsigned(d, 16)) & "h) expected " & to_hstring(exp)
+                            check(false, msg & ": byte " & integer'image(i) & " ("
+                                  & to_hstring(to_unsigned(addr + i, 16)) & "h) expected " & to_hstring(exp)
                                   & ", got " & to_hstring(rx_log(base + i)));
                         else
                             errors := errors + 1;
@@ -304,8 +277,7 @@ begin
             end procedure;
         begin
             for k in 0 to SHADOW - 1 loop
-                sh1(k) := pattern_byte(k, SEED1);
-                sh2(k) := pattern_byte(k, SEED2);
+                sh(k) := pattern_byte(k, SEED1);
             end loop;
             wait until rstn = '1';
             wait for 3 us;                                   -- Models' T_PU
@@ -313,36 +285,35 @@ begin
             -- 1. Before init_done, bad requests
             write(16#1000#, 16, 1, false);
             init_done <= '1';
-            write(16#1001#, 16, 1, false);
-            write(16#1000#, 15, 1, false);
             write(16#1000#, 0, 1, false);
-            write(HSIZE - 8, 16, 1, false);
-            check(err_pulses = 5, "req_err pulses: expected 5, got " & integer'image(err_pulses));
+            write(DSIZE - 8, 16, 1, false);
+            write(DSIZE, 1, 1, false);
+            check(err_pulses = 4, "req_err pulses: expected 4, got " & integer'image(err_pulses));
 
-            -- 2. 880 host bytes from die byte 0F80h (W25Q: sectors 0 and 1, pages 0F00h, 1000h, 1100h)
+            -- 2. 880 bytes from 0F81h (W25Q: sectors 0 and 1, pages 0F00h, 1000h, 1100h, 1200h)
             t0 := now;
-            write(16#1F00#, 880, 1);
+            write(16#0F81#, 880, 1);
             report "Config " & integer'image(g) & ": 880-byte write took " & time'image(now - t0);
-            read_check(16#1F00#, 880, "first write");
+            read_check(16#0F81#, 880, "first write");
             if W25 then
-                read_check(0, 16#1F00#, "erased sector 0 before the block");
-                read_check(16#1F00# + 880, 16#4000# - 16#1F00# - 880, "erased sector 1 after the block");
+                read_check(0, 16#0F81#, "erased sector 0 before the block");
+                read_check(16#0F81# + 880, 16#2000# - 16#0F81# - 880, "erased sector 1 after the block");
             end if;
 
             -- 3. Overlapping second write
-            write(16#2000#, 64, 2);
-            read_check(16#1E00#, 1400, "second write");
+            write(16#1000#, 63, 2);
+            read_check(16#0F00#, 1400, "second write");
 
             -- 4. AS: bytes around the block are untouched
             if not W25 then
-                read_check(16#1E00#, 256, "before the block");
-                read_check(16#1F00# + 880, 512, "after the block");
+                read_check(16#0E81#, 256, "before the block");
+                read_check(16#0F81# + 880, 512, "after the block");
             end if;
 
             wait_idle;
             wait for 1 us;
-            check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
-            check(err_pulses = 5, "unexpected req_err pulses: " & integer'image(err_pulses));
+            check(err1 = 0, "model protocol errors: " & integer'image(err1));
+            check(err_pulses = 4, "unexpected req_err pulses: " & integer'image(err_pulses));
             tb_errors(g) <= errors;
             finished(g)  <= true;
             wait;

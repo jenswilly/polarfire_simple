@@ -1,15 +1,16 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Self-checking testbench for qspi_bist + qspi_mram_ctrl against the device models
---   Five configurations side by side (4 blocks of 880 host bytes, clk_ctrl 200 MHz, SCLK_DIV 2 =
+--   Five configurations side by side (4 blocks of 880 bytes, clk_ctrl 200 MHz, SCLK_DIV 2 =
 --   SCLK 50 MHz, short model times). Sample points are 5 ns apart; the device data is valid from
 --   tCO/tCLQV + board delay to one SCLK period + tOH/tCLQX + board delay after the falling edge.
 --     0  W25Q128JV, no calibration, SAMPLE_DLY 4, board 3 ns          -> pass
 --     1  W25Q128JV, calibration, board 3 ns (valid 9..24.5 ns), one round only (no LOOP_ROUNDS)
 --                                                                     -> window {2,3,4}, delay 3, pass
---     2  AS308G208, 2 dies, calibration, SAMPLE_DLY 1, board 8 ns (valid 17..29 ns): init fails
+--     2  AS308G208, calibration, SAMPLE_DLY 1, board 8 ns (valid 17..29 ns): init fails
 --        with delays 1..3, retried up to 4                            -> window {4,5}, delay 4, pass
---     3  AS308G208, 1 die, model ignores array writes, no calibration -> fail (data mismatch)
---     4  AS308G208, 1 die, wrong ID, calibration                      -> fail (all init retries)
+--     3  AS308G208, model ignores array writes, no calibration        -> fail (data mismatch)
+--     4  AS308G208, wrong ID, calibration                             -> fail (all init retries)
+--   The AS308G208 is one port/die (one CS#) of the device.
 --   Checks: pass and fail stay off until the first round ends (pass_count >= 1 when pass rises); pass and fail are never both on;
 --   passing configurations with LOOP_ROUNDS keep passing (pass_count grows to 3 with fail off);
 --   without LOOP_ROUNDS pass stays on, pass_count stays 1 and no more reads are requested;
@@ -32,7 +33,6 @@ architecture sim of tb_qspi_bist is
 
     type cfg_t is record
         dev       : device_t;
-        die2      : boolean;
         calibrate : boolean;
         loop_rd   : boolean;                       -- LOOP_ROUNDS
         smp_dly   : positive;
@@ -45,11 +45,11 @@ architecture sim of tb_qspi_bist is
     end record;
     type cfg_arr_t is array (natural range <>) of cfg_t;
     constant CFGS : cfg_arr_t := (
-        (DEV_W25Q128JV, false, false, true,  4, 3 ns, false, x"E6212C01", true,  "00000000", 1),
-        (DEV_W25Q128JV, false, true,  false, 4, 3 ns, false, x"E6212C01", true,  "00001110", 3),
-        (DEV_AS308G208, true,  true,  true,  1, 8 ns, false, x"E6212C01", true,  "00011000", 4),
-        (DEV_AS308G208, false, false, true,  4, 3 ns, true,  x"E6212C01", false, "00000000", 1),
-        (DEV_AS308G208, false, true,  true,  4, 3 ns, false, x"E6212801", false, "00000000", 1)
+        (DEV_W25Q128JV, false, true,  4, 3 ns, false, x"E6212C01", true,  "00000000", 1),
+        (DEV_W25Q128JV, true,  false, 4, 3 ns, false, x"E6212C01", true,  "00001110", 3),
+        (DEV_AS308G208, true,  true,  1, 8 ns, false, x"E6212C01", true,  "00011000", 4),
+        (DEV_AS308G208, false, true,  4, 3 ns, true,  x"E6212C01", false, "00000000", 1),
+        (DEV_AS308G208, true,  true,  4, 3 ns, false, x"E6212801", false, "00000000", 1)
     );
     constant NCFG : positive := CFGS'length;
 
@@ -79,15 +79,15 @@ begin
         signal cal_window  : std_logic_vector(SAMPLE_DLY_MAX downto 1);
         signal cal_dly     : natural range 1 to SAMPLE_DLY_MAX;
         signal pass_count  : unsigned(15 downto 0);
-        signal sclk, cs_n  : std_logic_vector(1 downto 0);
-        signal io_o, io_oe : std_logic_vector(7 downto 0);
-        signal io          : std_logic_vector(7 downto 0);
+        signal sclk, cs_n  : std_logic;
+        signal io_o, io_oe : std_logic_vector(3 downto 0);
+        signal io          : std_logic_vector(3 downto 0);
         signal mem_reset_n : std_logic;
-        signal err1, err2  : natural := 0;
+        signal err1        : natural := 0;
         signal ovr_busy_errs : natural := 0;   -- Override changes while the controller was busy
     begin
         bist : entity work.qspi_bist
-            generic map (DIE2_PRESENT => C.die2, NBLK => 4, BLK_LEN => 880, BLK_STRIDE => 16#4000#,
+            generic map (NBLK => 4, BLK_LEN => 880, BLK_STRIDE => 16#2000#,
                          BASE_ADDR => 0, CALIBRATE => C.calibrate, LOOP_ROUNDS => C.loop_rd,
                          SPACE_W => 16)
             port map (
@@ -105,7 +105,7 @@ begin
                 pass_count => pass_count, state_dbg => open);
 
         ctrl : entity work.qspi_mram_ctrl
-            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_CTRL_HZ => 200_000_000,
+            generic map (DEVICE => C.dev, CLK_CTRL_HZ => 200_000_000,
                          SCLK_DIV => 2, SAMPLE_DLY => C.smp_dly, SPACE_W => 16,
                          T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
             port map (
@@ -123,7 +123,7 @@ begin
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io,
                 mem_reset_n => mem_reset_n);
 
-        pads : for i in 0 to 7 generate
+        pads : for i in 0 to 3 generate
             io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
         end generate;
 
@@ -131,15 +131,8 @@ begin
             generic map (DEVICE => C.dev, DIE => 1, PRELOAD_SEED => 5, AS_ID => C.as_id,
                          MEM_WRITE_IGNORE => C.mem_ign, T_BOARD => C.t_board,
                          T_PU => 20 us, T_RST => 1500 ns, T_PP => 3 us, T_SE => 5 us)
-            port map (sclk => sclk(0), cs_n => cs_n(0), reset_n => mem_reset_n,
-                      io => io(3 downto 0), err_count => err1);
-
-        die2_gen : if C.die2 generate
-            die2 : entity work.qspi_mem_model
-                generic map (DEVICE => C.dev, DIE => 2, PRELOAD_SEED => 9, T_BOARD => C.t_board, T_PU => 20 us)
-                port map (sclk => sclk(1), cs_n => cs_n(1), reset_n => mem_reset_n,
-                          io => io(7 downto 4), err_count => err2);
-        end generate;
+            port map (sclk => sclk, cs_n => cs_n, reset_n => mem_reset_n,
+                      io => io, err_count => err1);
 
         host : process
             variable errors : natural := 0;
@@ -155,13 +148,13 @@ begin
             wait until rstn = '1';
             -- Nothing shown while init and the first round run
             if not C.pass then
-                wait until fail = '1' for 3 ms;
+                wait until fail = '1' for 5 ms;
                 check(fail = '1', "fail expected");
                 check(pass = '0' and pass_count = 0, "pass must stay off");
                 wait for 200 us;
                 check(fail = '1' and pass = '0', "fail must stay latched");
             else
-                wait until pass = '1' or fail = '1' for 3 ms;
+                wait until pass = '1' or fail = '1' for 5 ms;
                 check(pass = '1' and fail = '0', "pass expected, got pass=" & std_logic'image(pass)
                       & " fail=" & std_logic'image(fail));
                 check(pass_count >= 1, "pass must only come on after a complete round");
@@ -183,7 +176,7 @@ begin
                           "should stop after one round (count "
                           & integer'image(to_integer(pass_count)) & ")");
                 end if;
-                check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
+                check(err1 = 0, "model protocol errors: " & integer'image(err1));
             end if;
             check(ovr_busy_errs = 0, "sample delay override changed while busy ("
                   & integer'image(ovr_busy_errs) & " times)");
@@ -233,7 +226,7 @@ begin
         wait for 50 ns;
         wait until rising_edge(clk);
         rstn <= '1';
-        wait until finished = (0 to NCFG - 1 => true) for 10 ms;
+        wait until finished = (0 to NCFG - 1 => true) for 20 ms;
         errors := 0;
         for i in 0 to NCFG - 1 loop
             errors := errors + tb_errors(i);
