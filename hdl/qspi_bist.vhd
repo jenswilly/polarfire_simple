@@ -5,8 +5,8 @@
 --
 --   1. Wait for init. With CALIBRATE, a failed init is retried with sample delays
 --      1..SAMPLE_DLY_MAX (init itself reads ID and registers, so a wrong delay can make it fail).
---   2. Write the pattern once: NBLK blocks of BLK_LEN host bytes at BASE_ADDR + k * BLK_STRIDE;
---      host byte i of block k = (k * 7 + i) mod 256. On the W25Q128JV each block's sectors are
+--   2. Write the pattern once: NBLK blocks of BLK_LEN bytes at BASE_ADDR + k * BLK_STRIDE;
+--      byte i of block k = (k * 7 + i) mod 256. On the W25Q128JV each block's sectors are
 --      erased first, so the pattern is written once per reset only (flash endurance).
 --   3. With CALIBRATE: read all blocks once with each sample delay 1..SAMPLE_DLY_MAX, record
 --      which delays return the pattern (cal_window(d)) and use the middle of the first passing run
@@ -17,7 +17,6 @@
 --   pass: on after the first complete correct read round, while no failure has occurred.
 --   fail: init error (after all retries), request error, no passing sample delay, or a data
 --         mismatch. Latched until reset. Both are off while init and the first round run.
---   With one die only the low nibble of each host byte is written and compared.
 --   rd_space is always the maximum: the BIST takes every read byte at once.
 
 library ieee;
@@ -27,11 +26,10 @@ use work.qspi_pkg.all;
 
 entity qspi_bist is
     generic (
-        DIE2_PRESENT : boolean  := false;
         NBLK         : positive := 8;
-        BLK_LEN      : positive := 880;             -- Host bytes per block (even)
-        BLK_STRIDE   : positive := 16#4000#;        -- Host bytes between block starts (W25Q: 2 sectors)
-        BASE_ADDR    : natural  := 0;               -- Host address of block 0 (even)
+        BLK_LEN      : positive := 880;             -- Bytes per block
+        BLK_STRIDE   : positive := 16#2000#;        -- Bytes between block starts (W25Q: 2 sectors)
+        BASE_ADDR    : natural  := 0;               -- Device address of block 0
         CALIBRATE    : boolean  := false;
         LOOP_ROUNDS  : boolean  := false;           -- Keep reading and comparing until reset
         SPACE_W      : positive := 16
@@ -80,15 +78,10 @@ architecture rtl of qspi_bist is
     type state_t is (B_INIT, B_INIT_RETRY, B_WREQ, B_WDATA, B_WDONE, B_CAL_SET, B_ROUND,
                      B_CAL_NEXT, B_CAL_PICK, B_LOOP, B_DONE, B_FAIL);
 
-    -- Expected host byte i of block k
+    -- Expected byte i of block k
     function pattern(k, i : natural) return std_logic_vector is
-        variable b : std_logic_vector(7 downto 0);
     begin
-        b := std_logic_vector(to_unsigned((k * 7 + i) mod 256, 8));
-        if not DIE2_PRESENT then
-            b(7 downto 4) := "0000";
-        end if;
-        return b;
+        return std_logic_vector(to_unsigned((k * 7 + i) mod 256, 8));
     end function;
 
     function req(k : natural) return std_logic_vector is
@@ -139,7 +132,6 @@ begin
 
     process (clk)
         variable lo, hi : natural range 0 to SAMPLE_DLY_MAX;
-        variable got    : std_logic_vector(7 downto 0);
     begin
         if rising_edge(clk) then
             restart <= '0';
@@ -147,11 +139,7 @@ begin
 
             -- Read data check (runs in B_ROUND)
             if rd_tvalid = '1' then
-                got := rd_tdata;
-                if not DIE2_PRESENT then
-                    got(7 downto 4) := "0000";
-                end if;
-                if rx_blk >= NBLK or got /= pattern(rx_blk, rx_idx)
+                if rx_blk >= NBLK or rd_tdata /= pattern(rx_blk, rx_idx)
                    or (rd_tlast = '1') /= (rx_idx = BLK_LEN - 1) then
                     round_bad <= '1';
                 end if;

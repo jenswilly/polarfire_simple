@@ -4,9 +4,9 @@
 --   wr_req / wr_data          --> qspi_write ------+--> arbiter --> qspi_xact (+ qspi_phy) --> pins
 --   init_restart, init_*      <-> qspi_init -------+
 --
---   Request formats, checks and flow control: see qspi_read_ctrl and qspi_write (host bytes,
---   {die2_nibble, die1_nibble}; host address / 2 = die address). Reads and writes are rejected
---   (rd_req_err / wr_req_err) until init_done.
+--   Request formats, checks and flow control: see qspi_read_ctrl and qspi_write (device byte
+--   addresses; one die on IO3:0, each byte is two nibbles, high nibble first). Reads and writes
+--   are rejected (rd_req_err / wr_req_err) until init_done.
 --
 -- Arbiter: one source owns qspi_xact (command port, TX and RX streams) at a time.
 --   qspi_init owns it while it runs (after reset and after init_restart). qspi_write keeps it
@@ -19,9 +19,8 @@
 -- Change it only while busy = '0'. It is registered (timing at 200 MHz), so a change takes effect
 -- one clock later; a command issued in the same cycle reaches the PHY only after that.
 --
--- Pins: no tristates inside. With DIE2_PRESENT = false, io_oe(7:4) stays low and io_i(7:4) is
--- ignored; sclk(1)/cs_n(1) still toggle (leave them unconnected). mem_reset_n is the
--- AS308G208 RESET# (always '1' for the W25Q128JV).
+-- Pins: no tristates inside (io_o / io_oe / io_i per IO line). mem_reset_n is the AS308G208
+-- RESET# (always '1' for the W25Q128JV).
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -31,7 +30,6 @@ use work.qspi_pkg.all;
 entity qspi_mram_ctrl is
     generic (
         DEVICE       : device_t := DEV_W25Q128JV;
-        DIE2_PRESENT : boolean  := false;
         CLK_CTRL_HZ  : positive := 200_000_000;     -- Input clock frequency
         SCLK_DIV     : positive := 2;               -- SCLK = CLK_CTRL_HZ / (2 * SCLK_DIV)
         SAMPLE_DLY   : positive := 4;               -- Default RX sample delay (clk cycles)
@@ -77,11 +75,11 @@ entity qspi_mram_ctrl is
         sample_dly_ovr       : in  natural range 1 to SAMPLE_DLY_MAX;
 
         -- Pins
-        sclk                 : out std_logic_vector(1 downto 0);
-        cs_n                 : out std_logic_vector(1 downto 0);
-        io_o                 : out std_logic_vector(7 downto 0);
-        io_oe                : out std_logic_vector(7 downto 0);
-        io_i                 : in  std_logic_vector(7 downto 0);
+        sclk                 : out std_logic;
+        cs_n                 : out std_logic;
+        io_o                 : out std_logic_vector(3 downto 0);
+        io_oe                : out std_logic_vector(3 downto 0);
+        io_i                 : in  std_logic_vector(3 downto 0);
         mem_reset_n          : out std_logic
     );
 end entity qspi_mram_ctrl;
@@ -196,7 +194,7 @@ begin
     -- Sources
     -------------------------------------------------------------------------------------------
     init : entity work.qspi_init
-        generic map (DEVICE => DEVICE, DIE2_PRESENT => DIE2_PRESENT, CLK_HZ => CLK_CTRL_HZ,
+        generic map (DEVICE => DEVICE, CLK_HZ => CLK_CTRL_HZ,
                      SCLK_DIV => SCLK_DIV, T_POWERUP_NS => T_POWERUP_NS, T_RESET_NS => T_RESET_NS)
         port map (
             clk => clk, reset_n => reset_n, init_restart => init_restart,
@@ -228,7 +226,7 @@ begin
             m_axis_tready => m_axis_tready, m_axis_tlast => m_axis_tlast);
 
     wr : entity work.qspi_write
-        generic map (DEVICE => DEVICE, DIE2_PRESENT => DIE2_PRESENT, SCLK_DIV => SCLK_DIV)
+        generic map (DEVICE => DEVICE, SCLK_DIV => SCLK_DIV)
         port map (
             clk => clk, reset_n => reset_n, init_done => init_done_i,
             s_axis_req_tdata => wr_req_tdata, s_axis_req_tvalid => wr_req_tvalid,
@@ -249,7 +247,7 @@ begin
     -- Transaction engine and PHY
     -------------------------------------------------------------------------------------------
     xact : entity work.qspi_xact
-        generic map (DEVICE => DEVICE, DIE2_PRESENT => DIE2_PRESENT, CLK_HZ => CLK_CTRL_HZ)
+        generic map (DEVICE => DEVICE, CLK_HZ => CLK_CTRL_HZ)
         port map (
             clk => clk, reset_n => reset_n,
             cmd_valid => cx.valid, cmd_ready => x_cmd_ready, cmd_op => cx.op,

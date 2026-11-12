@@ -1,7 +1,7 @@
 #!/bin/bash
 # Batch Synplify Pro run on hand-written HDL, outside the Libero project (the project isn't touched).
 #   Usage: tools/syn_check.sh <top entity> <config name> [generic=value ...] [-- file ...]
-#   e.g.   tools/syn_check.sh qspi_mram_ctrl as2 DEVICE=DEV_AS308G208 DIE2_PRESENT=true
+#   e.g.   tools/syn_check.sh qspi_mram_ctrl as DEVICE=DEV_AS308G208
 #   Default sources: hdl/util_pkg.vhd, hdl/qspi_pkg.vhd and hdl/qspi_*.vhd (VHDL-2008);
 #   after "--" give hdl file names (without .vhd) instead.
 #   Target: PolarFire SoC MPFS095T FCSG325 -1, 200 MHz (the fabric clock; FREQ=<MHz> to change),

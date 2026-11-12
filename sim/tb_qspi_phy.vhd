@@ -6,17 +6,15 @@
 --       exactly the expected number of SCLK cycles per CS# assertion, CS# high only after the
 --       last falling edge and after the last delayed RX sample, CS# high time >= ph_cs_high
 --       (exact when the next transaction is already waiting)
---     - TX bit order: SPI1 on IO0/IO4 MSB first, QUAD4 on IO3:0/IO7:4 high nibble first
+--     - TX bit order: SPI1 on IO0 MSB first, QUAD4 on IO3:0 high nibble first
 --     - OE: SPI1 = IO0/IO2/IO3 driven (IO2/IO3 high), QUAD4 TX all driven, QUAD4 RX/NONE released
---   and drives RX data (IO1/IO5 in SPI1, IO3:0/IO7:4 in QUAD4) a delay T after each falling
+--   and drives RX data (IO1 in SPI1, IO3:0 in QUAD4) a delay T after each falling
 --   edge that launches an RX cycle, and 'X' otherwise. With T = 5 ns * sample_dly - 2.5 ns the
 --   PHY must return exactly that data; a run with a mismatched T must give wrong data.
 --   One run inserts gaps between descriptors (SCLK pauses, PHY state S_WAIT).
 --   A monitor checks on every pin event: SCLK toggles only while CS# is low, CS# and OE change
 --   only while SCLK is low, OE does not change while CS# is high (pads are only re-driven
---   together with CS# low), and sclk(1)/cs_n(1) equal sclk(0)/cs_n(0).
---   DIE2_I = 1 (default) runs with DIE2_PRESENT = true; -gDIE2_I=0 with false (IO7:4 must stay
---   undriven and their RX nibble must read 0).
+--   together with CS# low).
 --   Prints "TB PASSED" or "TB FAILED: <n> error(s)" at the end (sim/run_tb.sh looks for these).
 
 library ieee;
@@ -25,13 +23,9 @@ use ieee.numeric_std.all;
 use work.qspi_pkg.all;
 
 entity tb_qspi_phy is
-    generic (
-        DIE2_I : integer := 1
-    );
 end entity tb_qspi_phy;
 
 architecture sim of tb_qspi_phy is
-    constant DIE2       : boolean := DIE2_I /= 0;
     constant CLK_PERIOD : time    := 5 ns;           -- clk_ctrl 200 MHz
 
     -- Transaction table: phases, ph_last ends a transaction
@@ -39,7 +33,7 @@ architecture sim of tb_qspi_phy is
         lanes   : lane_mode_t;
         dir     : dir_t;
         nclk    : positive;
-        d1, d2  : std_logic_vector(31 downto 0);
+        d       : std_logic_vector(31 downto 0);
         last    : boolean;
         cs_high : positive;
     end record;
@@ -48,26 +42,26 @@ architecture sim of tb_qspi_phy is
     constant Z32 : std_logic_vector(31 downto 0) := (others => '0');
     constant TABLE : phase_arr_t := (
         -- Read ID: opcode, 32 bits back in SPI1
-        (SPI1,  DIR_TX,   8,  x"9F000000", x"9E000000", false, 2),
-        (SPI1,  DIR_RX,   32, Z32,         Z32,         true,  2),
+        (SPI1,  DIR_TX,   8,  x"9F000000", false, 2),
+        (SPI1,  DIR_RX,   32, Z32,         true,  2),
         -- EBh read: opcode, address, mode byte, dummy, data
-        (SPI1,  DIR_TX,   8,  x"EB000000", x"EB000000", false, 2),
-        (QUAD4, DIR_TX,   8,  x"12345678", x"9ABCDEF0", false, 2),
-        (QUAD4, DIR_TX,   2,  x"FF000000", x"F0000000", false, 2),
-        (QUAD4, DIR_NONE, 4,  Z32,         Z32,         false, 2),
-        (QUAD4, DIR_RX,   40, Z32,         Z32,         true,  2),
+        (SPI1,  DIR_TX,   8,  x"EB000000", false, 2),
+        (QUAD4, DIR_TX,   8,  x"12345678", false, 2),
+        (QUAD4, DIR_TX,   2,  x"FF000000", false, 2),
+        (QUAD4, DIR_NONE, 4,  Z32,         false, 2),
+        (QUAD4, DIR_RX,   40, Z32,         true,  2),
         -- Quad write, ending with a 1-cycle phase; long CS# high time afterwards
-        (SPI1,  DIR_TX,   8,  x"D2000000", x"D2000000", false, 60),
-        (QUAD4, DIR_TX,   8,  x"00ABCDEF", x"00FEDCBA", false, 60),
-        (QUAD4, DIR_TX,   8,  x"A5C30FF0", x"5A3CF00F", false, 60),
-        (QUAD4, DIR_TX,   1,  x"70000000", x"C0000000", true,  60),
+        (SPI1,  DIR_TX,   8,  x"D2000000", false, 60),
+        (QUAD4, DIR_TX,   8,  x"00ABCDEF", false, 60),
+        (QUAD4, DIR_TX,   8,  x"A5C30FF0", false, 60),
+        (QUAD4, DIR_TX,   1,  x"70000000", true,  60),
         -- Odd lengths, SPI1 latency, SPI1 RX followed by a 1-cycle QUAD4 RX
-        (SPI1,  DIR_TX,   5,  x"B8000000", x"40000000", false, 3),
-        (SPI1,  DIR_NONE, 3,  Z32,         Z32,         false, 3),
-        (SPI1,  DIR_RX,   16, Z32,         Z32,         false, 3),
-        (QUAD4, DIR_RX,   1,  Z32,         Z32,         true,  3),
+        (SPI1,  DIR_TX,   5,  x"B8000000", false, 3),
+        (SPI1,  DIR_NONE, 3,  Z32,         false, 3),
+        (SPI1,  DIR_RX,   16, Z32,         false, 3),
+        (QUAD4, DIR_RX,   1,  Z32,         true,  3),
         -- Single-cycle transaction, minimum CS# high time
-        (SPI1,  DIR_TX,   1,  x"80000000", x"00000000", true,  1)
+        (SPI1,  DIR_TX,   1,  x"80000000", true,  1)
     );
 
     -- Runs: SCLK divider, sample delay, device round-trip delay, expected result, descriptor gaps
@@ -104,28 +98,27 @@ architecture sim of tb_qspi_phy is
     signal ph_lanes    : lane_mode_t := SPI1;
     signal ph_dir      : dir_t := DIR_NONE;
     signal ph_nclk     : unsigned(15 downto 0) := (others => '0');
-    signal ph_tx1      : std_logic_vector(31 downto 0) := (others => '0');
-    signal ph_tx2      : std_logic_vector(31 downto 0) := (others => '0');
+    signal ph_tx       : std_logic_vector(31 downto 0) := (others => '0');
     signal ph_last     : std_logic := '0';
     signal ph_sclk_div : natural range 1 to SCLK_DIV_MAX := 1;
     signal ph_cs_high  : unsigned(7 downto 0) := (others => '0');
     signal sample_dly  : natural range 1 to SAMPLE_DLY_MAX := 1;
     signal rx_valid    : std_logic;
-    signal rx_data     : std_logic_vector(7 downto 0);
+    signal rx_data     : std_logic_vector(3 downto 0);
     signal rx_last     : std_logic;
     signal busy        : std_logic;
-    signal sclk        : std_logic_vector(1 downto 0);
-    signal cs_n        : std_logic_vector(1 downto 0);
-    signal io_o        : std_logic_vector(7 downto 0);
-    signal io_oe       : std_logic_vector(7 downto 0);
-    signal io_i        : std_logic_vector(7 downto 0) := (others => 'X');
+    signal sclk        : std_logic;
+    signal cs_n        : std_logic;
+    signal io_o        : std_logic_vector(3 downto 0);
+    signal io_oe       : std_logic_vector(3 downto 0);
+    signal io_i        : std_logic_vector(3 downto 0) := (others => 'X');
 
     signal run_idx     : natural := 0;           -- Current run (set by the driver)
     signal done        : boolean := false;
 
     -- Expected RX words, written by the stub, read by the checker
     constant EXP_MAX : positive := 2048;
-    type word_arr_t is array (0 to EXP_MAX - 1) of std_logic_vector(7 downto 0);
+    type word_arr_t is array (0 to EXP_MAX - 1) of std_logic_vector(3 downto 0);
     type nat_arr_t  is array (0 to EXP_MAX - 1) of natural;
     signal exp_word  : word_arr_t := (others => (others => '0'));
     signal exp_last  : std_logic_vector(0 to EXP_MAX - 1) := (others => '0');
@@ -153,11 +146,11 @@ begin
     clk <= not clk after CLK_PERIOD / 2 when not done;
 
     dut : entity work.qspi_phy
-        generic map (DIE2_PRESENT => DIE2, NCLK_W => 16, CS_HIGH_W => 8)
+        generic map (NCLK_W => 16, CS_HIGH_W => 8)
         port map (
             clk => clk, reset_n => rstn,
             ph_valid => ph_valid, ph_ready => ph_ready, ph_lanes => ph_lanes, ph_dir => ph_dir,
-            ph_nclk => ph_nclk, ph_tx1 => ph_tx1, ph_tx2 => ph_tx2, ph_last => ph_last,
+            ph_nclk => ph_nclk, ph_tx => ph_tx, ph_last => ph_last,
             ph_sclk_div => ph_sclk_div, ph_cs_high => ph_cs_high, sample_dly => sample_dly,
             rx_valid => rx_valid, rx_data => rx_data, rx_last => rx_last, busy => busy,
             sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io_i);
@@ -182,8 +175,7 @@ begin
                 ph_lanes    <= TABLE(i).lanes;
                 ph_dir      <= TABLE(i).dir;
                 ph_nclk     <= to_unsigned(TABLE(i).nclk, 16);
-                ph_tx1      <= TABLE(i).d1;
-                ph_tx2      <= TABLE(i).d2;
+                ph_tx       <= TABLE(i).d;
                 ph_last     <= '1' when TABLE(i).last else '0';
                 ph_sclk_div <= RUNS(r).div;
                 ph_cs_high  <= to_unsigned(TABLE(i).cs_high, 8);
@@ -229,9 +221,8 @@ begin
         variable first_in_run: boolean;
         variable prev_cs_high: natural := 0;
         variable lfsr        : std_logic_vector(15 downto 0) := x"ACE1";
-        variable nib1, nib2  : std_logic_vector(3 downto 0);
-        variable drive       : std_logic_vector(7 downto 0);
-        variable word        : std_logic_vector(7 downto 0);
+        variable drive       : std_logic_vector(3 downto 0);
+        variable word        : std_logic_vector(3 downto 0);
         variable wr          : natural := 0;
         variable ph          : phase_t;
 
@@ -263,34 +254,17 @@ begin
             else
                 oe_exp := "0000";
             end if;
-            check(io_oe(3 downto 0) = oe_exp, "die 1 OE: expected " & to_string(oe_exp)
-                  & ", got " & to_string(io_oe(3 downto 0)));
-            if DIE2 then
-                check(io_oe(7 downto 4) = oe_exp, "die 2 OE: expected " & to_string(oe_exp)
-                      & ", got " & to_string(io_oe(7 downto 4)));
-            else
-                check(io_oe(7 downto 4) = "0000", "die 2 not present: IO7:4 must not be driven");
-            end if;
+            check(io_oe = oe_exp, "OE: expected " & to_string(oe_exp) & ", got " & to_string(io_oe));
             if ph.lanes = SPI1 then
                 check(io_o(3 downto 2) = "11", "SPI1: IO3/IO2 (HOLD#/WP#) must be high");
-                if DIE2 then
-                    check(io_o(7 downto 6) = "11", "SPI1: IO7/IO6 (HOLD#/WP#) must be high");
-                end if;
                 if ph.dir = DIR_TX then
-                    check(io_o(0) = ph.d1(31 - c), "SPI1 die 1 bit on IO0");
-                    if DIE2 then
-                        check(io_o(4) = ph.d2(31 - c), "SPI1 die 2 bit on IO4");
-                    end if;
+                    check(io_o(0) = ph.d(31 - c), "SPI1 bit on IO0");
                 end if;
             elsif ph.dir = DIR_TX then
-                check(io_o(3 downto 0) = ph.d1(31 - 4 * c downto 28 - 4 * c),
-                      "QUAD4 die 1 nibble on IO3:0: expected "
-                      & to_hstring(ph.d1(31 - 4 * c downto 28 - 4 * c)) & ", got "
-                      & to_hstring(io_o(3 downto 0)));
-                if DIE2 then
-                    check(io_o(7 downto 4) = ph.d2(31 - 4 * c downto 28 - 4 * c),
-                          "QUAD4 die 2 nibble on IO7:4");
-                end if;
+                check(io_o = ph.d(31 - 4 * c downto 28 - 4 * c),
+                      "QUAD4 nibble on IO3:0: expected "
+                      & to_hstring(ph.d(31 - 4 * c downto 28 - 4 * c)) & ", got "
+                      & to_hstring(io_o));
             end if;
         end procedure;
     begin
@@ -302,7 +276,7 @@ begin
             while ti <= TABLE'high loop
                 -- One transaction: phases ti .. (first with last = true)
                 p := ti; c := 0;
-                wait until cs_n(0) = '0';
+                wait until cs_n = '0';
                 t_cs_fall := now;
                 if t_cs_rise > 0 ns then
                     check(now - t_cs_rise >= prev_cs_high * CLK_PERIOD, "CS# high for "
@@ -318,8 +292,8 @@ begin
                 had_rx := false;
                 loop
                     ph := TABLE(p);
-                    wait until sclk(0) = '1' or cs_n(0) = '1';
-                    if cs_n(0) = '1' then
+                    wait until sclk = '1' or cs_n = '1';
+                    if cs_n = '1' then
                         check(false, "CS# went high before all SCLK cycles");
                         exit;
                     end if;
@@ -336,8 +310,8 @@ begin
                     t_rise := now;
                     check_pads;
 
-                    wait until sclk(0) = '0' or cs_n(0) = '1';
-                    if cs_n(0) = '1' then
+                    wait until sclk = '0' or cs_n = '1';
+                    if cs_n = '1' then
                         check(false, "CS# went high while SCLK was high");
                         exit;
                     end if;
@@ -350,20 +324,12 @@ begin
                     if has_next and TABLE(np).dir = DIR_RX then
                         next_rand;
                         if TABLE(np).lanes = SPI1 then
-                            nib1 := "000" & lfsr(0);
-                            nib2 := "000" & lfsr(1);
-                            drive(1) := nib1(0);
-                            drive(5) := nib2(0);
+                            word := "000" & lfsr(0);
+                            drive(1) := lfsr(0);
                         else
-                            nib1 := lfsr(3 downto 0);
-                            nib2 := lfsr(7 downto 4);
-                            drive(3 downto 0) := nib1;
-                            drive(7 downto 4) := nib2;
+                            word := lfsr(3 downto 0);
+                            drive := word;
                         end if;
-                        if not DIE2 then
-                            nib2 := "0000";
-                        end if;
-                        word := nib2 & nib1;
                         exp_word(wr) <= word;
                         exp_run(wr)  <= r;
                         if nc = TABLE(np).nclk - 1 then
@@ -382,10 +348,10 @@ begin
                 end loop;
 
                 -- End of the transaction: no more SCLK, CS# high after the last sample
-                wait until cs_n(0) = '1' or sclk(0) = '1';
-                if sclk(0) = '1' then
+                wait until cs_n = '1' or sclk = '1';
+                if sclk = '1' then
                     check(false, "extra SCLK cycle");
-                    wait until cs_n(0) = '1';
+                    wait until cs_n = '1';
                 end if;
                 -- CS# rises on the first clk edge after the last falling edge at which no launched
                 -- RX cycle is waiting for its sample (sample taken dly clk cycles after launch)
@@ -440,23 +406,19 @@ begin
         variable errors : natural := 0;
     begin
         if rstn = '1' then
-            if sclk(1) /= sclk(0) or cs_n(1) /= cs_n(0) then
-                report "MONITOR: sclk(1)/cs_n(1) differ from sclk(0)/cs_n(0)" severity error;
-                errors := errors + 1;
-            end if;
-            if sclk(0)'event and cs_n(0) /= '0' then
+            if sclk'event and cs_n /= '0' then
                 report "MONITOR: SCLK toggled while CS# high" severity error;
                 errors := errors + 1;
             end if;
-            if cs_n(0)'event and sclk(0) /= '0' then
+            if cs_n'event and sclk /= '0' then
                 report "MONITOR: CS# changed while SCLK high" severity error;
                 errors := errors + 1;
             end if;
-            if io_oe'event and sclk(0) /= '0' then
+            if io_oe'event and sclk /= '0' then
                 report "MONITOR: OE changed while SCLK high" severity error;
                 errors := errors + 1;
             end if;
-            if io_oe'event and cs_n(0) /= '0' then
+            if io_oe'event and cs_n /= '0' then
                 report "MONITOR: OE changed while CS# high (the device may still drive IO)"
                        severity error;
                 errors := errors + 1;

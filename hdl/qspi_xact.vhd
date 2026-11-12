@@ -10,19 +10,17 @@
 --     L111: address, mode, latency and data on 1 line (data in on IO1)
 --     L114: address on 1 line; latency and data on 4 lines
 --     L144: address, mode, latency and data on 4 lines
---   Both dies get the same opcode, address and mode byte (lockstep). The address is the die
---   byte address (host address / 2).
+--   One die (one CS#, IO3:0). The address is the die byte address.
 --
 -- Data, cmd_len and the streams:
---   4-line data: one stream byte per SCLK cycle, {die2_nibble, die1_nibble}. cmd_len = number
---     of these host bytes (= data clocks). With one die the upper nibble is ignored (TX) or 0 (RX).
---   1-line data: cmd_len = bytes per die (8 clocks each). Each byte is two stream bytes, die 1
---     then die 2 (only the die 1 byte when DIE2_PRESENT = false).
+--   cmd_len = number of data bytes (one stream byte = one device byte).
+--   4-line data: 2 SCLK cycles per byte, high nibble first. 1-line data: 8 SCLK cycles per byte,
+--     MSB first. RX phases are at most 2**17 - 1 clocks: 4-line any cmd_len, 1-line <= 16383.
 --   m_axis_tlast marks the last stream byte of a command. TX commands take exactly the stream
 --     bytes they need; s_axis_tlast is ignored.
 --   RX has no real backpressure (the PHY can't stop SCLK): a 4-entry FIFO absorbs short stalls,
 --   and rx_overflow pulses when a byte had to be dropped. The consumer must keep up.
---   TX: the next 32-bit chunk per die is collected while the previous one is sent; if the TX
+--   TX: the next 32-bit chunk (4 bytes) is collected while the previous one is sent; if the TX
 --   stream is late, SCLK pauses (CS# stays low).
 --
 -- CS# high time after the command: the device's write value if cmd_write = '1' (WREN, writes,
@@ -41,7 +39,6 @@ use work.qspi_pkg.all;
 entity qspi_xact is
     generic (
         DEVICE       : device_t := DEV_W25Q128JV;
-        DIE2_PRESENT : boolean  := false;
         CLK_HZ       : positive := 200_000_000    -- clk (clk_ctrl) frequency
     );
     port (
@@ -59,7 +56,7 @@ entity qspi_xact is
         cmd_mode       : in  std_logic_vector(7 downto 0);
         cmd_latency    : in  natural range 0 to 15;           -- Dummy/latency clocks
         cmd_dir        : in  dir_t;                           -- Data: none, TX or RX
-        cmd_len        : in  unsigned(15 downto 0);           -- See above; >= 1 if cmd_dir /= DIR_NONE
+        cmd_len        : in  unsigned(15 downto 0);           -- Data bytes; >= 1 if cmd_dir /= DIR_NONE
         cmd_sclk_div   : in  natural range 1 to SCLK_DIV_MAX; -- SCLK = CLK_HZ / (2 * div)
         cmd_write      : in  std_logic;                       -- Long CS# high time afterwards
 
@@ -79,11 +76,11 @@ entity qspi_xact is
         busy           : out std_logic;                       -- Command, PHY or RX output active
 
         -- Pins (see qspi_phy)
-        sclk           : out std_logic_vector(1 downto 0);
-        cs_n           : out std_logic_vector(1 downto 0);
-        io_o           : out std_logic_vector(7 downto 0);
-        io_oe          : out std_logic_vector(7 downto 0);
-        io_i           : in  std_logic_vector(7 downto 0)
+        sclk           : out std_logic;
+        cs_n           : out std_logic;
+        io_o           : out std_logic_vector(3 downto 0);
+        io_oe          : out std_logic_vector(3 downto 0);
+        io_i           : in  std_logic_vector(3 downto 0)
     );
 end entity qspi_xact;
 
@@ -94,9 +91,7 @@ architecture rtl of qspi_xact is
     -- is a few ns shorter than in the fabric (hardware: 6-8 ns for 10 ns, 46-48 ns for 50 ns)
     constant CS_RD : positive := ns_to_cycles(P.t_cs_rd_ns, CLK_HZ) + 1;
     constant CS_WR : positive := ns_to_cycles(P.t_cs_wr_ns, CLK_HZ) + 1;
-
-    -- // TODO: Appears not used. Delete?
-    constant BEATS_PER_BYTE1 : positive := 2 - boolean'pos(not DIE2_PRESENT);  -- 1-line data
+    constant NCLK_W : positive := 17;    -- PHY clock count: 2 * 65535 data clocks (4-line RX)
 
     type state_t is (X_IDLE, X_ISSUE, X_RXWAIT);
     type ph_sel_t is (PH_OP, PH_ADDR, PH_MODE, PH_LAT, PH_DATA, PH_DONE);
@@ -126,17 +121,11 @@ architecture rtl of qspi_xact is
         return SPI1;
     end function;
 
-    -- Units in the next TX chunk: min(len, 8) on 4 lines, min(len, 4) on 1 line
-    function chunk_units(len : unsigned(15 downto 0); quad : boolean) return natural is
-        variable mx : natural;
+    -- Bytes in the next TX chunk: min(len, 4)
+    function chunk_bytes(len : unsigned(15 downto 0)) return natural is
     begin
-        if quad then
-            mx := 8;
-        else
-            mx := 4;
-        end if;
-        if len > mx then
-            return mx;
+        if len > 4 then
+            return 4;
         end if;
         return to_integer(len);
     end function;
@@ -155,42 +144,39 @@ architecture rtl of qspi_xact is
 
     signal state     : state_t := X_IDLE;
     signal cur_ph    : ph_sel_t := PH_DONE;
-    signal data_left : unsigned(15 downto 0) := (others => '0');   -- TX units still to issue
+    signal data_left : unsigned(15 downto 0) := (others => '0');   -- TX bytes still to issue
     -- data_left = col_target (the chunk being collected is the last), one cycle behind: both
     -- change only on a handshake or a command latch, and the next TX data handshake is at least
     -- two cycles later. Registered for timing at 200 MHz.
     signal last_chunk : std_logic := '0';
 
-    -- TX chunk collector (4-line: units = host bytes, max 8; 1-line: units = bytes per die, max 4)
+    -- TX chunk collector (up to 4 bytes, first byte in bits 31:24)
     signal col_active : std_logic := '0';
-    signal col_target : natural range 0 to 8 := 0;                 -- Units in the current chunk
-    signal col_k      : natural range 0 to 8 := 0;                 -- Units collected
-    signal col_die    : std_logic := '0';                          -- 1-line: next beat is die 2
+    signal col_target : natural range 0 to 4 := 0;                 -- Bytes in the current chunk
+    signal col_k      : natural range 0 to 4 := 0;                 -- Bytes collected
     signal chunk_full : std_logic := '0';
-    signal chunk_tx1  : std_logic_vector(31 downto 0) := (others => '0');
-    signal chunk_tx2  : std_logic_vector(31 downto 0) := (others => '0');
+    signal chunk_tx   : std_logic_vector(31 downto 0) := (others => '0');
 
     -- PHY descriptor registers
     signal ph_valid   : std_logic := '0';
     signal ph_ready   : std_logic;
     signal ph_lanes   : lane_mode_t := SPI1;
     signal ph_dir     : dir_t := DIR_NONE;
-    signal ph_nclk    : unsigned(15 downto 0) := (others => '0');
-    signal ph_tx1     : std_logic_vector(31 downto 0) := (others => '0');
-    signal ph_tx2     : std_logic_vector(31 downto 0) := (others => '0');
+    signal ph_nclk    : unsigned(NCLK_W - 1 downto 0) := (others => '0');
+    signal ph_tx      : std_logic_vector(31 downto 0) := (others => '0');
     signal ph_last    : std_logic := '0';
     signal ph_cs_high : unsigned(7 downto 0) := (others => '0');
 
     signal rx_valid   : std_logic;
-    signal rx_data    : std_logic_vector(7 downto 0);
+    signal rx_data    : std_logic_vector(3 downto 0);
     signal rx_last    : std_logic;
     signal phy_busy   : std_logic;
 
-    -- RX: 1-line bit accumulation and the output FIFO ({last, data})
-    signal acc1, acc2 : std_logic_vector(7 downto 0) := (others => '0');
-    signal acc_n      : natural range 0 to 7 := 0;
-    -- RX FIFO: capacity 4, but 8 slots, so incoming words can be written before the overflow
-    -- check without touching unread entries (keeps pop / f_cnt out of the write enables)
+    -- RX: byte assembly (2 nibbles or 8 bits) and the output FIFO ({last, data})
+    signal acc        : std_logic_vector(7 downto 0) := (others => '0');
+    signal acc_n      : natural range 0 to 7 := 0;                 -- Words in acc
+    -- RX FIFO: capacity 4, but 8 slots, so an incoming byte can be written before the overflow
+    -- check without touching unread entries (keeps pop / f_cnt out of the write enable)
     type fifo_t is array (0 to 7) of std_logic_vector(8 downto 0);
     signal fifo       : fifo_t := (others => (others => '0'));
     attribute syn_ramstyle : string;
@@ -219,7 +205,7 @@ begin
         variable nph     : ph_sel_t;
         variable quad_ad : boolean;     -- Address / mode on 4 lines
         variable quad_d  : boolean;     -- Latency / data on 4 lines
-        variable n_units   : natural range 0 to 8;
+        variable n_bytes : natural range 0 to 4;
         variable left    : unsigned(15 downto 0);
         variable hs      : boolean;
 
@@ -230,47 +216,42 @@ begin
             quad_d  := c_lanes /= L111;
             ph_valid   <= '1';
             ph_dir     <= DIR_TX;
-            ph_tx1     <= (others => '0');
-            ph_tx2     <= (others => '0');
+            ph_tx      <= (others => '0');
             ph_last    <= '0';
             ph_cs_high <= c_cs_high;
             case ph is
                 when PH_OP =>
                     ph_lanes <= SPI1;
-                    ph_nclk  <= to_unsigned(8, 16);
-                    ph_tx1(31 downto 24) <= c_op;
-                    ph_tx2(31 downto 24) <= c_op;
+                    ph_nclk  <= to_unsigned(8, NCLK_W);
+                    ph_tx(31 downto 24) <= c_op;
                 when PH_ADDR =>
                     ph_lanes <= lanes_of(quad_ad);
-                    ph_nclk  <= to_unsigned(c_ab * (2 + 6 * boolean'pos(not quad_ad)), 16);
-                    ph_tx1   <= std_logic_vector(shift_left(unsigned(c_addr), 32 - 8 * c_ab));
-                    ph_tx2   <= std_logic_vector(shift_left(unsigned(c_addr), 32 - 8 * c_ab));
+                    ph_nclk  <= to_unsigned(c_ab * (2 + 6 * boolean'pos(not quad_ad)), NCLK_W);
+                    ph_tx    <= std_logic_vector(shift_left(unsigned(c_addr), 32 - 8 * c_ab));
                 when PH_MODE =>
                     ph_lanes <= lanes_of(quad_ad);
-                    ph_nclk  <= to_unsigned(2 + 6 * boolean'pos(not quad_ad), 16);
-                    ph_tx1(31 downto 24) <= c_mode;
-                    ph_tx2(31 downto 24) <= c_mode;
+                    ph_nclk  <= to_unsigned(2 + 6 * boolean'pos(not quad_ad), NCLK_W);
+                    ph_tx(31 downto 24) <= c_mode;
                 when PH_LAT =>
                     ph_lanes <= lanes_of(quad_d);
                     ph_dir   <= DIR_NONE;
-                    ph_nclk  <= to_unsigned(c_lat, 16);
+                    ph_nclk  <= to_unsigned(c_lat, NCLK_W);
                 when others =>                                   -- PH_DATA
                     ph_lanes <= lanes_of(quad_d);
                     ph_dir   <= c_dir;
                     if c_dir = DIR_RX then
                         if quad_d then
-                            ph_nclk <= data_left;
+                            ph_nclk <= shift_left(resize(data_left, NCLK_W), 1);
                         else
-                            ph_nclk <= shift_left(data_left, 3);
+                            ph_nclk <= shift_left(resize(data_left, NCLK_W), 3);
                         end if;
                     else
                         if quad_d then
-                            ph_nclk <= to_unsigned(col_target, 16);
+                            ph_nclk <= to_unsigned(2 * col_target, NCLK_W);
                         else
-                            ph_nclk <= to_unsigned(8 * col_target, 16);
+                            ph_nclk <= to_unsigned(8 * col_target, NCLK_W);
                         end if;
-                        ph_tx1 <= chunk_tx1;
-                        ph_tx2 <= chunk_tx2;
+                        ph_tx <= chunk_tx;
                     end if;
             end case;
         end procedure;
@@ -284,38 +265,16 @@ begin
             end if;
 
             ---------------------------------------------------------------- TX chunk collector
+            -- Same byte layout for 4 lines (high nibble first) and 1 line (MSB first)
             if s_ready_i = '1' and s_axis_tvalid = '1' then
-                if c_lanes /= L111 then                          -- 4 lines: one unit per beat
-                    for i in 0 to 7 loop
-                        if i = col_k then
-                            chunk_tx1(31 - 4 * i downto 28 - 4 * i) <= s_axis_tdata(3 downto 0);
-                            chunk_tx2(31 - 4 * i downto 28 - 4 * i) <= s_axis_tdata(7 downto 4);
-                        end if;
-                    end loop;
-                    col_k <= col_k + 1;
-                    if col_k + 1 = col_target then
-                        chunk_full <= '1';
+                for i in 0 to 3 loop
+                    if i = col_k then
+                        chunk_tx(31 - 8 * i downto 24 - 8 * i) <= s_axis_tdata;
                     end if;
-                else                                             -- 1 line: die 1 byte, die 2 byte
-                    for i in 0 to 3 loop
-                        if i = col_k then
-                            if col_die = '0' then
-                                chunk_tx1(31 - 8 * i downto 24 - 8 * i) <= s_axis_tdata;
-                                chunk_tx2(31 - 8 * i downto 24 - 8 * i) <= s_axis_tdata;
-                            else
-                                chunk_tx2(31 - 8 * i downto 24 - 8 * i) <= s_axis_tdata;
-                            end if;
-                        end if;
-                    end loop;
-                    if DIE2_PRESENT and col_die = '0' then
-                        col_die <= '1';
-                    else
-                        col_die <= '0';
-                        col_k   <= col_k + 1;
-                        if col_k + 1 = col_target then
-                            chunk_full <= '1';
-                        end if;
-                    end if;
+                end loop;
+                col_k <= col_k + 1;
+                if col_k + 1 = col_target then
+                    chunk_full <= '1';
                 end if;
             end if;
 
@@ -342,9 +301,8 @@ begin
                         if cmd_dir = DIR_TX then
                             col_active <= '1';
                             col_k      <= 0;
-                            col_die    <= '0';
                             chunk_full <= '0';
-                            col_target <= chunk_units(cmd_len, cmd_lanes /= L111);
+                            col_target <= chunk_bytes(cmd_len);
                         end if;
                         -- The opcode phase is presented in the next cycle (fields latched)
                         cur_ph <= PH_OP;
@@ -357,17 +315,15 @@ begin
                         nph := next_ph(cur_ph, c_ab, c_mode_en, c_lat, c_dir);
                         if cur_ph = PH_DATA and c_dir = DIR_TX then
                             -- Chunk sent: next chunk or done
-                            n_units := col_target;
-                            left  := data_left - n_units;
+                            n_bytes := col_target;
+                            left  := data_left - n_bytes;
                             data_left <= left;
                             chunk_full <= '0';
                             col_k      <= 0;
-                            col_die    <= '0';
-                            chunk_tx1  <= (others => '0');
-                            chunk_tx2  <= (others => '0');
+                            chunk_tx   <= (others => '0');
                             if last_chunk = '0' then
                                 nph := PH_DATA;
-                                col_target <= chunk_units(left, c_lanes /= L111);
+                                col_target <= chunk_bytes(left);
                             else
                                 col_active <= '0';
                             end if;
@@ -420,63 +376,58 @@ begin
     end process;
 
     -------------------------------------------------------------------------------------------
-    -- RX: PHY words -> stream bytes -> FIFO
+    -- RX: PHY words -> bytes -> FIFO
+    --   4 lines: two nibbles per byte, high nibble first. 1 line: eight bits, MSB first.
+    --   Every RX phase is a whole number of bytes, so acc_n is 0 at the start of each command.
     -------------------------------------------------------------------------------------------
     process (clk)
-        variable n_push : natural range 0 to 2;
-        variable d0, d1 : std_logic_vector(8 downto 0);
-        variable pop    : boolean;
-        variable cnt    : natural range 0 to 6;
-        variable b1, b2 : std_logic_vector(7 downto 0);
+        variable push : boolean;
+        variable d0   : std_logic_vector(8 downto 0);
+        variable pop  : boolean;
+        variable cnt  : natural range 0 to 4;
+        variable b    : std_logic_vector(7 downto 0);
     begin
         if rising_edge(clk) then
-            n_push  := 0;
+            push    := false;
             ovf     <= '0';
             rx_done <= '0';
             if rx_valid = '1' then
                 if c_lanes /= L111 then
-                    d0 := rx_last & rx_data;
-                    n_push := 1;
+                    b := acc(3 downto 0) & rx_data;
+                    push := acc_n = 1;
                 else
-                    b1 := acc1(6 downto 0) & rx_data(0);
-                    b2 := acc2(6 downto 0) & rx_data(4);
-                    acc1 <= b1;
-                    acc2 <= b2;
-                    if acc_n = 7 then
-                        acc_n <= 0;
-                        if DIE2_PRESENT then
-                            d0 := '0' & b1;
-                            d1 := rx_last & b2;
-                            n_push := 2;
-                        else
-                            d0 := rx_last & b1;
-                            n_push := 1;
-                        end if;
-                    else
-                        acc_n <= acc_n + 1;
-                    end if;
+                    b := acc(6 downto 0) & rx_data(0);
+                    push := acc_n = 7;
+                end if;
+                acc <= b;
+                d0  := rx_last & b;
+                if push then
+                    acc_n <= 0;
+                else
+                    acc_n <= acc_n + 1;
                 end if;
                 if rx_last = '1' then
                     rx_done <= '1';
                 end if;
             end if;
 
-            -- Unread entries are f_rd .. f_rd + 3 at most, so f_wr and f_wr + 1 are always free.
-            -- Only the words that fit advance f_wr; the others are dropped (rx_overflow).
-            if n_push >= 1 then
+            -- Unread entries are f_rd .. f_rd + 3 at most, so f_wr is always free. The byte only
+            -- advances f_wr if it fits; otherwise it is dropped (rx_overflow).
+            if push then
                 fifo(to_integer(f_wr)) <= d0;
-            end if;
-            if n_push = 2 then
-                fifo(to_integer(f_wr + 1)) <= d1;
             end if;
             pop := f_cnt /= 0 and m_axis_tready = '1';
             cnt := f_cnt - boolean'pos(pop);
-            if cnt + n_push > 4 then
-                ovf    <= '1';
-                n_push := 4 - cnt;
+            if push and cnt = 4 then
+                ovf  <= '1';
+                push := false;
             end if;
-            f_wr  <= f_wr + n_push;
-            f_cnt <= cnt + n_push;
+            if push then
+                f_wr  <= f_wr + 1;
+                f_cnt <= cnt + 1;
+            else
+                f_cnt <= cnt;
+            end if;
             if pop then
                 f_rd <= f_rd + 1;
             end if;
@@ -491,11 +442,11 @@ begin
     end process;
 
     phy : entity work.qspi_phy
-        generic map (DIE2_PRESENT => DIE2_PRESENT, NCLK_W => 16, CS_HIGH_W => 8)
+        generic map (NCLK_W => NCLK_W, CS_HIGH_W => 8)
         port map (
             clk => clk, reset_n => reset_n,
             ph_valid => ph_valid, ph_ready => ph_ready, ph_lanes => ph_lanes, ph_dir => ph_dir,
-            ph_nclk => ph_nclk, ph_tx1 => ph_tx1, ph_tx2 => ph_tx2, ph_last => ph_last,
+            ph_nclk => ph_nclk, ph_tx => ph_tx, ph_last => ph_last,
             ph_sclk_div => c_div, ph_cs_high => ph_cs_high, sample_dly => sample_dly,
             rx_valid => rx_valid, rx_data => rx_data, rx_last => rx_last, busy => phy_busy,
             sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io_i);

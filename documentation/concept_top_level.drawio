@@ -1,76 +1,223 @@
-<mxfile host="Electron">
+<mxfile host="65bd71144e">
     <diagram id="concept_top_level" name="Concept top level">
-        <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
+        <mxGraphModel dx="1513" dy="796" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="soc" value="PolarFire SoC (RTPFS160ZT / MPFS160T)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="260" y="40" width="1310" height="840" as="geometry"/></mxCell>
-                <mxCell id="mss" value="MSS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;dashed=1;" vertex="1" parent="1"><mxGeometry x="280" y="90" width="460" height="670" as="geometry"/></mxCell>
-                <mxCell id="fpga" value="FPGA fabric (TOP)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;dashed=1;" vertex="1" parent="1"><mxGeometry x="790" y="90" width="760" height="670" as="geometry"/></mxCell>
-                <mxCell id="arr" value="Array Controller (holds the Slice Controllers)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;dashed=1;align=left;spacingLeft=6;" vertex="1" parent="1"><mxGeometry x="1130" y="200" width="400" height="260" as="geometry"/></mxCell>
-                <mxCell id="envm" value='eNVM&lt;br&gt;&lt;font style="font-size: 10px;"&gt;HSS image&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="300" y="130" width="90" height="70" as="geometry"/></mxCell>
-                <mxCell id="e51" value='&lt;b&gt;E51&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;HSS zero-stage bootloader,&lt;br&gt;loads U54 firmware from MRAM (CS2)&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="410" y="130" width="230" height="70" as="geometry"/></mxCell>
-                <mxCell id="u1" value='&lt;b&gt;U54 core 1&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style="font-size: 10px;"&gt;CAN TC/TM, telemetry,&lt;br&gt;ADC readings, sensor values to FPGA&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="410" y="230" width="230" height="90" as="geometry"/></mxCell>
-                <mxCell id="u2" value='&lt;b&gt;U54 core 2&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style="font-size: 10px;"&gt;Ethernet/UDP,&lt;br&gt;Contact Plan ingestion&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="410" y="340" width="230" height="70" as="geometry"/></mxCell>
-                <mxCell id="u3" value='&lt;b&gt;U54 core 3&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style="font-size: 10px;"&gt;Calculation pipeline:&lt;br&gt;position/attitude + Contact Plan&lt;br&gt;→ u/v for 8 beams&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="410" y="450" width="230" height="90" as="geometry"/></mxCell>
-                <mxCell id="u4" value='&lt;b&gt;U54 core 4&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style="font-size: 10px;"&gt;Watchdog, power supply, FPGA state,&lt;br&gt;LUT data updates, FW updates&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="410" y="560" width="230" height="90" as="geometry"/></mxCell>
-                <mxCell id="can" value="CAN" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="300" y="230" width="90" height="40" as="geometry"/></mxCell>
-                <mxCell id="adcif" value='SPI / I²C&lt;br&gt;&lt;font style="font-size: 10px;"&gt;ADC&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="300" y="280" width="90" height="40" as="geometry"/></mxCell>
-                <mxCell id="mac" value="Ethernet MAC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="300" y="350" width="90" height="50" as="geometry"/></mxCell>
-                <mxCell id="gpio" value="GPIO" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="300" y="575" width="90" height="60" as="geometry"/></mxCell>
-                <mxCell id="qspi" value='QSPI&lt;br&gt;&lt;font style="font-size: 10px;"&gt;U54 firmware, app data, FW uploads&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="410" y="690" width="230" height="45" as="geometry"/></mxCell>
-                <mxCell id="fic" value="FIC_0 (AXI4)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;horizontal=0;" vertex="1" parent="1"><mxGeometry x="680" y="120" width="40" height="560" as="geometry"/></mxCell>
-                <mxCell id="sysctl" value='System Controller&lt;br&gt;&lt;font style="font-size: 10px;"&gt;SPI (IAP)&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="280" y="785" width="120" height="60" as="geometry"/></mxCell>
-                <mxCell id="ic" value="AXI4 interconnect" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;horizontal=0;" vertex="1" parent="1"><mxGeometry x="810" y="120" width="40" height="560" as="geometry"/></mxCell>
-                <mxCell id="sc" value='&lt;b&gt;System Control&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;high-level state, resets,&lt;br&gt;init/test trigger&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="890" y="120" width="200" height="70" as="geometry"/></mxCell>
-                <mxCell id="fifo_b2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="906" y="324" width="200" height="90" as="geometry"/></mxCell>
-                <mxCell id="fifo_b1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="898" y="332" width="200" height="90" as="geometry"/></mxCell>
-                <mxCell id="fifo" value='&lt;b&gt;8 × Beam FIFO&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;Steering Points:&lt;br&gt;u/v, frequency&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="890" y="340" width="200" height="90" as="geometry"/></mxCell>
-                <mxCell id="lutu" value='&lt;b&gt;LUT Updater&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;writes MRAM LUT&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="890" y="590" width="200" height="70" as="geometry"/></mxCell>
-                <mxCell id="dist" value="Steering Point distribution&lt;br&gt;&lt;br&gt;Temperature registers" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="1145" y="240" width="150" height="110" as="geometry"/></mxCell>
-                <mxCell id="slice_b2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="1346" y="244" width="180" height="170" as="geometry"/></mxCell>
-                <mxCell id="slice_b1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="1338" y="252" width="180" height="170" as="geometry"/></mxCell>
-                <mxCell id="slice" value='&lt;b&gt;Slice Controller × 22&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;10 BFICs each&lt;br&gt;Slice FIFO (Steering Points)&lt;br&gt;calibration RAM&lt;br&gt;tapering gains (generics)&lt;br&gt;format → block FIFO&lt;br&gt;→ serializer → SPI&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="1330" y="260" width="180" height="170" as="geometry"/></mxCell>
-                <mxCell id="cal" value='&lt;b&gt;Calibration LUT Controller&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;loads cal. data at startup&lt;br&gt;and after LUT updates&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="1145" y="500" width="170" height="70" as="geometry"/></mxCell>
-                <mxCell id="mramc" value='&lt;b&gt;MRAM Controller&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;shared, one user at a time&lt;br&gt;(selected by state)&lt;/font&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1"><mxGeometry x="1145" y="610" width="170" height="70" as="geometry"/></mxCell>
-                <mxCell id="cant" value="CAN transceiver" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="225" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="adc" value="ADC / MUX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="280" width="170" height="40" as="geometry"/></mxCell>
-                <mxCell id="phy" value="Ethernet PHY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="350" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="wdt" value="External watchdog" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="545" width="170" height="40" as="geometry"/></mxCell>
-                <mxCell id="psu" value='Power supply&lt;br&gt;&lt;font style="font-size: 10px;"&gt;control / monitoring&lt;/font&gt;' style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="600" width="170" height="50" as="geometry"/></mxCell>
-                <mxCell id="sst" value='&lt;b&gt;SST26L064&lt;/b&gt; QSPI flash&lt;br&gt;&lt;font style="font-size: 10px;"&gt;bitstream updates&lt;/font&gt;' style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="785" width="170" height="60" as="geometry"/></mxCell>
-                <mxCell id="bfic_b2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="1636" y="244" width="190" height="170" as="geometry"/></mxCell>
-                <mxCell id="bfic_b1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="1628" y="252" width="190" height="170" as="geometry"/></mxCell>
-                <mxCell id="bfic" value='&lt;b&gt;22 × Slice&lt;/b&gt;&lt;br&gt;&lt;font style="font-size: 10px;"&gt;10 BFICs each (220 total)&lt;/font&gt;' style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="1620" y="260" width="190" height="170" as="geometry"/></mxCell>
-                <mxCell id="as308" value='&lt;b&gt;AS308G208&lt;/b&gt; MRAM&lt;br&gt;&lt;font style="font-size: 10px;"&gt;dual-quad SPI, 1 GB&lt;br&gt;2 × 512 MB, one per CS#&lt;br&gt;&lt;br&gt;CS1: calibration LUT&lt;br&gt;CS2: MSS firmware, app data,&lt;br&gt;FW uploads&lt;/font&gt;' style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" vertex="1" parent="1"><mxGeometry x="1620" y="560" width="210" height="140" as="geometry"/></mxCell>
-                <mxCell id="e_can" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="cant" target="can"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_adc" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="adc" target="adcif"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_phy" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="phy" target="mac"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_wdt" value="kick" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="gpio" target="wdt"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_psu" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="gpio" target="psu"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_sst" value="SPI" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="sysctl" target="sst"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_envm" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" edge="1" parent="1" source="envm" target="e51"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_c23" value="Contact Plan" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" edge="1" parent="1" source="u2" target="u3"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_e51q" value="boot" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="e51" target="qspi"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="400" y="165"/><mxPoint x="400" y="712"/></Array></mxGeometry></mxCell>
-                <mxCell id="e_u1fic" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="u1" target="fic"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_u3fic" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="u3" target="fic"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_u4fic" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="u4" target="fic"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_ficic" value="AXI4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" edge="1" parent="1" source="fic" target="ic"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_sc" value="AXI-Lite" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.1;exitDx=0;exitDy=0;" edge="1" parent="1" source="ic" target="sc"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_temp" value="AXI-Lite (temp.)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ic" target="dist"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_fifo" value="AXI-S / DMA (u/v)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.54;exitDx=0;exitDy=0;" edge="1" parent="1" source="ic" target="fifo"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_lutu" value="AXI-Lite + AXI-S" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.93;exitDx=0;exitDy=0;" edge="1" parent="1" source="ic" target="lutu"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_state" value="state / resets / init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="sc" target="arr"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1330" y="155"/></Array></mxGeometry></mxCell>
-                <mxCell id="e_fd" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" edge="1" parent="1" source="fifo" target="dist"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_ds" value="Steering Points&lt;br&gt;(→ Slice FIFOs),&lt;br&gt;temperature" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" parent="1" source="dist" target="slice"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_cs" value="cal. data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="cal" target="slice"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_cm" value="read" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" edge="1" parent="1" source="mramc" target="cal"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_um" value="write" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" edge="1" parent="1" source="lutu" target="mramc"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_spi" value="SPI + GPIO&lt;br&gt;(22 buses)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;" edge="1" parent="1" source="slice" target="bfic"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_bsw" value="BSW" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" edge="1" parent="1" source="slice" target="bfic"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_mram" value="QSPI CS1 (4 bit)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.45;entryDx=0;entryDy=0;" edge="1" parent="1" source="mramc" target="as308"><mxGeometry relative="1" as="geometry"></mxGeometry></mxCell>
-                <mxCell id="e_fw" value="QSPI CS2 (4 bit)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="qspi" target="as308"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="525" y="865"/><mxPoint x="1725" y="865"/></Array></mxGeometry></mxCell>
-                <mxCell id="legend" value='&lt;div style="text-align:left;font-size:10px;"&gt;&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;solid: data / control path&lt;br&gt;dashed: control signal or unresolved&lt;br&gt;"?": open point in concept.md&lt;br&gt;stacked box: multiple instances&lt;/div&gt;' style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;align=left;spacingLeft=6;" vertex="1" parent="1"><mxGeometry x="1600" y="900" width="230" height="100" as="geometry"/></mxCell>
+                <mxCell id="soc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;" value="PolarFire SoC (RTPFS160ZT / MPFS160T)" vertex="1">
+                    <mxGeometry height="840" width="1310" x="260" y="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="mss" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;dashed=1;" value="MSS" vertex="1">
+                    <mxGeometry height="670" width="460" x="280" y="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="fpga" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;dashed=1;" value="FPGA fabric (TOP)" vertex="1">
+                    <mxGeometry height="670" width="760" x="790" y="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="arr" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;verticalAlign=top;fontStyle=1;dashed=1;align=left;spacingLeft=6;" value="Array Controller (holds the Slice Controllers)" vertex="1">
+                    <mxGeometry height="260" width="400" x="1130" y="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="envm" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="eNVM&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;HSS image&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="90" x="300" y="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="e51" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;E51&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;HSS zero-stage bootloader,&lt;br&gt;loads U54 firmware from MRAM (CS2)&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="230" x="410" y="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="u1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;U54 core 1&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;CAN TC/TM, telemetry,&lt;br&gt;ADC readings, sensor values to FPGA&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="90" width="230" x="410" y="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="u2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;U54 core 2&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;Ethernet/UDP,&lt;br&gt;Contact Plan ingestion&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="230" x="410" y="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="u3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;U54 core 3&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;Calculation pipeline:&lt;br&gt;position/attitude + Contact Plan&lt;br&gt;→ u/v for 8 beams&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="90" width="230" x="410" y="450" as="geometry"/>
+                </mxCell>
+                <mxCell id="u4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;U54 core 4&lt;/b&gt; (RTEMS)&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;Watchdog, power supply, FPGA state,&lt;br&gt;LUT data updates, FW updates&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="90" width="230" x="410" y="560" as="geometry"/>
+                </mxCell>
+                <mxCell id="can" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="CAN" vertex="1">
+                    <mxGeometry height="40" width="90" x="300" y="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="adcif" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="SPI / I²C&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;ADC&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="40" width="90" x="300" y="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="mac" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="Ethernet MAC" vertex="1">
+                    <mxGeometry height="50" width="90" x="300" y="350" as="geometry"/>
+                </mxCell>
+                <mxCell id="gpio" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="GPIO" vertex="1">
+                    <mxGeometry height="60" width="90" x="300" y="575" as="geometry"/>
+                </mxCell>
+                <mxCell id="qspi" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="QSPI&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;U54 firmware, app data, FW uploads&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="45" width="230" x="410" y="690" as="geometry"/>
+                </mxCell>
+                <mxCell id="fic" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;horizontal=0;" value="FIC_0 (AXI4)" vertex="1">
+                    <mxGeometry height="560" width="40" x="680" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="sysctl" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="System Controller&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;SPI (IAP)&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="60" width="120" x="280" y="785" as="geometry"/>
+                </mxCell>
+                <mxCell id="ic" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;horizontal=0;" value="AXI4 interconnect" vertex="1">
+                    <mxGeometry height="560" width="40" x="810" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="sc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;System Control&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;high-level state, resets,&lt;br&gt;init/test trigger&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="200" x="890" y="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="fifo_b2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="" vertex="1">
+                    <mxGeometry height="90" width="200" x="906" y="324" as="geometry"/>
+                </mxCell>
+                <mxCell id="fifo_b1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="" vertex="1">
+                    <mxGeometry height="90" width="200" x="898" y="332" as="geometry"/>
+                </mxCell>
+                <mxCell id="fifo" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;8 × Beam FIFO&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;Steering Points:&lt;br&gt;u/v, frequency&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="90" width="200" x="890" y="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="lutu" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;LUT Updater&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;writes MRAM LUT&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="200" x="890" y="590" as="geometry"/>
+                </mxCell>
+                <mxCell id="dist" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="Steering Point distribution&lt;br&gt;&lt;br&gt;Temperature registers" vertex="1">
+                    <mxGeometry height="110" width="150" x="1145" y="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="slice_b2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="" vertex="1">
+                    <mxGeometry height="170" width="180" x="1346" y="244" as="geometry"/>
+                </mxCell>
+                <mxCell id="slice_b1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="" vertex="1">
+                    <mxGeometry height="170" width="180" x="1338" y="252" as="geometry"/>
+                </mxCell>
+                <mxCell id="slice" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;Slice Controller × 22&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;10 BFICs each&lt;br&gt;Slice FIFO (Steering Points)&lt;br&gt;calibration RAM (46,080 bits)&lt;br&gt;tapering gains (generics)&lt;br&gt;format → block FIFO&lt;br&gt;→ serializer → SPI&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="170" width="180" x="1330" y="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="cal" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;Calibration LUT Controller&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;loads cal. data once after&lt;br&gt;MRAM init and after LUT updates&lt;br&gt;(22 × 46,080 bits, ≈ 5.1 ms)&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="170" x="1145" y="500" as="geometry"/>
+                </mxCell>
+                <mxCell id="mramc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" value="&lt;b&gt;MRAM Controller&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;shared, one user at a time&lt;br&gt;(selected by state)&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="70" width="170" x="1145" y="610" as="geometry"/>
+                </mxCell>
+                <mxCell id="cant" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="CAN transceiver" vertex="1">
+                    <mxGeometry height="50" width="170" x="40" y="225" as="geometry"/>
+                </mxCell>
+                <mxCell id="adc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="ADC / MUX" vertex="1">
+                    <mxGeometry height="40" width="170" x="40" y="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="phy" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="Ethernet PHY" vertex="1">
+                    <mxGeometry height="50" width="170" x="40" y="350" as="geometry"/>
+                </mxCell>
+                <mxCell id="wdt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="External watchdog" vertex="1">
+                    <mxGeometry height="40" width="170" x="40" y="545" as="geometry"/>
+                </mxCell>
+                <mxCell id="psu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="Power supply&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;control / monitoring&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="50" width="170" x="40" y="600" as="geometry"/>
+                </mxCell>
+                <mxCell id="sst" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="&lt;b&gt;SST26L064&lt;/b&gt; QSPI flash&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;bitstream updates&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="60" width="170" x="40" y="785" as="geometry"/>
+                </mxCell>
+                <mxCell id="bfic_b2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="" vertex="1">
+                    <mxGeometry height="170" width="190" x="1636" y="244" as="geometry"/>
+                </mxCell>
+                <mxCell id="bfic_b1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="" vertex="1">
+                    <mxGeometry height="170" width="190" x="1628" y="252" as="geometry"/>
+                </mxCell>
+                <mxCell id="bfic" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="&lt;b&gt;22 × Slice&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;10 BFICs each (220 total)&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="170" width="190" x="1620" y="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="as308" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=default;arcSize=12;" value="&lt;b&gt;AS308G208&lt;/b&gt; MRAM&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;dual-quad SPI, 1 GB&lt;br&gt;2 × 512 MB, one per CS#&lt;br&gt;&lt;br&gt;CS1: calibration LUT&lt;br&gt;CS2: MSS firmware, app data,&lt;br&gt;FW uploads&lt;/font&gt;" vertex="1">
+                    <mxGeometry height="140" width="210" x="1620" y="560" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_can" edge="1" parent="1" source="cant" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="can" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_adc" edge="1" parent="1" source="adc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="adcif" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_phy" edge="1" parent="1" source="phy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="mac" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_wdt" edge="1" parent="1" source="gpio" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" target="wdt" value="kick">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_psu" edge="1" parent="1" source="gpio" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" target="psu" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_sst" edge="1" parent="1" source="sysctl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="sst" value="SPI">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_envm" edge="1" parent="1" source="envm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" target="e51" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_c23" edge="1" parent="1" source="u2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" target="u3" value="Contact Plan">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_e51q" edge="1" parent="1" source="e51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="qspi" value="boot">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="400" y="165"/>
+                            <mxPoint x="400" y="712"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e_u1fic" edge="1" parent="1" source="u1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="fic" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_u3fic" edge="1" parent="1" source="u3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="fic" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_u4fic" edge="1" parent="1" source="u4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="fic" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ficic" edge="1" parent="1" source="fic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="ic" value="AXI4">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_sc" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.1;exitDx=0;exitDy=0;" target="sc" value="AXI-Lite">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_temp" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="dist" value="AXI-Lite (temp.)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_fifo" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.54;exitDx=0;exitDy=0;" target="fifo" value="AXI-S / DMA (u/v)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_lutu" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.93;exitDx=0;exitDy=0;" target="lutu" value="AXI-Lite + AXI-S">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_state" edge="1" parent="1" source="sc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="arr" value="state / resets / init">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1330" y="155"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e_fd" edge="1" parent="1" source="fifo" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" target="dist" value="">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ds" edge="1" parent="1" source="dist" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" target="slice" value="Steering Points&lt;br&gt;(→ Slice FIFOs),&lt;br&gt;temperature">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_cs" edge="1" parent="1" source="cal" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="slice" value="cal. data">
+                    <mxGeometry relative="1" x="0.3333" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e_cm" edge="1" parent="1" source="mramc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" target="cal" value="read">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_um" edge="1" parent="1" source="lutu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" target="mramc" value="write">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_spi" edge="1" parent="1" source="slice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;" target="bfic" value="SPI + GPIO&lt;br&gt;(22 buses)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_bsw" edge="1" parent="1" source="slice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" target="bfic" value="BSW">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_mram" edge="1" parent="1" source="mramc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.45;entryDx=0;entryDy=0;" target="as308" value="QSPI CS1 (4 bit)">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_fw" edge="1" parent="1" source="qspi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="as308" value="QSPI CS2 (4 bit)">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="525" y="865"/>
+                            <mxPoint x="1725" y="865"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
             </root>
         </mxGraphModel>
     </diagram>

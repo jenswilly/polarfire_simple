@@ -8,7 +8,6 @@ Source: `hdl/qspi_write.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | Memory type. |
-| `DIE2_PRESENT` | boolean | false | false: the upper nibble of each data byte is ignored. |
 | `SCLK_DIV` | positive | 2 | SCLK = `clk` / (2·`SCLK_DIV`). |
 
 ## Ports
@@ -18,7 +17,7 @@ Source: `hdl/qspi_write.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | `clk` | in | 1 | Clock. |
 | `reset_n` | in | 1 | Synchronous, active-low reset. |
 | `init_done` | in | 1 | Requests are rejected while low. |
-| `s_axis_req_tdata` | in | 48 | Request `{len[15:0], addr[31:0]}` in host bytes. |
+| `s_axis_req_tdata` | in | 48 | Request `{len[15:0], addr[31:0]}` in bytes. |
 | `s_axis_req_tvalid` | in | 1 | Request valid. |
 | `s_axis_req_tready` | out | 1 | Request accepted. |
 | `s_axis_data_tdata` | in | 8 | Write data byte; `len` bytes per request. |
@@ -40,14 +39,13 @@ Source: `hdl/qspi_write.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 
 ## Testbench
 
-`sim/tb_qspi_write.vhd` — `sim/run_tb.sh tb_qspi_write`. Runs `qspi_write` and `qspi_read_ctrl` on one `qspi_xact` against preloaded models (W25Q, AS 1 and 2 dies).
+`sim/tb_qspi_write.vhd` — `sim/run_tb.sh tb_qspi_write`. Runs `qspi_write` and `qspi_read_ctrl` on one `qspi_xact` against preloaded models (W25Q, AS308G208 one port/die).
 
 | Test | Checks |
 |---|---|
 | Rejected requests | Before `init_done` or bad requests: `req_err`, nothing written. |
-| Write / read back | 880 host bytes (W25Q: across a sector boundary and three pages). |
+| Write / read back | 880 bytes at an odd address (W25Q: across a sector boundary and four pages). |
 | Erase side effects | W25Q: rest of both erased sectors reads FFh. |
-| Overlapping write | 64-byte block over the first one, whole area read back. |
+| Overlapping write | 63-byte block over the first one, whole area read back. |
 | Neighbours | AS: bytes around the block keep the preload. |
-| One die | Upper nibble ignored. |
 | Protocol | WEL/WREN, BUSY, CS# high times, byte boundaries. |

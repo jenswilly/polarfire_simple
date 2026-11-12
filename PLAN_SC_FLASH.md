@@ -62,7 +62,7 @@ Keep the AS308 split (device 2 for MSS data through MSS QSPI → fabric pins, us
 4. Pinout: device 1 on fabric pins (IO3:0, CS1#, CLK1). Device 2 on SC_SPI (SCK → CLK2, SS → CS2#, SDO → IO4/SI, SDI ← IO5/SO). Pull-ups on IO6/IO7 and CS2#. RESET# from a POR supervisor (R2). Straps SPI_EN/IO_CFG_INTF = 1. VCCIO = VDDI3 = 3.3 V.
 
 **Phase 2: FPGA**
-5. Single-die `qspi_board`/`qspi_mram_ctrl` config (`DEVICE = DEV_AS308G208`, `DIE2_PRESENT = false`) with no RESET# pulse. Make RESET# optional in `qspi_init` (generic) and extend `tb_qspi_init`.
+5. Single-die `qspi_board`/`qspi_mram_ctrl` config (`DEVICE = DEV_AS308G208`; done 2026-11-12: the controller is single-die only, `DIE2_PRESENT` was removed) with no RESET# pulse. Make RESET# optional in `qspi_init` (generic) and extend `tb_qspi_init`.
 6. Add PF_SPI and route the MSS QSPI in fabric mode (normal SPI) to it. This replaces/extends `hdl/mss_qspi_pads.vhd`, with a new `mss_sc_spi_pads` mapping the QSPI DATA0/1 to SDO/SDI. Update SmartDesign, `TOP.vhd` and the diagrams.
 
 **Phase 3: HSS (small patch set in `hss/patches/`)**

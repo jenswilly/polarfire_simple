@@ -1,4 +1,4 @@
--- QSPI PHY / bit engine (SPI mode 0, SDR), both dies in lockstep
+-- QSPI PHY / bit engine (SPI mode 0, SDR), one die (one CS#, IO3:0)
 --
 --   phase descriptors (valid/ready) --> SCLK, CS#, IO out/OE   (pins)
 --   pins (io_i)                     --> rx_* (one word per RX SCLK cycle)
@@ -6,11 +6,11 @@
 --   A transaction is a sequence of phases between CS# low and CS# high. Each phase is a number
 --   of SCLK cycles with one lane mode and direction; ph_last marks the last phase. The PHY knows
 --   nothing about commands (qspi_xact builds the phases).
---     SPI1  TX: data on IO0 (die 1) / IO4 (die 2), MSB first, ph_tx1/ph_tx2(31) first.
---     QUAD4 TX: data on IO3:0 / IO7:4, 4 bits per cycle, ph_tx(31 downto 28) first (IO3 = bit 31).
---     RX: in SPI1 the bit comes from IO1 / IO5, in QUAD4 from IO3:0 / IO7:4.
+--     SPI1  TX: data on IO0, MSB first, ph_tx(31) first.
+--     QUAD4 TX: data on IO3:0, 4 bits per cycle, ph_tx(31 downto 28) first (IO3 = bit 31).
+--     RX: in SPI1 the bit comes from IO1, in QUAD4 the nibble from IO3:0.
 --     NONE: dummy/latency cycles.
---   TX phases carry at most 32 bits per die (SPI1 <= 32 cycles, QUAD4 <= 8 cycles); longer
+--   TX phases carry at most 32 bits (SPI1 <= 32 cycles, QUAD4 <= 8 cycles); longer
 --   writes are several phases. RX and NONE phases can be up to 2**NCLK_W - 1 cycles.
 --
 -- Pins:
@@ -19,22 +19,20 @@
 --   change together with the SCLK falling edge (and with CS# going low), so the device sees
 --   sclk_div clk cycles of setup and hold around each rising edge. CS# goes low together with
 --   the first data bit, and high at least one clk cycle after the last SCLK falling edge.
---   In SPI1 phases IO2/IO3 and IO6/IO7 are driven high (WP#/HOLD# inactive, device_facts.md
---   §4.7) and IO0/IO4 are driven ('0' when not transmitting). After reset the pads have this
+--   In SPI1 phases IO2/IO3 are driven high (WP#/HOLD# inactive, device_facts.md §4.7) and IO0
+--   is driven ('0' when not transmitting). After reset the pads have this
 --   SPI1 pattern. When CS# goes high the pads keep the state of the last cycle, so after a
 --   QUAD4 read IO3:0 stay released (no contention while the device turns its outputs off)
 --   until the next transaction drives them again together with CS# low.
 --   QUAD4 RX/NONE phases release OE on all four lanes; the release happens on the falling edge
 --   that starts the phase (the turnaround before latency cycles).
---   sclk(1)/cs_n(1) are copies of sclk(0)/cs_n(0) with their own pad flops.
---   With DIE2_PRESENT = false, IO7:4 are never driven, and their input is read as "0000".
 --
 -- RX sampling:
 --   The device drives a new bit/nibble after each SCLK falling edge. For every RX cycle the PHY
 --   uses the input register value captured sample_dly clk cycles after the falling edge that
 --   launched it (sample_dly = 1 .. SAMPLE_DLY_MAX, compensates the round-trip delay). CS# stays
---   low until the last sample has been captured. Each RX cycle gives one rx_data word
---   {die2_nibble, die1_nibble}; in SPI1 each nibble is "000" & bit. rx_last marks the last word
+--   low until the last sample has been captured. Each RX cycle gives one rx_data word: the
+--   nibble on IO3:0 in QUAD4, "000" & IO1 in SPI1. rx_last marks the last word
 --   of an RX phase. There is no backpressure: the receiver must take a word every cycle.
 --   Change sample_dly only while busy = '0'.
 --
@@ -59,7 +57,6 @@ use work.qspi_pkg.all;
 
 entity qspi_phy is
     generic (
-        DIE2_PRESENT : boolean  := true;
         NCLK_W       : positive := 16;   -- Width of ph_nclk
         CS_HIGH_W    : positive := 8     -- Width of ph_cs_high
     );
@@ -73,8 +70,7 @@ entity qspi_phy is
         ph_lanes    : in  lane_mode_t;
         ph_dir      : in  dir_t;
         ph_nclk     : in  unsigned(NCLK_W - 1 downto 0);          -- SCLK cycles, >= 1
-        ph_tx1      : in  std_logic_vector(31 downto 0);          -- Die 1 TX data, MSB first
-        ph_tx2      : in  std_logic_vector(31 downto 0);          -- Die 2 TX data, MSB first
+        ph_tx       : in  std_logic_vector(31 downto 0);          -- TX data, MSB first
         ph_last     : in  std_logic;                              -- Last phase: CS# high afterwards
         ph_sclk_div : in  natural range 1 to SCLK_DIV_MAX;        -- Used from the first phase
         ph_cs_high  : in  unsigned(CS_HIGH_W - 1 downto 0);       -- Min CS# high clk cycles, >= 1
@@ -83,17 +79,17 @@ entity qspi_phy is
 
         -- RX words
         rx_valid    : out std_logic;
-        rx_data     : out std_logic_vector(7 downto 0);           -- {die2_nibble, die1_nibble}
+        rx_data     : out std_logic_vector(3 downto 0);           -- QUAD4 nibble / SPI1 "000" & bit
         rx_last     : out std_logic;                              -- Last word of an RX phase
 
         busy        : out std_logic;     -- Low when idle and the CS# high time is over
 
         -- Pins
-        sclk        : out std_logic_vector(1 downto 0);
-        cs_n        : out std_logic_vector(1 downto 0);
-        io_o        : out std_logic_vector(7 downto 0);
-        io_oe       : out std_logic_vector(7 downto 0);
-        io_i        : in  std_logic_vector(7 downto 0)
+        sclk        : out std_logic;
+        cs_n        : out std_logic;
+        io_o        : out std_logic_vector(3 downto 0);
+        io_oe       : out std_logic_vector(3 downto 0);
+        io_i        : in  std_logic_vector(3 downto 0)
     );
 end entity qspi_phy;
 
@@ -101,7 +97,7 @@ architecture rtl of qspi_phy is
 
     type state_t is (S_IDLE, S_RUN, S_WAIT, S_END);
 
-    -- Pad pattern for one die (IO3 .. IO0) for a cycle with the given mode and data
+    -- Pad pattern (IO3 .. IO0) for a cycle with the given mode and data
     function lane_oe(quad : std_logic; dir : dir_t) return std_logic_vector is
     begin
         if quad = '0' then
@@ -151,7 +147,7 @@ architecture rtl of qspi_phy is
     signal cur_quad  : std_logic := '0';                                 -- Current quad mode (0: single, 1: quad)
     signal cur_dir   : dir_t := DIR_NONE;                                -- Current direction (DIR_TX, DIR_RX, DIR_NONE)
     signal cur_last  : std_logic := '0';                                 -- 1 = current transfer is the last one
-    signal sh1, sh2  : std_logic_vector(31 downto 0) := (others => '0'); -- Shift registers for TX data
+    signal sh        : std_logic_vector(31 downto 0) := (others => '0'); -- Shift register for TX data
     signal cs_high_l : unsigned(CS_HIGH_W - 1 downto 0) := (others => '0');
     signal cs_cnt    : unsigned(CS_HIGH_W - 1 downto 0) := (others => '0');
     signal cs_zero   : std_logic := '1';                                 -- cs_cnt = 0
@@ -166,14 +162,14 @@ architecture rtl of qspi_phy is
     signal pend_r    : std_logic := '0';
 
     -- Pad registers
-    signal sclk_r    : std_logic_vector(1 downto 0) := "00";
-    signal cs_n_r    : std_logic_vector(1 downto 0) := "11";
-    signal io_o_r    : std_logic_vector(7 downto 0) := (others => '0');
-    signal io_oe_r   : std_logic_vector(7 downto 0) := (others => '0');
-    signal io_i_r    : std_logic_vector(7 downto 0) := (others => '0');
+    signal sclk_r    : std_logic := '0';
+    signal cs_n_r    : std_logic := '1';
+    signal io_o_r    : std_logic_vector(3 downto 0) := (others => '0');
+    signal io_oe_r   : std_logic_vector(3 downto 0) := (others => '0');
+    signal io_i_r    : std_logic_vector(3 downto 0) := (others => '0');
 
     -- Every pad gets its own flip-flop so it can be packed into its I/O cell. Synthesis would
-    -- otherwise merge equal ones (sclk(1) with sclk(0), the OEs of IO0/IO2/IO3, ...).
+    -- otherwise merge equal ones (the OEs of IO0/IO2/IO3, ...).
     attribute syn_preserve : boolean;
     attribute syn_preserve of sclk_r  : signal is true;
     attribute syn_preserve of cs_n_r  : signal is true;
@@ -181,7 +177,7 @@ architecture rtl of qspi_phy is
     attribute syn_preserve of io_oe_r : signal is true;
 
     signal rx_valid_r : std_logic := '0';
-    signal rx_data_r  : std_logic_vector(7 downto 0) := (others => '0');
+    signal rx_data_r  : std_logic_vector(3 downto 0) := (others => '0');
     signal rx_last_r  : std_logic := '0';
 
     signal end_tick  : std_logic := '0';                          -- div_cnt = div_l - 1
@@ -196,18 +192,11 @@ begin
     busy <= '0' when state = S_IDLE and cs_zero = '1' else '1';
 
     process (clk)
-        -- Drive the pads for one SCLK cycle (both dies)
-        procedure set_pads(quad : std_logic; dir : dir_t; d1, d2 : std_logic_vector(31 downto 0)) is
+        -- Drive the pads for one SCLK cycle
+        procedure set_pads(quad : std_logic; dir : dir_t; d : std_logic_vector(31 downto 0)) is
         begin
-            io_oe_r(3 downto 0) <= lane_oe(quad, dir);
-            io_o_r(3 downto 0)  <= lane_o(quad, dir, d1);
-            if DIE2_PRESENT then
-                io_oe_r(7 downto 4) <= lane_oe(quad, dir);
-                io_o_r(7 downto 4)  <= lane_o(quad, dir, d2);
-            else
-                io_oe_r(7 downto 4) <= "0000";
-                io_o_r(7 downto 4)  <= "0000";
-            end if;
+            io_oe_r <= lane_oe(quad, dir);
+            io_o_r  <= lane_o(quad, dir, d);
         end procedure;
 
         -- Launch an RX cycle: its sample is taken sample_dly clk cycles from now
@@ -240,18 +229,17 @@ begin
             else
                 clk_one <= '0';
             end if;
-            sh1       <= ph_tx1;
-            sh2       <= ph_tx2;
+            sh        <= ph_tx;
             cs_high_l <= ph_cs_high;
             half      <= '0';
             div_cnt   <= 0;
-            set_pads(quad, ph_dir, ph_tx1, ph_tx2);
+            set_pads(quad, ph_dir, ph_tx);
             if ph_dir = DIR_RX then
                 launch(quad, ph_nclk = 1);
             end if;
         end procedure;
 
-        variable nsh1, nsh2 : std_logic_vector(31 downto 0);
+        variable nsh        : std_logic_vector(31 downto 0);
         variable pending    : std_logic;
     begin
         if rising_edge(clk) then
@@ -266,9 +254,6 @@ begin
 
             -- Input capture (pad register) and RX sample pipeline
             io_i_r <= io_i;
-            if not DIE2_PRESENT then
-                io_i_r(7 downto 4) <= "0000";
-            end if;
             tok_v <= '0' & tok_v(1 to NSTAGE - 1);
             tok_q <= '0' & tok_q(1 to NSTAGE - 1);
             tok_l <= '0' & tok_l(1 to NSTAGE - 1);
@@ -280,7 +265,7 @@ begin
                 if tok_q(sample_dly + 1) = '1' then
                     rx_data_r <= io_i_r;
                 else
-                    rx_data_r <= "000" & io_i_r(5) & "000" & io_i_r(1);
+                    rx_data_r <= "000" & io_i_r(1);
                 end if;
             end if;
 
@@ -294,7 +279,7 @@ begin
                         end if;
                     elsif ph_valid = '1' then
                         -- Start of a new phase transaction
-                        cs_n_r <= "00";
+                        cs_n_r <= '0';
                         div_l  <= ph_sclk_div;
                         load_phase;
                         if ph_sclk_div = 1 then
@@ -323,21 +308,19 @@ begin
                     end if;
 
                     if end_tick = '1' and half = '0' then
-                        sclk_r <= "11";
+                        sclk_r <= '1';
                         half   <= '1';
                     elsif end_tick = '1' then               -- Falling edge: next SCLK cycle
-                        sclk_r <= "00";
+                        sclk_r <= '0';
                         half   <= '0';
                         if clk_one = '0' then
                             clk_left <= clk_left - 1;
                             if clk_left = 2 then
                                 clk_one <= '1';
                             end if;
-                            nsh1 := shift_tx(cur_quad, sh1);
-                            nsh2 := shift_tx(cur_quad, sh2);
-                            sh1  <= nsh1;
-                            sh2  <= nsh2;
-                            set_pads(cur_quad, cur_dir, nsh1, nsh2);
+                            nsh := shift_tx(cur_quad, sh);
+                            sh  <= nsh;
+                            set_pads(cur_quad, cur_dir, nsh);
                             if cur_dir = DIR_RX then
                                 launch(cur_quad, clk_left = 2);
                             end if;
@@ -362,7 +345,7 @@ begin
                         -- The pads keep their state: after a QUAD4 read the device needs its
                         -- output disable time (tSHQZ/tHZCS) before IO may be driven again.
                         -- The next transaction sets them together with CS# low.
-                        cs_n_r <= "11";
+                        cs_n_r <= '1';
                         cs_cnt <= cs_high_l - 1;
                         if cs_high_l = 1 then
                             cs_zero <= '1';
@@ -376,15 +359,15 @@ begin
             if reset_n = '0' then
                 -- Synchronous reset, active low
                 state    <= S_IDLE;
-                sclk_r   <= "00";
-                cs_n_r   <= "11";
+                sclk_r   <= '0';
+                cs_n_r   <= '1';
                 cs_cnt   <= (others => '0');
                 cs_zero  <= '1';
                 tok_v    <= (others => '0');
                 pend_r   <= '0';
                 rx_valid_r <= '0';
                 io_i_r     <= (others => '0');
-                set_pads('0', DIR_NONE, (others => '0'), (others => '0'));
+                set_pads('0', DIR_NONE, (others => '0'));
             end if;
         end if; -- rising_edge(clk)
     end process;

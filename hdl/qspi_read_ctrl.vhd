@@ -1,11 +1,11 @@
 -- QSPI read front end: read requests -> EBh commands for qspi_xact, with credit-based flow control
 --
---   s_axis_req (tdata = {len[15:0], addr[31:0]}, host bytes) --> cmd_* (EBh, 1-4-4) --> qspi_xact
+--   s_axis_req (tdata = {len[15:0], addr[31:0]}, bytes)      --> cmd_* (EBh, 1-4-4) --> qspi_xact
 --   rx_* (from qspi_xact)                                    --> m_axis (passed through)
 --
---   Host bytes: one per SCLK cycle, {die2_nibble, die1_nibble}; host address / 2 = die byte
---   address. A request needs an even address and an even, non-zero length, init_done = '1', and
---   addr + len <= 2 * die size (no wrap). Otherwise it is dropped and req_err pulses for one cycle.
+--   addr and len are device byte addresses / bytes (one die, 2 SCLK cycles per byte on IO3:0).
+--   A request needs a non-zero length, init_done = '1', and addr + len <= die size (no wrap).
+--   Otherwise it is dropped and req_err pulses for one cycle.
 --
 --   Flow control: the PHY can't stop SCLK, so a request only starts when the downstream buffer
 --   has room for all of it: rx_space (free bytes downstream) >= in_flight + len, where in_flight
@@ -70,7 +70,7 @@ end entity qspi_read_ctrl;
 architecture rtl of qspi_read_ctrl is
 
     constant P         : dev_params_t := dev_params(DEVICE);
-    constant HOST_SIZE : unsigned(32 downto 0) := shift_left(to_unsigned(P.size_bytes, 33), 1);
+    constant DIE_SIZE  : unsigned(32 downto 0) := to_unsigned(P.size_bytes, 33);
 
     signal pend_valid : std_logic := '0';
     signal pend_addr  : unsigned(31 downto 0) := (others => '0');
@@ -118,8 +118,7 @@ begin
             if req_ready = '1' and s_axis_req_tvalid = '1' then
                 addr := unsigned(s_axis_req_tdata(31 downto 0));
                 len  := unsigned(s_axis_req_tdata(47 downto 32));
-                if init_done = '0' or addr(0) = '1' or len(0) = '1' or len = 0
-                   or resize(addr, 33) + len > HOST_SIZE then
+                if init_done = '0' or len = 0 or resize(addr, 33) + len > DIE_SIZE then
                     err_r <= '1';
                 else
                     pend_valid <= '1';
@@ -133,7 +132,7 @@ begin
                      and resize(rx_space, SPACE_W + 1) >= in_flight + pend_len;
             if issue then
                 cmd_v      <= '1';
-                cmd_addr   <= std_logic_vector(shift_right(pend_addr, 1));
+                cmd_addr   <= std_logic_vector(pend_addr);
                 cmd_len    <= pend_len;
                 pend_valid <= '0';
             elsif cmd_v = '1' and cmd_ready = '1' then

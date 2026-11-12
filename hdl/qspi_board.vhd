@@ -6,9 +6,10 @@
 --
 --   Runs qspi_bist on its own after reset: init, write the pattern once, (calibrate,) then read
 --   and compare once (qspi_bist's LOOP_ROUNDS default). bist_pass / bist_fail drive LEDs (see qspi_bist).
---   Single die only (IO[3:0]); a dual-die AS308G208 board needs a wrapper with the die-2 pins
---   and RESET# (README.md, AS308G208 remaining work). With DEVICE_SEL = 1 (AS308G208 die), RESET# must be tied high
---   on the board.
+--   One die on IO[3:0]: the W25Q128JV, or one port (die) of the AS308G208; the other AS308G208
+--   die is connected to the MSS. Each data byte is two nibbles on IO[3:0], high nibble first.
+--   With DEVICE_SEL = 1 (AS308G208 die), RESET# must be tied high on the board (no RESET# pin
+--   here; README.md, AS308G208 remaining work).
 --   Use as an HDL+ core so the generics can be set per instance. They are integers because the
 --   HDL+ configurator only handles integer generics.
 --   clk is clk_ctrl (the fabric clock, 200 MHz in TOP: SCLK 50 MHz with SCLK_DIV = 2 and
@@ -30,7 +31,7 @@ entity qspi_board is
         SAMPLE_DLY : positive range 1 to 8 := 4;       -- RX sample delay before calibration
         CALIBRATE  : natural range 0 to 1 := 1;        -- 1: BIST calibrates the sample delay
         NBLK       : positive := 8;                    -- BIST blocks
-        BLK_LEN    : positive := 880                   -- BIST host bytes per block (even)
+        BLK_LEN    : positive := 880                   -- BIST bytes per block
     );
     port (
         clk       : in    std_logic;
@@ -68,12 +69,11 @@ architecture rtl of qspi_board is
     signal rd_tvalid, rd_tready, rd_tlast, wr_tvalid, wr_tready : std_logic;
     signal ovr_valid   : std_logic;
     signal ovr         : natural range 1 to SAMPLE_DLY_MAX;
-    signal sclk, cs_n  : std_logic_vector(1 downto 0);
-    signal io_o, io_oe : std_logic_vector(7 downto 0);
-    signal io_i        : std_logic_vector(7 downto 0);
+    signal sclk, cs_n  : std_logic;
+    signal io_o, io_oe : std_logic_vector(3 downto 0);
 begin
     ctrl : entity work.qspi_mram_ctrl
-        generic map (DEVICE => DEV, DIE2_PRESENT => false, CLK_CTRL_HZ => CLK_HZ,
+        generic map (DEVICE => DEV, CLK_CTRL_HZ => CLK_HZ,
                      SCLK_DIV => SCLK_DIV, SAMPLE_DLY => SAMPLE_DLY, SPACE_W => 16)
         port map (
             clk => clk, reset_n => reset_n,
@@ -87,12 +87,12 @@ begin
             wr_req_tready => wr_req_tready, wr_req_err => wr_req_err, wr_done => wr_done,
             s_axis_wr_tdata => wr_tdata, s_axis_wr_tvalid => wr_tvalid, s_axis_wr_tready => wr_tready,
             sample_dly_ovr_valid => ovr_valid, sample_dly_ovr => ovr,
-            sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io_i,
+            sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => qspi_io,
             mem_reset_n => open);
 
     bist : entity work.qspi_bist
-        generic map (DIE2_PRESENT => false, NBLK => NBLK, BLK_LEN => BLK_LEN,
-                     BLK_STRIDE => 16#4000#, BASE_ADDR => 0, CALIBRATE => CALIBRATE = 1,
+        generic map (NBLK => NBLK, BLK_LEN => BLK_LEN,
+                     BLK_STRIDE => 16#2000#, BASE_ADDR => 0, CALIBRATE => CALIBRATE = 1,
                      SPACE_W => 16)
         port map (
             clk => clk, reset_n => reset_n,
@@ -109,12 +109,11 @@ begin
             cal_window => open, cal_dly => open, pass_count => open, state_dbg => open);
 
     -- Pads: tristate buffers (BIBUF), driven straight from the PHY's pad registers
-    qspi_sclk <= sclk(0);
-    qspi_cs_n <= cs_n(0);
+    qspi_sclk <= sclk;
+    qspi_cs_n <= cs_n;
     pads : for i in 0 to 3 generate
         qspi_io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
     end generate;
-    io_i <= "0000" & qspi_io;
 
     busy_out <= busy;
 end architecture rtl;

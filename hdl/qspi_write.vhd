@@ -1,12 +1,12 @@
 -- QSPI write path (test patterns and calibration): write requests -> commands for qspi_xact
 --
---   s_axis_req (tdata = {len[15:0], addr[31:0]}, host bytes) + s_axis_data (len host bytes)
+--   s_axis_req (tdata = {len[15:0], addr[31:0]}, bytes) + s_axis_data (len bytes)
 --     --> cmd_* / tx_* --> qspi_xact
 --
---   Same request format and checks as qspi_read_ctrl: even address, even non-zero length,
---   init_done = '1', addr + len <= 2 * die size; otherwise req_err pulses and the request is
---   dropped (its data is not consumed). Data bytes are host bytes {die2_nibble, die1_nibble};
---   with one die the upper nibble is ignored. The die address is addr / 2.
+--   Same request format and checks as qspi_read_ctrl: non-zero length, init_done = '1',
+--   addr + len <= die size; otherwise req_err pulses and the request is dropped (its data is
+--   not consumed). addr is the device byte address; each data byte goes out as two nibbles on
+--   IO3:0, high nibble first.
 --
 --   W25Q128JV: every 4 KB sector touched by the request is erased first (WREN + 20h, then 05h
 --     polling until BUSY = 0), so other data in those sectors is lost. Then the data is
@@ -24,7 +24,6 @@ use work.qspi_pkg.all;
 entity qspi_write is
     generic (
         DEVICE       : device_t := DEV_W25Q128JV;
-        DIE2_PRESENT : boolean  := false;
         SCLK_DIV     : positive := 2                -- SCLK = input clock / (2 * SCLK_DIV)
     );
     port (
@@ -74,7 +73,7 @@ architecture rtl of qspi_write is
 
     constant P         : dev_params_t := dev_params(DEVICE);
     constant W25       : boolean := DEVICE = DEV_W25Q128JV;
-    constant HOST_SIZE : unsigned(32 downto 0) := shift_left(to_unsigned(P.size_bytes, 33), 1);
+    constant DIE_SIZE  : unsigned(32 downto 0) := to_unsigned(P.size_bytes, 33);
     constant SECTOR    : positive := 4096;
 
     type state_t is (W_IDLE,
@@ -90,7 +89,6 @@ architecture rtl of qspi_write is
     signal chunk     : unsigned(15 downto 0) := (others => '0');   -- Bytes in the current page
     signal sec_addr  : unsigned(31 downto 0) := (others => '0');   -- Next sector to erase
     signal sec_last  : unsigned(31 downto 0) := (others => '0');
-    signal host_len  : unsigned(15 downto 0) := (others => '0');
     signal poll_busy : std_logic := '0';
     signal err_r     : std_logic := '0';
     signal done_r    : std_logic := '0';
@@ -116,7 +114,8 @@ begin
         variable len        : unsigned(15 downto 0);
         variable room       : unsigned(15 downto 0);
 
-        -- Issue a command (fields fixed until cmd_ready)
+        -- Issue a command (fields fixed until cmd_ready). cmd_addr is only loaded for commands
+        -- with an address, which keeps it out of the BUSY poll decision (timing at 200 MHz).
         procedure issue(op : std_logic_vector(7 downto 0); lanes : cmd_lanes_t;
                         a : unsigned(31 downto 0); ab : natural; mode_en : std_logic;
                         dir : dir_t; n : unsigned(15 downto 0); wr : std_logic;
@@ -125,7 +124,9 @@ begin
             cmd_v          <= '1';
             cmd_op         <= op;
             cmd_lanes      <= lanes;
-            cmd_addr       <= std_logic_vector(a);
+            if ab > 0 then
+                cmd_addr   <= std_logic_vector(a);
+            end if;
             cmd_addr_bytes <= ab;
             cmd_mode_en    <= mode_en;
             cmd_mode       <= MODE_BYTE_NO_XIP;
@@ -171,16 +172,14 @@ begin
                     if s_axis_req_tvalid = '1' then
                         addr := unsigned(s_axis_req_tdata(31 downto 0));
                         len  := unsigned(s_axis_req_tdata(47 downto 32));
-                        if init_done = '0' or addr(0) = '1' or len(0) = '1' or len = 0
-                           or resize(addr, 33) + len > HOST_SIZE then
+                        if init_done = '0' or len = 0 or resize(addr, 33) + len > DIE_SIZE then
                             err_r <= '1';
                         else
-                            die_addr <= shift_right(addr, 1);
-                            die_left <= shift_right(len, 1);
-                            host_len <= len;
+                            die_addr <= addr;
+                            die_left <= len;
                             if W25 then
-                                last     := shift_right(addr, 1) + shift_right(len, 1) - 1;
-                                sec_addr <= shift_right(addr, 1) and not to_unsigned(SECTOR - 1, 32);
+                                last     := addr + len - 1;
+                                sec_addr <= addr and not to_unsigned(SECTOR - 1, 32);
                                 sec_last <= last and not to_unsigned(SECTOR - 1, 32);
                                 issue_wren;
                                 state <= W_ERASE_WREN;
@@ -216,7 +215,7 @@ begin
                         room := page_chunk(die_addr, die_left);
                         chunk <= room;
                         issue(OP_W25_QPP, L114, die_addr, P.addr_bytes, '0', DIR_TX,
-                              shift_left(room, 1), '1', SCLK_DIV);
+                              room, '1', SCLK_DIV);
                         state <= W_PROG;
                     end if;
 
@@ -260,7 +259,7 @@ begin
                 -- AS308G208 ------------------------------------------------------------------
                 when W_AS_WREN =>
                     if cmd_v = '1' and cmd_ready = '1' then
-                        issue(OP_AS_WRQIO, L144, die_addr, P.addr_bytes, '1', DIR_TX, host_len,
+                        issue(OP_AS_WRQIO, L144, die_addr, P.addr_bytes, '1', DIR_TX, die_left,
                               '1', SCLK_DIV);
                         state <= W_AS_WRITE;
                     end if;

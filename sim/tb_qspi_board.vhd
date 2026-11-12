@@ -1,6 +1,6 @@
 -- run_tb models: qspi_model_pkg qspi_mem_model
 -- Self-checking testbench for qspi_board: the board wrapper with a W25Q128JV model on its pins
---   qspi_board (DEVICE_SEL 0, CALIBRATE 1, 2 blocks of 64 host bytes) drives the model directly
+--   qspi_board (DEVICE_SEL 0, CALIBRATE 1, 2 blocks of 63 bytes) drives the model directly
 --   through its inout qspi_io pins (3 ns board delay). Uses the datasheet power-up time (5 ms
 --   tPUW), so the run is mostly waiting. Checks: bist_pass comes on, bist_fail stays off, and the
 --   model reports no protocol errors. Covers the tristate wiring and the generic mapping that
@@ -31,7 +31,7 @@ begin
 
     dut : entity work.qspi_board
         generic map (DEVICE_SEL => 0, CLK_HZ => 200_000_000, SCLK_DIV => 2, SAMPLE_DLY => 4,
-                     CALIBRATE => 1, NBLK => 2, BLK_LEN => 64)
+                     CALIBRATE => 1, NBLK => 2, BLK_LEN => 63)
         port map (clk => clk, reset_n => rstn, qspi_sclk => qspi_sclk, qspi_cs_n => qspi_cs_n,
                   qspi_io => qspi_io, bist_pass => pass, bist_fail => fail);
 

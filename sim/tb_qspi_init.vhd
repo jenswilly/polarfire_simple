@@ -5,11 +5,12 @@
 --     0  W25Q128JV                                        -> init_done
 --     1  W25Q128JV with QE = 0                            -> ERR_CFG
 --     2  W25Q128JV with ID EF 70 18                       -> ERR_ID
---     3  AS308G208, 1 die, CR2 = 10 and SR protected at reset -> init_done (init writes fix both)
---     4  AS308G208, 2 dies, die 2 CR2 = 12 at reset       -> init_done
---     5  AS308G208, 2 dies, die 2 ignores register writes, CR2 = 10 -> ERR_CFG
---     6  AS308G208, 2 dies, die 2 ID with density 1 Gb    -> ERR_ID
---     7  AS308G208, 1 die, ignores register writes, SR protected -> ERR_CFG
+--     3  AS308G208, CR2 = 10 and SR protected at reset    -> init_done (init writes fix both)
+--     4  AS308G208, CR2 = 12 at reset                     -> init_done
+--     5  AS308G208, ignores register writes, CR2 = 10     -> ERR_CFG
+--     6  AS308G208, ID with density 1 Gb                  -> ERR_ID
+--     7  AS308G208, ignores register writes, SR protected -> ERR_CFG
+--   The AS308G208 is one port/die (one CS#) of the device.
 --   Each configuration is run twice: after reset and again after init_restart. The models must
 --   report no protocol errors (power-up/reset timing, CS# high times, SCLK limits such as 9Fh at
 --   <= 40 MHz on the AS), RESET# must stay high for the W25Q and must have been pulsed for the AS.
@@ -29,26 +30,24 @@ architecture sim of tb_qspi_init is
     type result_t is (R_DONE, R_ERR_ID, R_ERR_CFG);
     type cfg_t is record
         dev        : device_t;
-        die2       : boolean;
         qe         : std_logic;                       -- W25Q QE_INIT
         w25_id     : std_logic_vector(23 downto 0);
-        id2        : std_logic_vector(31 downto 0);   -- AS die 2 ID
-        sr1, sr2   : std_logic_vector(7 downto 0);    -- AS SR at reset, die 1 / die 2
-        cr2_1      : natural;                         -- AS CR2 at reset, die 1 / die 2
-        cr2_2      : natural;
-        ign1, ign2 : boolean;                         -- Ignore register writes, die 1 / die 2
+        as_id      : std_logic_vector(31 downto 0);
+        sr         : std_logic_vector(7 downto 0);    -- AS SR at reset
+        cr2        : natural;                         -- AS CR2 at reset
+        ign        : boolean;                         -- Ignore register writes
         result     : result_t;
     end record;
     type cfg_arr_t is array (natural range <>) of cfg_t;
     constant CFGS : cfg_arr_t := (
-        (DEV_W25Q128JV, false, '1', x"EF4018", x"E6212C01", x"00", x"00", 8, 8,  false, false, R_DONE),
-        (DEV_W25Q128JV, false, '0', x"EF4018", x"E6212C01", x"00", x"00", 8, 8,  false, false, R_ERR_CFG),
-        (DEV_W25Q128JV, false, '1', x"EF7018", x"E6212C01", x"00", x"00", 8, 8,  false, false, R_ERR_ID),
-        (DEV_AS308G208, false, '1', x"EF4018", x"E6212C01", x"1C", x"00", 10, 8, false, false, R_DONE),
-        (DEV_AS308G208, true,  '1', x"EF4018", x"E6212A01", x"00", x"00", 8, 12, false, false, R_DONE),
-        (DEV_AS308G208, true,  '1', x"EF4018", x"E6212C01", x"00", x"00", 8, 10, false, true,  R_ERR_CFG),
-        (DEV_AS308G208, true,  '1', x"EF4018", x"E6212801", x"00", x"00", 8, 8,  false, false, R_ERR_ID),
-        (DEV_AS308G208, false, '1', x"EF4018", x"E6212C01", x"04", x"00", 8, 8,  true,  false, R_ERR_CFG)
+        (DEV_W25Q128JV, '1', x"EF4018", x"E6212C01", x"00", 8,  false, R_DONE),
+        (DEV_W25Q128JV, '0', x"EF4018", x"E6212C01", x"00", 8,  false, R_ERR_CFG),
+        (DEV_W25Q128JV, '1', x"EF7018", x"E6212C01", x"00", 8,  false, R_ERR_ID),
+        (DEV_AS308G208, '1', x"EF4018", x"E6212C01", x"1C", 10, false, R_DONE),
+        (DEV_AS308G208, '1', x"EF4018", x"E6212A01", x"00", 12, false, R_DONE),
+        (DEV_AS308G208, '1', x"EF4018", x"E6212C01", x"00", 10, true,  R_ERR_CFG),
+        (DEV_AS308G208, '1', x"EF4018", x"E6212801", x"00", 8,  false, R_ERR_ID),
+        (DEV_AS308G208, '1', x"EF4018", x"E6212C01", x"04", 8,  true,  R_ERR_CFG)
     );
     constant NCFG : positive := CFGS'length;
 
@@ -81,14 +80,14 @@ begin
         signal init_done, init_err : std_logic;
         signal err_code    : std_logic_vector(1 downto 0);
         signal mem_reset_n : std_logic;
-        signal sclk, cs_n  : std_logic_vector(1 downto 0);
-        signal io_o, io_oe : std_logic_vector(7 downto 0);
-        signal io          : std_logic_vector(7 downto 0);
-        signal err1, err2  : natural := 0;
+        signal sclk, cs_n  : std_logic;
+        signal io_o, io_oe : std_logic_vector(3 downto 0);
+        signal io          : std_logic_vector(3 downto 0);
+        signal err1        : natural := 0;
         signal reset_pulses : natural := 0;
     begin
         init : entity work.qspi_init
-            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_HZ => 200_000_000,
+            generic map (DEVICE => C.dev, CLK_HZ => 200_000_000,
                          SCLK_DIV => 2, T_POWERUP_NS => 25_000, T_RESET_NS => 2_000)
             port map (
                 clk => clk, reset_n => rstn, init_restart => init_restart,
@@ -104,7 +103,7 @@ begin
                 rx_tlast => rx_tlast);
 
         xact : entity work.qspi_xact
-            generic map (DEVICE => C.dev, DIE2_PRESENT => C.die2, CLK_HZ => 200_000_000)
+            generic map (DEVICE => C.dev, CLK_HZ => 200_000_000)
             port map (
                 clk => clk, reset_n => rstn,
                 cmd_valid => cmd_valid, cmd_ready => cmd_ready, cmd_op => cmd_op,
@@ -118,26 +117,17 @@ begin
                 sample_dly => 4, busy => xact_busy,
                 sclk => sclk, cs_n => cs_n, io_o => io_o, io_oe => io_oe, io_i => io);
 
-        pads : for i in 0 to 7 generate
+        pads : for i in 0 to 3 generate
             io(i) <= io_o(i) when io_oe(i) = '1' else 'Z';
         end generate;
 
         die1 : entity work.qspi_mem_model
             generic map (DEVICE => C.dev, DIE => 1, PRELOAD_SEED => 3, QE_INIT => C.qe,
-                         W25_ID => C.w25_id, AS_SR_INIT => C.sr1, AS_CR2_INIT => C.cr2_1,
-                         REG_WRITE_IGNORE => C.ign1, T_BOARD => 3 ns, T_PU => 20 us,
-                         T_RST => 1500 ns)
-            port map (sclk => sclk(0), cs_n => cs_n(0), reset_n => mem_reset_n,
-                      io => io(3 downto 0), err_count => err1);
-
-        die2_gen : if C.die2 generate
-            die2 : entity work.qspi_mem_model
-                generic map (DEVICE => C.dev, DIE => 2, PRELOAD_SEED => 4, AS_ID => C.id2,
-                             AS_SR_INIT => C.sr2, AS_CR2_INIT => C.cr2_2,
-                             REG_WRITE_IGNORE => C.ign2, T_BOARD => 3 ns, T_PU => 20 us)
-                port map (sclk => sclk(1), cs_n => cs_n(1), reset_n => mem_reset_n,
-                          io => io(7 downto 4), err_count => err2);
-        end generate;
+                         W25_ID => C.w25_id, AS_ID => C.as_id, AS_SR_INIT => C.sr,
+                         AS_CR2_INIT => C.cr2, REG_WRITE_IGNORE => C.ign, T_BOARD => 3 ns,
+                         T_PU => 20 us, T_RST => 1500 ns)
+            port map (sclk => sclk, cs_n => cs_n, reset_n => mem_reset_n,
+                      io => io, err_count => err1);
 
         count_resets : process (mem_reset_n)
         begin
@@ -194,7 +184,7 @@ begin
 
             wait until rising_edge(clk) and xact_busy = '0';
             wait for 1 us;
-            check(err1 + err2 = 0, "model protocol errors: " & integer'image(err1 + err2));
+            check(err1 = 0, "model protocol errors: " & integer'image(err1));
             if C.dev = DEV_W25Q128JV then
                 check(reset_pulses = 0, "RESET# must stay high for the W25Q");
             else

@@ -16,7 +16,7 @@ The ground rules in CLAUDE.md apply (VHDL subset Synplify supports, `hdl/` conve
 After the BIST has passed, two clients can read and write the QSPI memory through `qspi_board`, **never at the same time**:
 
 - **CPU** (E51 over FIC0): an AXI4-Lite register block. The CPU writes the memory to update lookup data and reads it back to verify. Throughput is not critical.
-- **Fabric**: AXI4-Stream request, read data and response streams, for the high-throughput readers of the lookup data (e.g. 8 × 880 bytes within 200 µs). Fabric will never _write_ data to the QSPI memory.
+- **Fabric**: AXI4-Stream request, read data and response streams, for the reader of the lookup data: the Calibration LUT Controller, which preloads the LUT into the Slice Controllers' RAM after init and after LUT updates (22 × 46,080 bits = 126,720 bytes, ≈ 5.1 ms at 50 MHz SCLK; no per-iteration reads). Fabric will never _write_ data to the QSPI memory.
 
 Who may access the memory follows from a **high-level system state** that the CPU controls:
 - `operational`: the fabric owns the QSPI.
@@ -28,11 +28,11 @@ Until the BIST has passed, all client requests are held (`tready` low). After a 
 
 ## Starting point (existing, unchanged by this plan unless noted)
 
-- `qspi_mram_ctrl` has a read request stream and a write request stream (`{len[15:0], addr[31:0]}`, host bytes), a read data stream (`m_axis`, `tlast` per request), a write data stream, `rd_req_err` / `wr_req_err` (one-cycle pulses in the cycle after the request handshake), `wr_done`, and `busy`.
+- `qspi_mram_ctrl` has a read request stream and a write request stream (`{len[15:0], addr[31:0]}`, bytes), a read data stream (`m_axis`, `tlast` per request), a write data stream, `rd_req_err` / `wr_req_err` (one-cycle pulses in the cycle after the request handshake), `wr_done`, and `busy`.
 - **Reads are credit-based:** `qspi_read_ctrl` starts a read only when `rd_space ≥ in_flight + len`, and after that the consumer must keep up (the PHY can't stop SCLK). One read request is buffered while the previous one runs.
 - **Late write data pauses SCLK** (CS# stays low, `qspi_xact`). Functionally harmless, but a client that never delivers its data would keep the controller busy forever, and an ownership change would then never happen.
 - `qspi_bist` stops in `B_DONE` / `B_FAIL` (with `LOOP_ROUNDS = false`) and keeps driving `sample_dly_ovr_valid = '1'` with the calibrated delay until reset.
-- The BIST writes 8 blocks of 880 host bytes at stride `0x4000` from `BASE_ADDR = 0`, i.e. within host addresses `0x0000_0000 – 0x0001_FFFF`. On the W25Q128JV it erases the sectors it touches. It does this **at every power-up**.
+- The BIST writes 8 blocks of 880 bytes at stride `0x2000` from `BASE_ADDR = 0`, i.e. within addresses `0x0000_0000 – 0x0000_FFFF`. On the W25Q128JV it erases the sectors it touches. It does this **at every power-up**.
 - Everything in the fabric, including `qspi_board` (`clk_ctrl`) and FIC0, runs on the one 200 MHz clock (`PF_CCC_C0` OUT0, `CORERESET_0_FABRIC_RESET_N`). There is no clock domain crossing anywhere in this plan. At 200 MHz the QSPI controller is close to the timing limit, so check `syn_check.sh` after every change to the QSPI path.
 
 ## Architecture
@@ -87,8 +87,8 @@ The existing `axi_led_reg` offsets stay unchanged, so the current software keeps
 |---|---|---|---|
 | 0x00 | ID | RO | Fixed value, e.g. `0x95F1_0001` |
 | 0x04 | STATUS | RO | bit 0 `ready`, bit 1 `bist_fail`, bit 2 `owner` (1 = fabric), bit 3 request FIFO full, bit 4 response available |
-| 0x08 | ADDR | R/W | Host byte address |
-| 0x0C | LEN | R/W | Length in host bytes (even, > 0) |
+| 0x08 | ADDR | R/W | Byte address |
+| 0x0C | LEN | R/W | Length in bytes (even, > 0; the controller itself accepts any length > 0) |
 | 0x10 | CMD | WO | Write pushes `{wr = bit 0, LEN, ADDR}` as one request. 0 = read, 1 = write. Held (not lost) while the CPU isn't the owner; check `owner` first |
 | 0x14 | RSP | RO | Reading pops one response: bit 31 valid, bit 1 `wr`, bit 0 `err`. Reads `0` when there is none |
 | 0x18 | WDATA | WO | Pushes 4 bytes, byte 0 = bits 7:0 (sent first) |

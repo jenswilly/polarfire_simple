@@ -1,6 +1,6 @@
 # qspi_xact
 
-QSPI transaction engine: one command (opcode, address, mode byte, latency, data) becomes one CS# assertion on the pins, with AXI4-Stream TX and RX data. Both dies run in lockstep.
+QSPI transaction engine: one command (opcode, address, mode byte, latency, data) becomes one CS# assertion on the pins, with AXI4-Stream TX and RX data. One die (one CS#, IO3:0).
 Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 
 ## Generics
@@ -8,7 +8,6 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | Generic | Type | Default | Description |
 |---|---|---|---|
 | `DEVICE` | `device_t` | `DEV_W25Q128JV` | Sets the CS# high times. |
-| `DIE2_PRESENT` | boolean | false | Second die on IO7:4. |
 | `CLK_HZ` | positive | 200 000 000 | `clk` frequency (CS# high times). |
 
 ## Ports
@@ -27,7 +26,7 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | `cmd_mode` | in | 8 | Mode byte. |
 | `cmd_latency` | in | 0–15 | Dummy/latency clocks. |
 | `cmd_dir` | in | `dir_t` | `DIR_NONE`, `DIR_TX` or `DIR_RX`. |
-| `cmd_len` | in | 16 | 4-line: host bytes (= data clocks); 1-line: bytes per die. ≥ 1 unless `DIR_NONE`. |
+| `cmd_len` | in | 16 | Data bytes (4-line: 2 SCLK cycles each; 1-line: 8). ≥ 1 unless `DIR_NONE`. 1-line RX ≤ 16383. |
 | `cmd_sclk_div` | in | 1–8 | SCLK = `CLK_HZ` / (2·div) for this command. |
 | `cmd_write` | in | 1 | Use the device's write CS# high time afterwards. |
 | `s_axis_tdata` | in | 8 | TX byte. |
@@ -40,16 +39,16 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 | `rx_overflow` | out | 1 | One-cycle pulse: an RX byte was dropped. |
 | `sample_dly` | in | 1–8 | RX sample delay; change only while `busy` = 0. |
 | `busy` | out | 1 | Command, PHY or RX output active. |
-| `sclk` | out | 2 | SCLK; index 0 = die 1, 1 = die 2. |
-| `cs_n` | out | 2 | CS#; index 0 = die 1, 1 = die 2. |
-| `io_o` | out | 8 | IO7:0 output data. |
-| `io_oe` | out | 8 | IO7:0 output enable. |
-| `io_i` | in | 8 | IO7:0 input. |
+| `sclk` | out | 1 | SCLK. |
+| `cs_n` | out | 1 | CS#. |
+| `io_o` | out | 4 | IO3:0 output data. |
+| `io_oe` | out | 4 | IO3:0 output enable. |
+| `io_i` | in | 4 | IO3:0 input. |
 
 ## Usage notes
 
-- Stream bytes: 4-line data = one `{die2_nibble, die1_nibble}` byte per SCLK cycle. 1-line data = two stream bytes per byte (die 1, then die 2; die 1 only without die 2).
-- RX has only a 4-entry FIFO (8 slots, so incoming words can be written before the overflow check; SCLK can't stop); the consumer must keep up or `rx_overflow` pulses. If TX data is late, SCLK pauses with CS# low.
+- Stream bytes = device bytes. 4-line data: two SCLK cycles per byte, high nibble first (TX: the PHY gets 4-byte chunks; RX: two nibbles are assembled into one byte). 1-line data: eight SCLK cycles per byte, MSB first.
+- RX has only a 4-entry FIFO (8 slots, so an incoming byte can be written before the overflow check; SCLK can't stop); the consumer must keep up or `rx_overflow` pulses. If TX data is late, SCLK pauses with CS# low.
 - The next command's opcode follows directly; the PHY enforces the CS# high time.
 
 ## Sub-components
@@ -60,14 +59,14 @@ Source: `hdl/qspi_xact.vhd`. Used inside [qspi_mram_ctrl](qspi_mram_ctrl.md).
 
 ## Testbench
 
-`sim/tb_qspi_xact.vhd` — `sim/run_tb.sh tb_qspi_xact`. Three configurations side by side (W25Q, AS 1 die, AS 2 dies) at 200 MHz `clk`, 50 MHz SCLK, sample delay 4, 3 ns board delay.
+`sim/tb_qspi_xact.vhd` — `sim/run_tb.sh tb_qspi_xact`. Two configurations side by side (W25Q, AS308G208 one port/die) at 200 MHz `clk`, 50 MHz SCLK, sample delay 4, 3 ns board delay.
 
 | Test | Checks |
 |---|---|
-| ID / registers | Device ID per die, status reads, RDAR/WRAR. |
-| EBh reads | Latency 8 and 10, across the end of the die. |
-| W25Q writes | Sector erase with BUSY polling, quad and 1-1-1 page programs (page wrap, ignored upper nibble with one die). |
-| AS writes | D2h/02h writes over several TX chunks. |
-| Queued reads | Two reads (880 + 20 host bytes) back to back. |
-| Data | Every byte, nibble order `{die2, die1}`, 1-line die order and `tlast`. |
+| ID / registers | Device ID, status reads, RDAR/WRAR. |
+| EBh reads | Latency 8 and 10, across the end of the die, odd lengths. |
+| W25Q writes | Sector erase with BUSY polling, quad and 1-1-1 page programs (page wrap). |
+| AS writes | D2h (7 bytes) / 02h writes over several TX chunks. |
+| Queued reads | Two reads (880 + 21 bytes) back to back. |
+| Data | Every byte (high nibble first) and `tlast`. |
 | Protocol | No model protocol errors, `rx_overflow` never pulses. |
