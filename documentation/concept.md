@@ -12,7 +12,7 @@ memory mapped AXI/AXI-Lite control and DMA for AXI-Streaming.
 ### E51 Bootloader
 
 The E51 core will run Microchip's HSS ("Hart Software Services") zero-stage bootloader and initialization 
-software. This will, in turn, load the firmware for the four application cores from external QSPI Flash storage.
+software. This will, in turn, load the firmware for the four application cores from one of the dies in the MRAM.
 
 If at all possible, we should use Microchip's HSS instead of implementing our own zero-stage bootloader since
 HSS is designed for low-level initialization and memory configuration of the SoC and has been extensively tested.
@@ -22,7 +22,7 @@ HSS is designed for low-level initialization and memory configuration of the SoC
 The application cores will run RTEMS (6.2) applications, reusing software developed for Univity as much as possible.
 
 Tasks running here should be relatively slow without strict realtime requirements (still realtime, but not with
-microsecond requirements). These tasks could include:
+microsecond requirements). These tasks include:
 
 * CAN-based TC/TM parsing
 * Telemetry reporting
@@ -35,17 +35,25 @@ microsecond requirements). These tasks could include:
 * Firmware updates
 * Calculation pipeline: from spacecraft position/attitude plus target locations on Earth -> u/v components for eight beams
 
+Proposed split is:
+
+* Core 1: CAN, TC/TM and ADC readings (and AXI Lite for storing sensor values to FPGA fabric)
+* Core 2: Ethernet/UDP protocol and ingestion of Contact Plan
+* Core 3: Calculation pipeline: Contact Plan -> u/v components in FIFO using AXI (streaming or lite)
+* Core 4: Remaining tasks
+
+
 ## FPGA
 
-FPGA fabric will run five main components (and several "interface" and "sub-" components):
+FPGA fabric will run several main components (and several "interface" and "sub-" components as well as one "TOP" component):
 
 1. **System Control**  
    Controls high-level state and resets for other FPGA components. Controlled from MSS using AXI-Lite.
 2. **Array Controller**  
    Reads u/v vector components from 8 "Beam FIFOs", each containing Steering Points (u/v, frequency) for each of the 8 beams.  
-   Passes Steering Points to the individual Slice Controllers.  
+   Passes Steering Points to the individual Slice Controllers' "Slice FIFOs".  
    Also updates current temperature (from MSS via AXI) registers on Slice Controllers.  
-   This is the top-level component wiring the subcomponents together.
+   This component holds the Slice Controller instances as subcomponents.
 3. **Calibration LUT Controller**  
    Loads calibration LUT data from MRAM (using MRAM Controller).  
    Data will be split and set on the individual Slice Controllers. That means that all calibration will be **pre-loaded** at
@@ -59,20 +67,21 @@ FPGA fabric will run five main components (and several "interface" and "sub-" co
    Calibration data is stored in RAM on each Slice Controller.  
    Tapering gains are hardcoded as generics on each Slice Controller.  
    Slice Controllers contain several subcomponents. In Operational mode, the controller reads u/v data (possibly already multiplied
-   by X/Y element pitch) and frequency from Steering Point FIFOs, uses temperature and frequency to get calibration data from own
+   by X/Y element pitch) and frequency from Slice FIFOs, uses temperature and frequency to get calibration data from own
    RAM, formats the data correctly (adding BFIC and register headers) and adds the data to a block FIFO, from where the data is 
    serialized into single bytes and sent out in 10 byte blocks on the SPI bus.  
    The BSW signal is used to synchronize BFIC programming.
-2. **MRAM Controller**  
-   This HAL component is shared between several other components. One component at a tim has exclusive access
+5. **LUT Updater**  
+   Handles writes to external MRAM LUT. Controlled from MSS using AXI-Lite (for setup) and AXI-Streaming/DMA (for data).  
+   After updating LUT data, the new data must be loaded to the individual slices.
+6. **MRAM Controller**  
+   This HAL component is shared between several other components. One component at a time has exclusive access
    based on the current state.
-2. **LUT Updater**  
-   Handles writes to external MRAM LUT. Controlled from MSS using AXI-Lite (for setup) and AXI-Streaming/DMA (for data).
 
 ### Issues
 
-* **Timing, fan-out and propagation delay** for Slice Controller: nanosecond precision is required for the BSW signal.
-* **SPI bus pad control**: strict timing/fan-out requirements for all SPI pads/IO buffer registers.
+* **Timing, fan-out and propagation delay** for 22 x Slice Controller.
+* **SPI bus pad control**: strict timing requirements for all SPI pads/IO buffer registers.
 * **Validation of custom VHDL**
 * **Repo/project organization** of shared components/interfaces from Univity project
 * **Tooling setup:** both RTEMS/Cmake and FPGA tools, the latter of which require individual hardware-linked license files.
@@ -86,6 +95,6 @@ FPGA fabric will run five main components (and several "interface" and "sub-" co
 These are the components expected to be used:
 
 * **RTPFS160ZT-FCV784M PolarFire SoC** - main SoC. 160k logic elements, radiation tolerant. The industrial version, **MPFS160T-FCVG784I** can be used for prototyping and _might_ also be used for the first EMs depending on availability of the rad. tolerant devices.
-* **AS308G208 Space-Grade Dual-Quad Serial Persistent SRAM Memory** - LUT data storage. 1 GB capacity. Two QSPI flash dies. One will be used for the 
-MSS to store firmware binaries and application data as well as storage area for firmware uploads.
+* **AS308G208 Space-Grade Dual-Quad Serial Persistent SRAM Memory** - 1 GB total capacity. Contains two separate ports; each with QSPI interface. One will be used for the 
+MSS to store firmware binaries and application data as well as storage area for firmware uploads; the other will be used for LUT data.
 * **SST26L064-80-RT/SM-HP Serial Flash Memory** - Radiation tolerant external QSPI-based flash storage for bitstream updates (same device as on Univity).

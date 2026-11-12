@@ -1693,10 +1693,8 @@ LIST UserCustomizedFileList
 ENDLIST
 LIST OpenedFileList
 ORIENTATION;HORIZONTAL
-Reports;Reports;0
-ReportsCurrentItem;Pre-Synthesis Simulate:tb_start_to_spi_presynth_simulation.log
 SmartDesign;TOP;0
-ACTIVEVIEW;Reports
+ACTIVEVIEW;TOP
 ENDLIST
 LIST ModuleSubBlockList
 LIST "AXI_IC::work","component/work/AXI_IC/AXI_IC.v","TRUE","FALSE"
