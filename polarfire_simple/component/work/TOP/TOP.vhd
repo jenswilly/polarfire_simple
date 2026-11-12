@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
--- Created by SmartDesign Wed Nov  4 10:04:31 2026
+-- Created by SmartDesign Tue Nov 10 11:45:24 2026
 -- Version: 2026.1 2026.1.0.17
 ----------------------------------------------------------------------
 
@@ -172,6 +172,8 @@ component AXI_IC
 end component;
 -- axi_sys_ctrl
 -- using entity instantiation for component axi_sys_ctrl
+-- bfic_block_producer
+-- using entity instantiation for component bfic_block_producer
 -- block_arbiter
 -- using entity instantiation for component block_arbiter
 -- button_debounce
@@ -398,8 +400,6 @@ component spi_tx_path
         spi_sclk : out std_logic
         );
 end component;
--- test_block_producer
--- using entity instantiation for component test_block_producer
 ----------------------------------------------------------------------
 -- Signal declarations
 ----------------------------------------------------------------------
@@ -427,6 +427,10 @@ signal AXI_IC_0_AXI4Lmtarget0_WSTRB              : std_logic_vector(7 downto 0);
 signal AXI_IC_0_AXI4Lmtarget0_WVALID             : std_logic;
 signal axi_sys_ctrl_0_DEBUG_PULSE                : std_logic;
 signal BA_net_0                                  : std_logic_vector(1 downto 0);
+signal bfic_block_producer_0_m_data              : std_logic_vector(79 downto 0);
+signal bfic_block_producer_0_m_valid             : std_logic;
+signal bfic_block_producer_1_m_data              : std_logic_vector(79 downto 0);
+signal bfic_block_producer_1_m_valid             : std_logic;
 signal BG0_net_0                                 : std_logic;
 signal block_arbiter_0_m_data                    : std_logic_vector(79 downto 0);
 signal block_arbiter_0_m_valid                   : std_logic;
@@ -522,10 +526,6 @@ signal SD_VOLT_DIR_1_3_net_0                     : std_logic;
 signal SD_VOLT_EN_net_0                          : std_logic;
 signal SD_VOLT_SEL_net_0                         : std_logic;
 signal spi_tx_path_0_s_ready                     : std_logic;
-signal test_block_producer_0_m_data              : std_logic_vector(79 downto 0);
-signal test_block_producer_0_m_valid             : std_logic;
-signal test_block_producer_1_m_data              : std_logic_vector(79 downto 0);
-signal test_block_producer_1_m_valid             : std_logic;
 signal UART0_TX_net_0                            : std_logic;
 signal WE_N_net_0                                : std_logic;
 signal RESET_N_net_1                             : std_logic;
@@ -561,11 +561,11 @@ signal SD_VOLT_EN_net_1                          : std_logic;
 signal SD_VOLT_CMD_DIR_net_1                     : std_logic;
 signal SD_VOLT_DIR_0_net_1                       : std_logic;
 signal SD_VOLT_DIR_1_3_net_1                     : std_logic;
+signal MBUS_QSPI_SCLK_net_1                      : std_logic;
+signal MBUS_QSPI_CS_N_net_1                      : std_logic;
 signal BA_net_1                                  : std_logic_vector(1 downto 0);
 signal DM_net_1                                  : std_logic_vector(1 downto 0);
 signal A_net_1                                   : std_logic_vector(13 downto 0);
-signal MBUS_QSPI_SCLK_net_1                      : std_logic;
-signal MBUS_QSPI_CS_N_net_1                      : std_logic;
 signal s_data_net_0                              : std_logic_vector(159 downto 0);
 signal s_valid_net_0                             : std_logic_vector(1 downto 0);
 signal s_ready_net_0                             : std_logic_vector(1 downto 0);
@@ -658,16 +658,16 @@ begin
  SD_VOLT_DIR_0         <= SD_VOLT_DIR_0_net_1;
  SD_VOLT_DIR_1_3_net_1 <= SD_VOLT_DIR_1_3_net_0;
  SD_VOLT_DIR_1_3       <= SD_VOLT_DIR_1_3_net_1;
+ MBUS_QSPI_SCLK_net_1  <= MBUS_QSPI_SCLK_net_0;
+ MBUS_QSPI_SCLK        <= MBUS_QSPI_SCLK_net_1;
+ MBUS_QSPI_CS_N_net_1  <= MBUS_QSPI_CS_N_net_0;
+ MBUS_QSPI_CS_N        <= MBUS_QSPI_CS_N_net_1;
  BA_net_1              <= BA_net_0;
  BA(1 downto 0)        <= BA_net_1;
  DM_net_1              <= DM_net_0;
  DM(1 downto 0)        <= DM_net_1;
  A_net_1               <= A_net_0;
  A(13 downto 0)        <= A_net_1;
- MBUS_QSPI_SCLK_net_1  <= MBUS_QSPI_SCLK_net_0;
- MBUS_QSPI_SCLK        <= MBUS_QSPI_SCLK_net_1;
- MBUS_QSPI_CS_N_net_1  <= MBUS_QSPI_CS_N_net_0;
- MBUS_QSPI_CS_N        <= MBUS_QSPI_CS_N_net_1;
 ----------------------------------------------------------------------
 -- Slices assignments
 ----------------------------------------------------------------------
@@ -676,8 +676,8 @@ begin
 ----------------------------------------------------------------------
 -- Concatenation assignments
 ----------------------------------------------------------------------
- s_data_net_0  <= ( test_block_producer_1_m_data & test_block_producer_0_m_data );
- s_valid_net_0 <= ( test_block_producer_1_m_valid & test_block_producer_0_m_valid );
+ s_data_net_0  <= ( bfic_block_producer_1_m_data & bfic_block_producer_0_m_data );
+ s_valid_net_0 <= ( bfic_block_producer_1_m_valid & bfic_block_producer_0_m_valid );
 ----------------------------------------------------------------------
 -- Component instances
 ----------------------------------------------------------------------
@@ -794,6 +794,38 @@ axi_sys_ctrl_0 : entity work.axi_sys_ctrl
         RDATA       => AXI_IC_0_AXI4Lmtarget0_RDATA,
         RRESP       => AXI_IC_0_AXI4Lmtarget0_RRESP 
         );
+-- bfic_block_producer_0
+bfic_block_producer_0 : entity work.bfic_block_producer
+    generic map( 
+        BEAMS_PER_BFIC => ( 4 ),
+        BFIC_AD3       => ( 0 )
+        )
+    port map( 
+        -- Inputs
+        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
+        start_in => OR2_1_Y,
+        m_ready  => block_arbiter_0_s_ready0to0(0),
+        -- Outputs
+        m_data   => bfic_block_producer_0_m_data,
+        m_valid  => bfic_block_producer_0_m_valid 
+        );
+-- bfic_block_producer_1
+bfic_block_producer_1 : entity work.bfic_block_producer
+    generic map( 
+        BEAMS_PER_BFIC => ( 4 ),
+        BFIC_AD3       => ( 1 )
+        )
+    port map( 
+        -- Inputs
+        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
+        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
+        start_in => OR2_1_Y,
+        m_ready  => block_arbiter_0_s_ready1to1(1),
+        -- Outputs
+        m_data   => bfic_block_producer_1_m_data,
+        m_valid  => bfic_block_producer_1_m_valid 
+        );
 -- block_arbiter_0
 block_arbiter_0 : entity work.block_arbiter
     generic map( 
@@ -879,9 +911,9 @@ mss_qspi_pads_0 : mss_qspi_pads
         mss_qspi_data_o  => MSS_simple_0_QSPI_DATA_M2F,
         mss_qspi_data_oe => MSS_simple_0_QSPI_DATA_OE_M2F,
         -- Outputs
-        mss_qspi_data_i  => mss_qspi_pads_0_mss_qspi_data_i,
         qspi_sclk        => MBUS_QSPI_SCLK_net_0,
         qspi_cs_n        => MBUS_QSPI_CS_N_net_0,
+        mss_qspi_data_i  => mss_qspi_pads_0_mss_qspi_data_i,
         -- Inouts
         qspi_io          => MBUS_QSPI_IO 
         );
@@ -892,49 +924,31 @@ MSS_simple_0 : MSS_simple
         FIC_0_ACLK           => PF_CCC_C0_0_OUT0_FABCLK_0,
         FIC_0_AXI4_M_AWREADY => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWREADY,
         FIC_0_AXI4_M_WREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_WREADY,
-        FIC_0_AXI4_M_BID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BID,
-        FIC_0_AXI4_M_BRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_BRESP,
         FIC_0_AXI4_M_BVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_BVALID,
         FIC_0_AXI4_M_ARREADY => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARREADY,
-        FIC_0_AXI4_M_RID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RID,
-        FIC_0_AXI4_M_RDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RDATA,
-        FIC_0_AXI4_M_RRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RRESP,
         FIC_0_AXI4_M_RLAST   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RLAST,
         FIC_0_AXI4_M_RVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_RVALID,
         MMUART_0_RXD_F2M     => UART0_RX,
-        QSPI_DATA_F2M        => mss_qspi_pads_0_mss_qspi_data_i,
         MSS_RESET_N_F2M      => VCC_net,
         MMUART_1_RXD         => MMUART_1_RXD,
         MMUART_4_RXD         => MMUART_4_RXD,
         SD_CD                => SD_CD,
         REFCLK               => REFCLK,
         REFCLK_N             => REFCLK_N,
+        FIC_0_AXI4_M_BID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_BID,
+        FIC_0_AXI4_M_BRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_BRESP,
+        FIC_0_AXI4_M_RID     => MSS_simple_0_FIC_0_AXI4_INITIATOR_RID,
+        FIC_0_AXI4_M_RDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RDATA,
+        FIC_0_AXI4_M_RRESP   => MSS_simple_0_FIC_0_AXI4_INITIATOR_RRESP,
+        QSPI_DATA_F2M        => mss_qspi_pads_0_mss_qspi_data_i,
         -- Outputs
         FIC_0_DLL_LOCK_M2F   => MSS_simple_0_FIC_0_DLL_LOCK_M2F,
-        FIC_0_AXI4_M_AWID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWID,
-        FIC_0_AXI4_M_AWADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWADDR,
-        FIC_0_AXI4_M_AWLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLEN,
-        FIC_0_AXI4_M_AWSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWSIZE,
-        FIC_0_AXI4_M_AWBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWBURST,
         FIC_0_AXI4_M_AWLOCK  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLOCK,
-        FIC_0_AXI4_M_AWQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWQOS,
-        FIC_0_AXI4_M_AWCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWCACHE,
-        FIC_0_AXI4_M_AWPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWPROT,
         FIC_0_AXI4_M_AWVALID => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWVALID,
-        FIC_0_AXI4_M_WDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WDATA,
-        FIC_0_AXI4_M_WSTRB   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WSTRB,
         FIC_0_AXI4_M_WLAST   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WLAST,
         FIC_0_AXI4_M_WVALID  => MSS_simple_0_FIC_0_AXI4_INITIATOR_WVALID,
         FIC_0_AXI4_M_BREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_BREADY,
-        FIC_0_AXI4_M_ARID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARID,
-        FIC_0_AXI4_M_ARADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR,
-        FIC_0_AXI4_M_ARLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLEN,
-        FIC_0_AXI4_M_ARSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARSIZE,
-        FIC_0_AXI4_M_ARBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST,
         FIC_0_AXI4_M_ARLOCK  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLOCK,
-        FIC_0_AXI4_M_ARQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARQOS,
-        FIC_0_AXI4_M_ARCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE,
-        FIC_0_AXI4_M_ARPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARPROT,
         FIC_0_AXI4_M_ARVALID => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARVALID,
         FIC_0_AXI4_M_RREADY  => MSS_simple_0_FIC_0_AXI4_INITIATOR_RREADY,
         MMUART_0_TXD_M2F     => UART0_TX_net_0,
@@ -943,8 +957,6 @@ MSS_simple_0 : MSS_simple
         QSPI_SEL_OE_M2F      => MSS_simple_0_QSPI_SEL_OE_M2F,
         QSPI_CLK_M2F         => MSS_simple_0_QSPI_CLK_M2F,
         QSPI_CLK_OE_M2F      => MSS_simple_0_QSPI_CLK_OE_M2F,
-        QSPI_DATA_M2F        => MSS_simple_0_QSPI_DATA_M2F,
-        QSPI_DATA_OE_M2F     => MSS_simple_0_QSPI_DATA_OE_M2F,
         PLL_CPU_LOCK_M2F     => OPEN,
         PLL_DDR_LOCK_M2F     => OPEN,
         MSS_RESET_N_M2F      => MSS_simple_0_MSS_RESET_N_M2F,
@@ -956,9 +968,6 @@ MSS_simple_0 : MSS_simple
         SD_VOLT_CMD_DIR      => SD_VOLT_CMD_DIR_net_0,
         SD_VOLT_DIR_0        => SD_VOLT_DIR_0_net_0,
         SD_VOLT_DIR_1_3      => SD_VOLT_DIR_1_3_net_0,
-        BA                   => BA_net_0,
-        DM                   => DM_net_0,
-        A                    => A_net_0,
         RESET_N              => RESET_N_net_0,
         CKE0                 => CKE0_net_0,
         CS0_N                => CS0_N_net_0,
@@ -970,6 +979,29 @@ MSS_simple_0 : MSS_simple
         CAS_N                => CAS_N_net_0,
         ACT_N                => ACT_N_net_0,
         BG0                  => BG0_net_0,
+        FIC_0_AXI4_M_AWID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWID,
+        FIC_0_AXI4_M_AWADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWADDR,
+        FIC_0_AXI4_M_AWLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWLEN,
+        FIC_0_AXI4_M_AWSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWSIZE,
+        FIC_0_AXI4_M_AWBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWBURST,
+        FIC_0_AXI4_M_AWQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWQOS,
+        FIC_0_AXI4_M_AWCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWCACHE,
+        FIC_0_AXI4_M_AWPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_AWPROT,
+        FIC_0_AXI4_M_WDATA   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WDATA,
+        FIC_0_AXI4_M_WSTRB   => MSS_simple_0_FIC_0_AXI4_INITIATOR_WSTRB,
+        FIC_0_AXI4_M_ARID    => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARID,
+        FIC_0_AXI4_M_ARADDR  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARADDR,
+        FIC_0_AXI4_M_ARLEN   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARLEN,
+        FIC_0_AXI4_M_ARSIZE  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARSIZE,
+        FIC_0_AXI4_M_ARBURST => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARBURST,
+        FIC_0_AXI4_M_ARQOS   => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARQOS,
+        FIC_0_AXI4_M_ARCACHE => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARCACHE,
+        FIC_0_AXI4_M_ARPROT  => MSS_simple_0_FIC_0_AXI4_INITIATOR_ARPROT,
+        QSPI_DATA_M2F        => MSS_simple_0_QSPI_DATA_M2F,
+        QSPI_DATA_OE_M2F     => MSS_simple_0_QSPI_DATA_OE_M2F,
+        BA                   => BA_net_0,
+        DM                   => DM_net_0,
+        A                    => A_net_0,
         -- Inouts
         SD_CMD               => SD_CMD,
         SD_DATA0             => SD_DATA0,
@@ -1050,38 +1082,6 @@ spi_tx_path_0 : spi_tx_path
         spi_mosi => RPi_GPIO16_net_0,
         spi_cs_n => RPi_GPIO26_net_0,
         busy_out => RPi_GPIO20_net_0 
-        );
--- test_block_producer_0
-test_block_producer_0 : entity work.test_block_producer
-    generic map( 
-        BLOCKS_PER_PRESS => ( 1 ),
-        FIRST_BYTE       => ( 240 )
-        )
-    port map( 
-        -- Inputs
-        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
-        start_in => OR2_1_Y,
-        m_ready  => block_arbiter_0_s_ready0to0(0),
-        -- Outputs
-        m_valid  => test_block_producer_0_m_valid,
-        m_data   => test_block_producer_0_m_data 
-        );
--- test_block_producer_1
-test_block_producer_1 : entity work.test_block_producer
-    generic map( 
-        BLOCKS_PER_PRESS => ( 1 ),
-        FIRST_BYTE       => ( 170 )
-        )
-    port map( 
-        -- Inputs
-        clk      => PF_CCC_C0_0_OUT0_FABCLK_0,
-        reset_n  => CORERESET_0_FABRIC_RESET_N_0,
-        start_in => OR2_1_Y,
-        m_ready  => block_arbiter_0_s_ready1to1(1),
-        -- Outputs
-        m_valid  => test_block_producer_1_m_valid,
-        m_data   => test_block_producer_1_m_data 
         );
 
 end RTL;

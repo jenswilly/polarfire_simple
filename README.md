@@ -48,21 +48,17 @@ Several producers share `spi_tx_path` through `block_arbiter` (in TOP, in front 
 For now the blocks come from two `test_block_producer` instances (HDL+ cores, so the generics are set per instance) on `block_arbiter`. Each pulse from SWITCH2 or a write to DEBUG makes each of them send one block `<id> <seq> 02 03 04 05 06 07 08 09`, where `<id>` is the `FIRST_BYTE` generic (`F0` for `test_block_producer_0`, `AA` for `test_block_producer_1`) and `<seq>` counts that producer's blocks since reset. So every pulse gives two SPI frames, `F0 <seq> …` first, then `AA <seq> …`.
 
 ### QSPI controller and BIST
-`qspi_board` (HDL+ core) contains `qspi_mram_ctrl` (the QSPI controller for the W25Q128JV prototype and, later, the dual-die AS308G208 MRAM) and `qspi_bist`. After reset the BIST initialises the memory, writes a test pattern once, calibrates the RX sample delay and then reads and compares 8 × 880 bytes once and stops: LED5 = pass, LED6 = fail (the `LOOP_ROUNDS` generic of `qspi_bist` repeats the read rounds until reset). SCLK is 50 MHz, reads are 1-4-4 (EBh). The SCLK/CS# output registers and the IO3:0 input registers are packed into the I/O cells (`constraints/qspi_ioreg.ndc`). Block diagram: `documentation/qspi_controller.drawio`; device facts: `documentation/device_facts.md`; timing: `documentation/timing_budget.md`; bring-up on the breakout: `documentation/bringup.md`.
+`qspi_board` (HDL+ core) contains `qspi_mram_ctrl` (the QSPI controller for the W25Q128JV prototype and, later, a single port of the AS308G208 MRAM) and `qspi_bist`. After reset the BIST initialises the memory, writes a test pattern once, calibrates the RX sample delay and then reads and compares 8 × 880 bytes once and stops: LED5 = pass, LED6 = fail (the `LOOP_ROUNDS` generic of `qspi_bist` repeats the read rounds until reset). SCLK is 50 MHz, reads are 1-4-4 (EBh). The SCLK/CS# output registers and the IO3:0 input registers are packed into the I/O cells (`constraints/qspi_ioreg.ndc`). Block diagram: `documentation/qspi_controller.drawio`; device facts: `documentation/device_facts.md`; timing: `documentation/timing_budget.md`; bring-up on the breakout: `documentation/bringup.md`.
 
 Design decisions:
-- **Devices.** Final: Avalanche AS308G208 dual-die MRAM, die 1 on IO3:0 and die 2 on IO7:4 with separate CS#/SCLK, run in lockstep: each quad SCLK cycle moves one host byte `{die2_nibble, die1_nibble}`. Prototype: Winbond W25Q128JVSSIQ (single die, IO7:4 read as 0). Selected with the `DEVICE` generic (`device_t` in `qspi_pkg`) and `DIE2_PRESENT`.
+- **Devices.** Final: Avalanche AS308G208 dual-die MRAM. Will be used as separate QSPI devices, quad SCLK cycle moves one nibble. Prototype: Winbond W25Q128JVSSIQ. Selected with the `DEVICE` generic (`device_t` in `qspi_pkg`).
 - **Protocol.** SDR, SPI mode 0. Reads are EBh 1-4-4 on both devices (the W25Q has no QPI mode). Writes are only for tests and calibration: W25Q 20h sector erase + 32h page program with BUSY polling; AS D2h.
 - **Clocking.** `clk_ctrl` is the 200 MHz fabric clock (`PF_CCC_C0` OUT0, `CORERESET_0`), the same as the rest of the fabric and FIC_0, so the read stream can go to the MSS without a clock crossing. SCLK = `clk_ctrl` / (2 × `SCLK_DIV`) = 50 MHz with `SCLK_DIV` = 2 (range 1–8). RX data is sampled `SAMPLE_DLY` `clk_ctrl` cycles (5 ns steps, range 1–8) after the SCLK falling edge, 4 by default; the BIST can calibrate it at run time.
 - **Interface.** Read requests `{len, addr}` in host bytes (both even; die address = host address / 2). A read starts only when the credit `rd_space` covers it, so SCLK never stalls. Data out is AXI4-Stream, 8 bit, `tlast` per request.
 - **Read time.** 8 × 880 host bytes take ≈ 145 µs at 50 MHz on both devices (7200 / 7248 SCLK cycles; `tb_qspi_read_ctrl`) which is within the allowed 200 µs.
 
 Remaining work for the AS308G208 board (on hold until the target PCB exists):
-1. A dual-die variant of `qspi_board` with IO7:4, CS2#/SCLK2 and RESET# (`mem_reset_n` of `qspi_mram_ctrl`), `DEVICE_SEL` = 1 and `DIE2_PRESENT` = true. The current `qspi_board` is single die; with an AS308G208 die, RESET# must be tied high.
-2. Pins and constraints for the PCB: `io.pdc` (4 mA drive, pull-ups on CS#, IO2/IO3, IO6/IO7), `qspi_ioreg.ndc` (input registers for IO7:4, output registers for CS2#/SCLK2), `timing.sdc` (I/O delays for the new ports) and the PCB's board delays in `timing_budget.md`. The breakout left 1.91 ns input setup slack with the AS308G208's tCO at 100 MHz `clk_ctrl`, where only one sample point (20 ns) worked at 50 MHz; at 200 MHz the same 20 ns point is `SAMPLE_DLY` = 4 (`timing_budget.md`).
-3. Run the BIST with calibration on the PCB and measure the read time. Lessons from the breakout are in `bringup.md`: decoupling at the device, 4 mA drive, CS# high times.
-4. Vendor questions Q‑A1…Q‑A6 in `device_facts.md` §5 (currently accepted assumptions). The 8 Gb addressing question is answered there (§3.1: each CS# is one linear 4 Gb space).
-5. Optional: QPI 4-4-4 reads (38h, 0Bh, latency 10–15, FFh in 4-0-0 form to leave QPI) if the 1-4-4 overhead (≈ 1 µs per 8 reads) ever matters.
+1. Amend `qspi_board` to work with a single port of the dual-port AS308G208. With AS308G208, RESET# must be tied high.
 
 ### Register map (`axi_sys_ctrl`, base `0x6000_0000`)
 
@@ -311,16 +307,5 @@ GDB in the devcontainer connects to U54_1 through SoftConsole's OpenOCD. It can 
 OpenOCD has no RTEMS thread support, so GDB sees only the thread that is running when it halts. The application is built with `-O2`, so stepping jumps around and some variables are `<optimized out>`.
 
 ## Status / next steps
-- [x] FPGA design built and programmed. SWITCH1 → LED1 works.
-- [x] Bare-metal app (LIM debug): AXI reads and writes to `0x6000_0000` work, LED2/LED3 count, UART output works.
-- [x] Standalone boot from eNVM (boot mode 1): everything works after a power cycle, without a PC.
-- [x] SWITCH2 debounce → LED4 works.
-- [ ] DEBUG pulse (1 ms) on RPi header pin 40: check on the scope.
-- [x] SPI TX path: simulated (`tb_spi_tx_path`, `tb_block_arbiter`), and checked on header pins 35–37 with a logic analyser: each press gives two frames (`F0 <seq> …`, `AA <seq> …`) with the counter incrementing.
-- [x] QSPI controller + BIST integrated into `TOP`, with timing constraints: synthesis, place and route and timing pass.
-- [x] QSPI hardware bring-up on the W25Q128JV breakout: BIST passes at 50 MHz SCLK, calibration window {2}, timing met (`documentation/bringup.md`). This was with the old 100 MHz `clk_ctrl`.
-- [x] RTEMS on U54_1: the HSS (eNVM) boots `led_test` from the SD card. HSS console on MMUART1, LED test output on MMUART0, LED2/LED3 count.
-- [x] RTEMS boot from QSPI flash (Flash 6 Click on mikroBUS, MSS QSPI through the fabric): works without the SD card. Reads at 25 MHz, 1-1-4.
-- [ ] Single 200 MHz fabric clock (OUT0 for everything, OUT1 and `CORERESET_1` removed): HDL, testbenches, `timing.sdc` and Libero changes done; `axi_sys_ctrl` widened to a 64-bit bus (no interconnect DownConverter). Verify Timing passes with full constraint coverage (`timing_budget.md`); the BIST passes on the breakout (calibration window {3, 4, 5}, delay 4). Still to do on the board: SPI TX at 20 MHz, DEBUG pulse 1 ms, AXI register access from software.
-- [ ] QSPI on the AS308G208 dual-die PCB: on hold, see "Remaining work" under QSPI controller and BIST.
-- [ ] Software: write blocks to the SPI TX path from the MSS instead of the `test_block_producer`s (as a `block_arbiter` port).
+
+- [ ] Convert use of AS308G208 to use one port for FPGA and one for MSS QSPI for storing MSS firmware instead of the current QSPI flash.
