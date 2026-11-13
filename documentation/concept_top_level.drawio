@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="concept_top_level" name="Concept top level">
-        <mxGraphModel dx="1513" dy="796" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
+        <mxGraphModel dx="736" dy="460" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -130,13 +130,13 @@
                 <mxCell id="e_phy" edge="1" parent="1" source="phy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="mac" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_wdt" edge="1" parent="1" source="gpio" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" target="wdt" value="kick">
+                <mxCell id="e_wdt" edge="1" parent="1" source="gpio" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=0;exitY=0.25;exitDx=0;exitDy=0;labelPadding=2;" target="wdt" value="kick">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_psu" edge="1" parent="1" source="gpio" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" target="psu" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_sst" edge="1" parent="1" source="sysctl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="sst" value="SPI">
+                <mxCell id="e_sst" edge="1" parent="1" source="sysctl" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;labelPadding=2;" target="sst" value="SPI">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_envm" edge="1" parent="1" source="envm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" target="e51" value="">
@@ -162,23 +162,24 @@
                 <mxCell id="e_u4fic" edge="1" parent="1" source="u4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="fic" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_ficic" edge="1" parent="1" source="fic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;" target="ic" value="AXI4">
+                <mxCell id="e_ficic" edge="1" parent="1" source="fic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;labelPadding=2;" target="ic" value="AXI4">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_sc" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.1;exitDx=0;exitDy=0;" target="sc" value="AXI-Lite">
+                <mxCell id="e_sc" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.1;exitDx=0;exitDy=0;labelPadding=2;" target="sc" value="AXI-Lite">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_temp" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="dist" value="AXI-Lite (temp.)">
+                <mxCell id="e_temp" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelPadding=2;" target="dist" value="AXI-Lite (temp.)">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_fifo" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.54;exitDx=0;exitDy=0;" target="fifo" value="AXI-S / DMA (u/v)">
+                <mxCell id="e_fifo" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.54;exitDx=0;exitDy=0;labelPadding=2;" target="fifo" value="AXI-S / DMA (u/v)">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_lutu" edge="1" parent="1" source="ic" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.93;exitDx=0;exitDy=0;" target="lutu" value="AXI-Lite + AXI-S">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_state" edge="1" parent="1" source="sc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="arr" value="state / resets / init">
-                    <mxGeometry relative="1" as="geometry">
+                <mxCell id="e_state" edge="1" parent="1" source="sc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelPadding=2;" target="arr" value="state / resets / init">
+                    <mxGeometry relative="1" x="0.007" as="geometry">
+                        <mxPoint x="1" as="offset"/>
                         <Array as="points">
                             <mxPoint x="1330" y="155"/>
                         </Array>
@@ -201,13 +202,13 @@
                 <mxCell id="e_um" edge="1" parent="1" source="lutu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;" target="mramc" value="write">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_spi" edge="1" parent="1" source="slice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;" target="bfic" value="SPI + GPIO&lt;br&gt;(22 buses)">
+                <mxCell id="e_spi" edge="1" parent="1" source="slice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;labelPadding=2;" target="bfic" value="SPI + GPIO&lt;br&gt;(22 buses)">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_bsw" edge="1" parent="1" source="slice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" target="bfic" value="BSW">
+                <mxCell id="e_bsw" edge="1" parent="1" source="slice" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;dashed=1;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;labelPadding=2;" target="bfic" value="BSW">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_mram" edge="1" parent="1" source="mramc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.45;entryDx=0;entryDy=0;" target="as308" value="QSPI CS1 (4 bit)">
+                <mxCell id="e_mram" edge="1" parent="1" source="mramc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.45;entryDx=0;entryDy=0;labelPadding=2;" target="as308" value="QSPI CS1 (4 bit)">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_fw" edge="1" parent="1" source="qspi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;labelBackgroundColor=default;fontSize=10;startArrow=block;startFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="as308" value="QSPI CS2 (4 bit)">
