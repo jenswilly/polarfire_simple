@@ -122,7 +122,9 @@ constraints/timing.sdc      QSPI timing (SCLK generated clock, I/O delays), cloc
 sim/                Testbenches (tb_*.vhd) and run_tb.sh to run them in QuestaSim
   models/           Simulation-only models: qspi_mem_model.vhd (one W25Q128JV / AS308G208 die),
                     qspi_model_pkg.vhd (sparse memory, preload pattern)
-polarfire_simple/   Libero project (.prjx + component configs + designer/TOP/ENVM.cfg); build output is git-ignored
+polarfire_simple/   Libero project. Folder is ignored in Git and can be recreated with tools/create_project.sh
+libero/             Tcl to recreate the Libero project: create_project.tcl, export_components.tcl and
+                    components/*.tcl (HDL+ cores, IP cores and SmartDesign TOP, exported from the project)
 softconsole/        SoftConsole workspace
   led_test/         Bare-metal app (based on Microchip's mpfs-blank-baremetal template)
 hss/                HSS (Hart Software Services) build: build_hss.sh (devcontainer), make_envm_hex.sh, config_overrides,
@@ -131,7 +133,8 @@ rtems/              RTEMS 6.2: config.ini (BSP options), dts/ (Discovery Kit dev
                     led_test/ (RTEMS version of the LED test, CMake), write_sd.sh (boot image -> microSD),
                     write_qspi.sh (boot image -> QSPI flash via the HSS YMODEM utility)
 .devcontainer/      RTEMS toolchain, BSP build, HSS source and xPack GCC
-tools/              Libero license-server start/stop scripts (see tools/README.md), syn_check.sh (batch Synplify check),
+tools/              Libero license-server start/stop scripts (see tools/README.md), create_project.sh / export_components.sh
+                    (recreate the Libero project / re-export its components), syn_check.sh (batch Synplify check),
                     the udev rule for the board's UARTs, openocd_mpfs.sh (GDB server), mss_reset.sh (MSS reset over JTAG)
 ```
 
@@ -143,9 +146,43 @@ tools/              Libero license-server start/stop scripts (see tools/README.m
 
 **Fresh clone:** the bitstream includes the eNVM boot image (see [Standalone boot](#standalone-boot-from-envm-boot-mode-1)), and that hex is build output, so it isn't in git. Build the `Discovery-Kit-eNVM-Scratchpad-Release` configuration in SoftConsole first. Otherwise Generate Design Initialization Data / Generate Bitstream fails on the missing file.
 
-The project uses **absolute paths** (`/home/jenswilly/Projs/polarfire_simple/...`) in two places. If you clone the repository somewhere else, fix both:
-- `polarfire_simple.prjx` links all files in the `hdl/` folder, the testbenches in `sim/` and `constraints/io.pdc`. Re-link them, or search and replace the path in the `.prjx` while Libero is closed.
-- `designer/TOP/ENVM.cfg` points the eNVM client at `led_test-bm1-p0.hex`. Select the hex again in the eNVM client.
+
+### Recreating the Libero project from Tcl
+
+The whole Libero project can be rebuilt from the sources in this repository, with no absolute paths involved:
+
+```
+tools/create_project.sh [project_dir]
+```
+
+This runs `libero/create_project.tcl` in batch mode (no GUI). `project_dir` defaults to `polarfire_simple/` and **must not exist yet**, because Libero's `new_project` refuses an existing directory. To replace the current project, move or delete the `polarfire_simple/` folder first; to try it out, pass another directory.
+
+The script:
+
+1. creates the project with the device and project settings (MPFS095T-1FCSG325E, VHDL-2008, LVCMOS18 default);
+2. links `hdl/*.vhd`, the testbenches listed in `stimulus_files` and the three files in `constraints/`;
+3. imports the MSS from `mss/MSS_simple.cxz`;
+4. sources `libero/components/*.tcl` to create the HDL+ cores, the IP cores and the SmartDesign `TOP`, and generates them;
+5. derives the timing constraints and associates the constraint files with synthesis, place and route and timing verification;
+6. associates `tb_start_to_spi` as stimulus and sets the simulation options;
+7. writes the eNVM client to `designer/TOP/ENVM.cfg`, pointing at `hss/build/bootmode1/hss-envm-wrapper-bm1-p0.hex` with the byte count taken from the hex. If the HSS has not been built yet, this step is skipped with a note; add the client by hand later.
+
+It stops after creating the project. Synthesis, place and route and bitstream generation are run from the GUI as described above.
+
+The generated `.prjx` still contains absolute paths, but they are those of the current checkout.
+
+**Keeping the Tcl up to date.** `libero/components/*.tcl` is an export of the components in the Libero project, so it has to be refreshed when they change:
+
+| Change made in the GUI | What to do |
+|---|---|
+| SmartDesign `TOP` edited, IP core reconfigured, HDL+ core ports/generics/bus interfaces changed | Save the project, then run `tools/export_components.sh` (batch) or, with the project open, **Project → Execute Script…** → `libero/export_components.tcl`. Commit `libero/components/`. |
+| MSS configuration changed | Regenerate into `mss/` as in step 2 above. `create_project.tcl` imports `mss/MSS_simple.cxz`. |
+| New IP core or HDL+ core added | Add its name to `ip_cores` / `hdl_cores` in **both** `libero/export_components.tcl` and `libero/create_project.tcl`, add the core's VLNV to the `download_core` list, then export. |
+| Testbench linked, constraint file added, project or simulation settings changed | Edit `libero/create_project.tcl` by hand. New files in `hdl/` are picked up automatically. |
+
+`tools/export_components.sh [project.prjx]` opens the project, exports each component with `export_component_to_tcl`, rewrites paths below the repository root to `$repo_root/...` and closes the project without saving.
+
+Both scripts run Libero in batch mode and need the license. There is only one, so **close the Libero GUI first**; otherwise they fail with "License Checkout Error".
 
 ## Simulation
 
