@@ -21,6 +21,7 @@ libstdc++6:i386
 libtinfo-dev
 libyaml-dev
 locales
+lrzsz
 lsb-release
 ninja-build
 openocd

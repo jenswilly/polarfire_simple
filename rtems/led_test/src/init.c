@@ -27,9 +27,10 @@ static rtems_task Init(rtems_task_argument argument) {
   printf("ID register: 0x%08" PRIX32 " (expect 0x1ED50001)\n", LED_ID_REG);
 
   while (1) {
-    (void)rtems_task_wake_after(RTEMS_MILLISECONDS_TO_TICKS(500));
+    (void)rtems_task_wake_after(RTEMS_MILLISECONDS_TO_TICKS(200));
 
-    count = (count + 1U) & 0x3U;
+    // count = (count + 1U) & 0x3U;
+    count ^= 0x3U;
     LED_REG = count;
 
     printf("LED <- %" PRIu32 ", readback %" PRIu32 "\n", count, LED_REG & 0x3U);
