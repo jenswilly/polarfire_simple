@@ -133,7 +133,7 @@ rtems/              RTEMS 6.2: config.ini (BSP options), dts/ (Discovery Kit dev
                     led_test/ (RTEMS version of the LED test, CMake), write_sd.sh (boot image -> microSD),
                     write_qspi.sh (boot image -> QSPI flash via the HSS YMODEM utility)
 .devcontainer/      RTEMS toolchain, BSP build, HSS source and xPack GCC
-tools/              Libero license-server start/stop scripts (see tools/README.md), create_project.sh / export_components.sh
+tools/              Libero license-server start/stop scripts (see tools/README.md), create_project.sh|.bat / export_components.sh|.bat
                     (recreate the Libero project / re-export its components), syn_check.sh (batch Synplify check),
                     the udev rule for the board's UARTs, openocd_mpfs.sh (GDB server), mss_reset.sh (MSS reset over JTAG)
 ```
@@ -152,7 +152,8 @@ tools/              Libero license-server start/stop scripts (see tools/README.m
 The whole Libero project can be rebuilt from the sources in this repository, with no absolute paths involved:
 
 ```
-tools/create_project.sh [project_dir]
+tools/create_project.sh [project_dir]        # Linux
+tools\create_project.bat [project_dir]       # Windows
 ```
 
 This runs `libero/create_project.tcl` in batch mode (no GUI). `project_dir` defaults to `polarfire_simple/` and **must not exist yet**, because Libero's `new_project` refuses an existing directory. To replace the current project, move or delete the `polarfire_simple/` folder first; to try it out, pass another directory.
@@ -181,6 +182,8 @@ The generated `.prjx` still contains absolute paths, but they are those of the c
 | Testbench linked, constraint file added, project or simulation settings changed | Edit `libero/create_project.tcl` by hand. New files in `hdl/` are picked up automatically. |
 
 `tools/export_components.sh [project.prjx]` opens the project, exports each component with `export_component_to_tcl`, rewrites paths below the repository root to `$repo_root/...` and closes the project without saving.
+
+**Windows:** `tools\create_project.bat` and `tools\export_components.bat` do the same as the `.sh` scripts. They look for `libero.exe` under `%LIBERO_INSTALL_DIR%\Libero_SoC\Designer\bin` (or `bin64`); `LIBERO_INSTALL_DIR` defaults to `C:\Microchip\Libero_SoC_2026.1`. They don't start a license server: the license must already work as it does for the Libero GUI (license manager service or `LM_LICENSE_FILE`). The Tcl scripts are the same on both platforms; `export_components.tcl` writes LF line endings and matches the repository path case-insensitively and with `\` or `/`, so an export on Windows produces the same files as on Linux. `.gitattributes` keeps `*.tcl`/`*.sh` at LF and `*.bat` at CRLF. Paths with spaces work.
 
 Both scripts run Libero in batch mode and need the license. There is only one, so **close the Libero GUI first**; otherwise they fail with "License Checkout Error".
 

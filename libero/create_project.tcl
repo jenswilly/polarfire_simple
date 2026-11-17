@@ -5,7 +5,8 @@
 # All paths are derived from the location of this script, so the repository
 # can be checked out anywhere.
 #
-#   tools/create_project.sh [project_dir]
+#   Linux:    tools/create_project.sh [project_dir]
+#   Windows:  tools\create_project.bat [project_dir]
 #
 # or directly (Libero must NOT be started from inside the project folder,
 # which does not exist yet):
@@ -29,8 +30,10 @@ set repo_root  [file dirname $script_dir]
 
 set project_name {polarfire_simple}
 set project_dir  [file join $repo_root polarfire_simple]
-if {[info exists argc] && $argc > 0 && [lindex $argv 0] ne ""} {
-    set project_dir [file normalize [lindex $argv 0]]
+# Libero splits SCRIPT_ARGS at spaces, so join the pieces again (Windows paths
+# like "C:/Users/First Last/..." contain spaces).
+if {[info exists argv] && [string trim [join $argv " "]] ne ""} {
+    set project_dir [file normalize [string trim [join $argv " "]]]
 }
 
 # Components in dependency order: HDL+ cores, IP cores, then the SmartDesign.
@@ -123,11 +126,33 @@ build_design_hierarchy
 # ---------------------------------------------------------------------------
 import_mss_component -file [file join $repo_root mss MSS_simple.cxz]
 
+# Sources a libero/components/*.tcl file. Each "$repo_root/<path>" in it is
+# replaced by the native path ([file nativename]) first: sd_instantiate_hdl_module
+# only accepts -hdl_file if it is exactly the string Libero stored for the linked
+# file, and on Windows Libero stores C:\...\hdl\x.vhd with backslashes. Any other
+# spelling fails with "You cannot instantiate a sub-module '<x>' of HDL module".
+proc source_component {path repo_root} {
+    set f [open $path r]
+    set text [read $f]
+    close $f
+    set out {}
+    set pos 0
+    while {[regexp -indices -start $pos {"\$repo_root/([^"]*)"} $text match rest]} {
+        lassign $match m0 m1
+        lassign $rest r0 r1
+        set native [file nativename [file join $repo_root [string range $text $r0 $r1]]]
+        append out [string range $text $pos [expr {$m0 - 1}]] [list $native]
+        set pos [expr {$m1 + 1}]
+    }
+    append out [string range $text $pos end]
+    uplevel #0 $out
+}
+
 foreach c [concat $hdl_cores $ip_cores] {
-    source [file join $script_dir components $c.tcl]
+    source_component [file join $script_dir components $c.tcl] $repo_root
 }
 build_design_hierarchy
-source [file join $script_dir components $root_name.tcl]
+source_component [file join $script_dir components $root_name.tcl] $repo_root
 
 build_design_hierarchy
 set_root -module "${root_name}::work"
@@ -209,5 +234,20 @@ if {[file exists $envm_hex]} {
     puts "      Configure Design Initialization Data and Memories."
 }
 
+# Set the root again just before saving (later steps must not leave the project
+# without one), then check that it really ended up in the saved .prjx.
+build_design_hierarchy
+set_root -module "${root_name}::work"
 save_project
-puts "create_project.tcl: created $project_dir/$project_name.prjx"
+
+set prjx [file join $project_dir $project_name.prjx]
+set f [open $prjx r]
+set prjx_text [read $f]
+close $f
+if {![regexp -line {^KEY ActiveRoot "([^"]*)"} $prjx_text -> active_root]
+        || $active_root ne "${root_name}::work"} {
+    error "create_project.tcl: the saved project has no root '${root_name}::work'\
+           (ActiveRoot is '[expr {[info exists active_root] ? $active_root : {}}]').\
+           Look for errors from TOP.tcl / generate_component above."
+}
+puts "create_project.tcl: created $prjx (root ${root_name}::work)"

@@ -9,7 +9,9 @@
 # the result.
 #
 #   GUI:    with the project open: Project -> Execute Script... -> this file
-#   Batch:  tools/export_components.sh   (Libero GUI must be closed: one license)
+#   Batch:  tools/export_components.sh     (Linux)
+#           tools\export_components.bat    (Windows)
+#           The Libero GUI must be closed (one license).
 #
 # The MSS is not exported: it is imported from mss/MSS_simple.cxz.
 #
@@ -25,27 +27,57 @@ set hdl_cores  {axi_sys_ctrl bfic_block_producer block_arbiter pulse_stretch qsp
 set components {PF_CCC_C0 CORERESET INIT_MONITOR AXI_IC BLOCK_FIFO_CORE TOP}
 
 set opened_here 0
-if {[info exists argc] && $argc > 0} {
-    open_project -file [file normalize [lindex $argv 0]] -do_backup_on_convert 0
+# Libero splits SCRIPT_ARGS at spaces, so join the pieces again.
+if {[info exists argv] && [string trim [join $argv " "]] ne ""} {
+    open_project -file [file normalize [string trim [join $argv " "]]] -do_backup_on_convert 0
     set opened_here 1
 }
 
 file mkdir $out_dir
 
 # Replace {<repo_root>/x} and "<repo_root>/x" with "$repo_root/x".
+# Plain string search instead of a regexp, so that paths with spaces or regexp
+# characters work. The match ignores case and accepts \ as well as /, because
+# on Windows the drive letter case and the separator may differ from
+# [file normalize]. Written with LF line endings on every platform.
 proc make_relocatable {path repo_root} {
     set f [open $path r]
     set text [read $f]
     close $f
-    # \x7b / \x7d are the brace characters (written as escapes to keep this
-    # proc body brace-balanced); ***= would not allow the capture group.
-    set root [string map {. \\. + \\+} $repo_root]
-    regsub -all "\\x7b$root/(\\S*?)\\x7d" $text {"$repo_root/\1"} text
-    set text [string map [list "\"$repo_root/" "\"\$repo_root/"] $text]
+
+    set lbrace [format %c 123]
+    set rbrace [format %c 125]
+    # Same length as $text, so indices can be used on both.
+    set norm   [string tolower [string map {\\ /} $text]]
+    set needle [string tolower [string map {\\ /} $repo_root]]/
+    set out    {}
+    set pos    0
+    while {[set i [string first $needle $norm $pos]] >= 0} {
+        set open_ch [string index $text [expr {$i - 1}]]
+        if {$open_ch eq $lbrace} {
+            set close_ch $rbrace
+        } elseif {$open_ch eq "\""} {
+            set close_ch "\""
+        } else {
+            append out [string range $text $pos [expr {$i + [string length $needle] - 1}]]
+            set pos [expr {$i + [string length $needle]}]
+            continue
+        }
+        set rest_start [expr {$i + [string length $needle]}]
+        set j [string first $close_ch $text $rest_start]
+        if {$j < 0} break
+        set rest [string map {\\ /} [string range $text $rest_start [expr {$j - 1}]]]
+        append out [string range $text $pos [expr {$i - 2}]]
+        append out "\"\$repo_root/$rest\""
+        set pos [expr {$j + 1}]
+    }
+    append out [string range $text $pos end]
+
     set f [open $path w]
-    puts -nonewline $f $text
+    fconfigure $f -translation lf
+    puts -nonewline $f $out
     close $f
-    if {[string first $repo_root $text] >= 0} {
+    if {[string first $needle [string tolower [string map {\\ /} $out]]] >= 0} {
         puts "WARNING: $path still contains the absolute path $repo_root"
     }
 }
