@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="Ys9MNqmiTdMTzIQ8i4A7" name="Top">
-        <mxGraphModel grid="1" page="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
+        <mxGraphModel dx="675" dy="421" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="2336" pageHeight="1654" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
             <root>
                 <mxCell id="mtRlP6FcxhWbJw7U602t-0"/>
                 <mxCell id="mtRlP6FcxhWbJw7U602t-1" parent="mtRlP6FcxhWbJw7U602t-0"/>
@@ -96,7 +96,7 @@
                 <mxCell id="YreJvVKSforrdpG5m3IM-3" parent="9ClDCLuR8Wl2kTbweGUx-1" style="whiteSpace=wrap;html=1;shape=mxgraph.basic.layered_rect;dx=10;outlineConnect=0;boundedLbl=1;shadow=0;verticalAlign=top;fontStyle=1" value="22&amp;nbsp;× TX/RX Slice" vertex="1">
                     <mxGeometry height="312" width="240" x="1448" y="650" as="geometry"/>
                 </mxCell>
-                <mxCell id="G_8n7HxtKy-t4fnMxnxr-126" parent="mtRlP6FcxhWbJw7U602t-0" value="Slice Details"/>
+                <mxCell id="G_8n7HxtKy-t4fnMxnxr-126" parent="mtRlP6FcxhWbJw7U602t-0" value="Slice Details" visible="0"/>
                 <mxCell id="G_8n7HxtKy-t4fnMxnxr-79" edge="1" parent="G_8n7HxtKy-t4fnMxnxr-126" source="G_8n7HxtKy-t4fnMxnxr-3" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endSize=2;endArrow=openThin;endFill=0;strokeWidth=1;" target="G_8n7HxtKy-t4fnMxnxr-20">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
@@ -339,7 +339,7 @@
                         <mxPoint x="1" y="1" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="9ClDCLuR8Wl2kTbweGUx-2" parent="mtRlP6FcxhWbJw7U602t-0" value="Peripherals"/>
+                <mxCell id="9ClDCLuR8Wl2kTbweGUx-2" parent="mtRlP6FcxhWbJw7U602t-0" value="Peripherals" visible="0"/>
                 <mxCell id="YreJvVKSforrdpG5m3IM-12" edge="1" parent="9ClDCLuR8Wl2kTbweGUx-2" source="YreJvVKSforrdpG5m3IM-1" style="edgeStyle=none;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;rounded=1;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;startArrow=block;startFill=0;startSize=9;endArrow=block;endFill=0;endSize=9;sourcePerimeterSpacing=1;targetPerimeterSpacing=1;fixedPointSpacing=1;" target="YreJvVKSforrdpG5m3IM-11">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
@@ -441,7 +441,7 @@
                         <mxPoint x="1240" y="1081.86" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="V9NLvgyW7E9Ly5RxnOIi-0" parent="mtRlP6FcxhWbJw7U602t-0" value="Responsibilities"/>
+                <mxCell id="V9NLvgyW7E9Ly5RxnOIi-0" parent="mtRlP6FcxhWbJw7U602t-0" value="Responsibilities" visible="0"/>
                 <mxCell id="V9NLvgyW7E9Ly5RxnOIi-5" parent="V9NLvgyW7E9Ly5RxnOIi-0" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=#FFFFCC;opacity=80;opacityGroup=1;fontStyle=1;fontSize=24;" value="&lt;font style=&quot;font-size: 12px; line-height: 100%;&quot;&gt;LUT &amp;amp;&lt;br&gt;MSS Firmware &amp;amp; storage&lt;/font&gt;" vertex="1">
                     <mxGeometry height="80" width="120" x="1148" y="437" as="geometry"/>
                 </mxCell>
@@ -482,7 +482,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="7LpDnvs4L1mVZndboeZh" name="FPGA">
-        <mxGraphModel dx="869" dy="1063" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="2336" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
+        <mxGraphModel dx="1656" dy="1663" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1654" pageHeight="2336" background="light-dark(#FFFFFF,#121212)" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>

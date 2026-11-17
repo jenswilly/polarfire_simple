@@ -47,5 +47,10 @@ fi
 
 # Run Libero from inside the project folder: it saves some files (e.g. HDL+ core
 # definitions under component/User/) relative to its working directory.
-cd "$(dirname "$(readlink -f "$0")")/../polarfire_simple" || exit 1
+# The folder is missing before libero/create_project.tcl has created the project;
+# stay in the current directory then.
+PROJECT_DIR="$(dirname "$(readlink -f "$0")")/../polarfire_simple"
+if [ -d "$PROJECT_DIR" ]; then
+    cd "$PROJECT_DIR" || exit 1
+fi
 exec "$LIBERO_BIN" "$@"
